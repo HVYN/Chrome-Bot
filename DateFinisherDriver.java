@@ -9,19 +9,18 @@ import java.util.Scanner;
     REPRESENT NODES / VERTICES / LOCATIONS
         WITH LETTERS AND NUMBERS
 
-    LETTERS WILL REPRESENT PLACE OF INTEREST TYPE
+    LETTERS WILL REPRESENT ADJACENT ATTRIBUTES TO 'NODES'
+        NODES ARE PLACES THE PLAYER CAN OCCUPY
 
-    NUMBERS WILL REPRESENT CONNECTING ROADS
-
-    X - (TREES/FILLER)
-    R - (ROADS) -> PATHING
+    T - (TREES)
+    X - (FILLER)
 
     REFILL GAS
-        G - (GAS) -> +100 GAS
+        G1, G2, G3 - (GAS) -> +100 GAS
 
     ONLY FOOD
         I - (ITALIAN) -> +60 FOOD
-        T - (TACO) -> +60 FOOD
+        P - (TACO) -> +60 FOOD
 
     ONLY DRINK
         J - (JUICE) -> +60 DRINK
@@ -29,7 +28,7 @@ import java.util.Scanner;
 
     ONLY ENTERTAINMENT
         Q - (GARDEN) -> +100 ENTERTAINMENT
-        P - (THEATER) -> +60 ENTERTAINMENT
+        M - (THEATER) -> +60 ENTERTAINMENT
 
     HYBRID
         D - (DANCE) -> +100 ENTERTAINMENT, -10 FOOD, -15 DRINK
@@ -38,7 +37,7 @@ import java.util.Scanner;
         F - (FAIR) -> +20 FOOD, +20 DRINK, +40 ENTERTAINMENT
 
     SPECIAL
-        M - (MALL) -> +30 AFFECTION POINTS
+        U - (MALL) -> +30 AFFECTION POINTS
         W - (RING) -> UNLOCK MARRIAGE
         H - (HOME) -> BAIL DATE
         A - (AIRPORT) -> REROLL, -10 ENTERTAINMENT
@@ -61,13 +60,13 @@ public class DateFinisherDriver
 
         // Read a Map Encoding from the User
         System.out.println("INPUT MAP CODE ->");
-            mapEncoding = userReader.nextLine();
-            int mapEncodingNodeAmount = 0;
+        mapEncoding = userReader.nextLine();
+        int mapEncodingNodeAmount = 0;
 
         for(String node : mapEncoding.split("\\s+"))
             mapEncodingNodeAmount++;
 
-        while(mapEncodingNodeAmount != 83)
+        while(mapEncodingNodeAmount != 84)
         {
             mapEncodingNodeAmount = 0;
             System.out.println("MISSING ARGUMENTS! RE-INPUT MAP CODE ->");
@@ -83,6 +82,7 @@ public class DateFinisherDriver
         dateMap = new DateMap(mapEncoding);
 
         dateMap.solveDate();
-        dateMap.displayResults();
+        dateMap.displayHighestResult();
+        // dateMap.displayResults();
     }
 }

@@ -1,9 +1,14 @@
 
 //  Map Class for Date Finisher
 
+//  Initially, this class was supposed to represent some abstract
+//      version of the Date board.
+
+//  However it quickly became the driving force of much of the work
+//      that goes into solving the date board problem.
+
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
-import java.util.LinkedList;
 import java.util.Set;
 
 public class DateMap
@@ -21,10 +26,11 @@ public class DateMap
     // private int fuel, hunger, thirst, happiness, time;
 
     private int startingNodeNumber;
+    private int desiredAffectionPoints;
 
     private int juiceRefreshTime, coffeeRefreshTime, gasOneRefreshTime, sandwichRefreshTime,
-        gasTwoRefreshTime, gasThreeRefreshTime, fairRefreshTime, spaghettiRefreshTime,
-        barRefreshTime, theaterRefreshTime, tacoRefreshTime, ballroomRefreshTime;
+            gasTwoRefreshTime, gasThreeRefreshTime, fairRefreshTime, spaghettiRefreshTime,
+            barRefreshTime, theaterRefreshTime, tacoRefreshTime, ballroomRefreshTime;
 
     // Test Constructor - Using String Encoding
     public DateMap(String mapEncoding)
@@ -37,6 +43,8 @@ public class DateMap
 
         pathsTaken = new LinkedHashSet<>();
 
+        //  STARTING NODE IS ALWAYS AT THE SAME LOCATION, SO WE CAN
+        //      DEFINE IT EARLY
         startingNodeNumber = 79;
 
         constructNodes();
@@ -50,8 +58,8 @@ public class DateMap
                 0, 0, 0, 0,
                 0, 0, 0, 0,
                 0, 0, 0, 0,
-                false, false,
-                "[" + Integer.toString(startingNodeNumber) + "]");
+                false,
+                "[" + startingNodeNumber + "]");
     }
 
     public void solveDate(DateNode currentNode, String currentDirection, int turnNumber,
@@ -59,7 +67,7 @@ public class DateMap
                           int juiceRefresh, int coffeeRefresh, int sandwichRefresh, int fairRefresh,
                           int spaghettiRefresh, int barRefresh, int theaterRefresh, int tacoRefresh,
                           int ballroomRefresh, int gasOneRefresh, int gasTwoRefresh, int gasThreeRefresh,
-                          boolean gardenVisited, boolean homeVisited,
+                          boolean gardenVisited,
                           String path)
     {
         /*
@@ -68,8 +76,8 @@ public class DateMap
             barRefreshTime, theaterRefreshTime, tacoRefreshTime, ballroomRefreshTime;
          */
 
-        // System.out.println(" * * *  SOLVING DATE  * * * ");
-
+        //  MAX RESOURCE CAP IS 100; ADJUST IF THEY ARE OVER THE LIMIT TO
+        //      AVOID ANY MISCALCULATIONS GOING FORWARD
         if(hunger > 100)
             hunger = 100;
         if(thirst > 100)
@@ -107,43 +115,44 @@ public class DateMap
             gasThreeRefresh = 0;
 
         if(time > 0 && fuel > 0 && happiness > 0 &&
-            hunger > 0 && thirst > 0 &&
-            !homeVisited)
+                hunger > 0 && thirst > 0)
         {
             // System.out.println("TEST");
 
             if(currentDirection.equals("RIGHT"))
             {
                 if(!(currentNode.getRightNorthNode() == null) &&
-                    !currentNode.getRightNorthNode().isInaccessible())
+                        !currentNode.getRightNorthNode().isInaccessible())
                     solveDate(currentNode.getRightNorthNode(), "UP", turnNumber + 1,
                             fuel - 10, hunger - 4, thirst - 6, happiness - 8, time - 4,
                             juiceRefresh, coffeeRefresh, sandwichRefresh, fairRefresh,
                             spaghettiRefresh, barRefresh, theaterRefresh, tacoRefresh,
                             ballroomRefresh, gasOneRefresh, gasTwoRefresh, gasThreeRefresh,
-                            gardenVisited, homeVisited,
-                            path + " --UP-> [" + currentNode.getRightNorthNode().getNodeNumber() + "] ");
+                            gardenVisited,
+                          //  path + " UP [" + currentNode.getRightNorthNode().getNodeNumber() + "] ");
+                            path + " UP");
 
                 if(!(currentNode.getCentralEastNode() == null) &&
-                    !currentNode.getCentralEastNode().isInaccessible())
+                        !currentNode.getCentralEastNode().isInaccessible())
                     solveDate(currentNode.getCentralEastNode(), currentDirection, turnNumber + 1,
                             fuel - 10, hunger - 4, thirst - 6, happiness - 8, time - 4,
                             juiceRefresh, coffeeRefresh, sandwichRefresh, fairRefresh,
                             spaghettiRefresh, barRefresh, theaterRefresh, tacoRefresh,
                             ballroomRefresh, gasOneRefresh, gasTwoRefresh, gasThreeRefresh,
-                            gardenVisited, homeVisited,
-                            path + " --RIGHT-> [" + currentNode.getCentralEastNode().getNodeNumber() + "] ");
+                            gardenVisited,
+                          //  path + " RIGHT [" + currentNode.getCentralEastNode().getNodeNumber() + "] ");
+                            path + " RIGHT");
 
                 if(!(currentNode.getRightSouthNode() == null) &&
-                    !currentNode.getRightSouthNode().isInaccessible())
+                        !currentNode.getRightSouthNode().isInaccessible())
                     solveDate(currentNode.getRightSouthNode(), "DOWN", turnNumber + 1,
                             fuel - 10, hunger - 4, thirst - 6, happiness - 8, time - 4,
                             juiceRefresh, coffeeRefresh, sandwichRefresh, fairRefresh,
                             spaghettiRefresh, barRefresh, theaterRefresh, tacoRefresh,
                             ballroomRefresh, gasOneRefresh, gasTwoRefresh, gasThreeRefresh,
-                            gardenVisited, homeVisited,
-                            path + " --DOWN-> [" + currentNode.getRightSouthNode().getNodeNumber() + "] ");
-
+                            gardenVisited,
+                          //  path + " DOWN [" + currentNode.getRightSouthNode().getNodeNumber() + "] ");
+                            path + " DOWN");
             }
             else if(currentDirection.equals("LEFT"))
             {
@@ -155,8 +164,9 @@ public class DateMap
                             juiceRefresh, coffeeRefresh, sandwichRefresh, fairRefresh,
                             spaghettiRefresh, barRefresh, theaterRefresh, tacoRefresh,
                             ballroomRefresh, gasOneRefresh, gasTwoRefresh, gasThreeRefresh,
-                            gardenVisited, homeVisited,
-                            path + " --UP-> [" + currentNode.getLeftNorthNode().getNodeNumber() + "] ");
+                            gardenVisited,
+                          //  path + " UP [" + currentNode.getLeftNorthNode().getNodeNumber() + "] ");
+                            path + " UP");
 
                 if(!(currentNode.getCentralWestNode() == null) &&
                         !currentNode.getCentralWestNode().isInaccessible())
@@ -165,8 +175,9 @@ public class DateMap
                             juiceRefresh, coffeeRefresh, sandwichRefresh, fairRefresh,
                             spaghettiRefresh, barRefresh, theaterRefresh, tacoRefresh,
                             ballroomRefresh, gasOneRefresh, gasTwoRefresh, gasThreeRefresh,
-                            gardenVisited, homeVisited,
-                            path + " --LEFT-> [" + currentNode.getCentralWestNode().getNodeNumber() + "] ");
+                            gardenVisited,
+                         //   path + " LEFT [" + currentNode.getCentralWestNode().getNodeNumber() + "] ");
+                            path + " LEFT");
 
                 if(!(currentNode.getLeftSouthNode() == null) &&
                         !currentNode.getLeftSouthNode().isInaccessible())
@@ -175,9 +186,9 @@ public class DateMap
                             juiceRefresh, coffeeRefresh, sandwichRefresh, fairRefresh,
                             spaghettiRefresh, barRefresh, theaterRefresh, tacoRefresh,
                             ballroomRefresh, gasOneRefresh, gasTwoRefresh, gasThreeRefresh,
-                            gardenVisited, homeVisited,
-                            path + " --DOWN-> [" + currentNode.getLeftSouthNode().getNodeNumber() + "] ");
-
+                            gardenVisited,
+                          //  path + " DOWN [" + currentNode.getLeftSouthNode().getNodeNumber() + "] ");
+                            path + " DOWN");
             }
             else if(currentDirection.equals("UP"))
             {
@@ -189,8 +200,9 @@ public class DateMap
                             juiceRefresh, coffeeRefresh, sandwichRefresh, fairRefresh,
                             spaghettiRefresh, barRefresh, theaterRefresh, tacoRefresh,
                             ballroomRefresh, gasOneRefresh, gasTwoRefresh, gasThreeRefresh,
-                            gardenVisited, homeVisited,
-                            path + " --LEFT-> [" + currentNode.getTopWestNode().getNodeNumber() + "] ");
+                            gardenVisited,
+                          //  path + " LEFT [" + currentNode.getTopWestNode().getNodeNumber() + "] ");
+                            path + " LEFT");
 
                 if(!(currentNode.getCentralNorthNode() == null) &&
                         !currentNode.getCentralNorthNode().isInaccessible())
@@ -199,8 +211,9 @@ public class DateMap
                             juiceRefresh, coffeeRefresh, sandwichRefresh, fairRefresh,
                             spaghettiRefresh, barRefresh, theaterRefresh, tacoRefresh,
                             ballroomRefresh, gasOneRefresh, gasTwoRefresh, gasThreeRefresh,
-                            gardenVisited, homeVisited,
-                            path + " --UP-> [" + currentNode.getCentralNorthNode().getNodeNumber() + "] ");
+                            gardenVisited,
+                          //  path + " UP [" + currentNode.getCentralNorthNode().getNodeNumber() + "] ");
+                            path + " UP");
 
                 if(!(currentNode.getTopEastNode() == null) &&
                         !currentNode.getTopEastNode().isInaccessible())
@@ -209,9 +222,9 @@ public class DateMap
                             juiceRefresh, coffeeRefresh, sandwichRefresh, fairRefresh,
                             spaghettiRefresh, barRefresh, theaterRefresh, tacoRefresh,
                             ballroomRefresh, gasOneRefresh, gasTwoRefresh, gasThreeRefresh,
-                            gardenVisited, homeVisited,
-                            path + " --RIGHT-> [" + currentNode.getTopEastNode().getNodeNumber() + "] ");
-
+                            gardenVisited,
+                          //  path + " RIGHT [" + currentNode.getTopEastNode().getNodeNumber() + "] ");
+                            path + " RIGHT");
             }
             else if(currentDirection.equals("DOWN"))
             {
@@ -223,8 +236,9 @@ public class DateMap
                             juiceRefresh, coffeeRefresh, sandwichRefresh, fairRefresh,
                             spaghettiRefresh, barRefresh, theaterRefresh, tacoRefresh,
                             ballroomRefresh, gasOneRefresh, gasTwoRefresh, gasThreeRefresh,
-                            gardenVisited, homeVisited,
-                            path + " --LEFT-> [" + currentNode.getBottomWestNode().getNodeNumber() + "] ");
+                            gardenVisited,
+                          //  path + " LEFT [" + currentNode.getBottomWestNode().getNodeNumber() + "] ");
+                            path + " LEFT");
 
                 if(!(currentNode.getCentralSouthNode() == null) &&
                         !currentNode.getCentralSouthNode().isInaccessible())
@@ -233,9 +247,9 @@ public class DateMap
                             juiceRefresh, coffeeRefresh, sandwichRefresh, fairRefresh,
                             spaghettiRefresh, barRefresh, theaterRefresh, tacoRefresh,
                             ballroomRefresh, gasOneRefresh, gasTwoRefresh, gasThreeRefresh,
-                            gardenVisited, homeVisited,
-                            path + " --DOWN-> [" + currentNode.getCentralSouthNode().getNodeNumber() + "] ");
-
+                            gardenVisited,
+                          //  path + " DOWN [" + currentNode.getCentralSouthNode().getNodeNumber() + "] ");
+                            path + " DOWN");
                 if(!(currentNode.getBottomEastNode() == null) &&
                         !currentNode.getBottomEastNode().isInaccessible())
                     solveDate(currentNode.getBottomEastNode(), "RIGHT", turnNumber + 1,
@@ -243,9 +257,9 @@ public class DateMap
                             juiceRefresh, coffeeRefresh, sandwichRefresh, fairRefresh,
                             spaghettiRefresh, barRefresh, theaterRefresh, tacoRefresh,
                             ballroomRefresh, gasOneRefresh, gasTwoRefresh, gasThreeRefresh,
-                            gardenVisited, homeVisited,
-                            path + " --RIGHT-> [" + currentNode.getBottomEastNode().getNodeNumber() + "] ");
-
+                            gardenVisited,
+                          //  path + " RIGHT [" + currentNode.getBottomEastNode().getNodeNumber() + "] ");
+                            path + " RIGHT");
             }
 
             //  OBSERVE RESOURCES SURROUNDING CURRENT NODE
@@ -259,10 +273,10 @@ public class DateMap
                 {
                     solveDate(currentNode, currentDirection, turnNumber + 1,
                             fuel, hunger - 4, thirst + 60 - 6, happiness - 8, time - 4,
-                            10, coffeeRefresh, sandwichRefresh, fairRefresh,
+                            11, coffeeRefresh, sandwichRefresh, fairRefresh,
                             spaghettiRefresh, barRefresh, theaterRefresh, tacoRefresh,
                             ballroomRefresh, gasOneRefresh, gasTwoRefresh, gasThreeRefresh,
-                            gardenVisited, homeVisited,
+                            gardenVisited,
                             path + " JUICE");
                 }
 
@@ -272,10 +286,10 @@ public class DateMap
                 {
                     solveDate(currentNode, currentDirection, turnNumber + 1,
                             fuel, hunger - 4, thirst + 60 - 6, happiness - 8, time - 4,
-                            juiceRefresh, 10, sandwichRefresh, fairRefresh,
+                            juiceRefresh, 11, sandwichRefresh, fairRefresh,
                             spaghettiRefresh, barRefresh, theaterRefresh, tacoRefresh,
                             ballroomRefresh, gasOneRefresh, gasTwoRefresh, gasThreeRefresh,
-                            gardenVisited, homeVisited,
+                            gardenVisited,
                             path + " COFFEE");
                 }
 
@@ -287,9 +301,9 @@ public class DateMap
                             100, hunger - 4, thirst - 6, happiness - 8, time - 4,
                             juiceRefresh, coffeeRefresh, sandwichRefresh, fairRefresh,
                             spaghettiRefresh, barRefresh, theaterRefresh, tacoRefresh,
-                            ballroomRefresh, 10, gasTwoRefresh, gasThreeRefresh,
-                            gardenVisited, homeVisited,
-                            path + " GAS-ONE");
+                            ballroomRefresh, 11, gasTwoRefresh, gasThreeRefresh,
+                            gardenVisited,
+                            path + " GAS1");
                 }
 
                 //  GAS (TWO) RESOURCE
@@ -300,9 +314,9 @@ public class DateMap
                             100, hunger - 4, thirst - 6, happiness - 8, time - 4,
                             juiceRefresh, coffeeRefresh, sandwichRefresh, fairRefresh,
                             spaghettiRefresh, barRefresh, theaterRefresh, tacoRefresh,
-                            ballroomRefresh, gasOneRefresh, 10, gasThreeRefresh,
-                            gardenVisited, homeVisited,
-                            path + " GAS-TWO");
+                            ballroomRefresh, gasOneRefresh, 11, gasThreeRefresh,
+                            gardenVisited,
+                            path + " GAS2");
                 }
 
                 //  GAS (THREE) RESOURCE
@@ -313,9 +327,9 @@ public class DateMap
                             100, hunger - 4, thirst - 6, happiness - 8, time - 4,
                             juiceRefresh, coffeeRefresh, sandwichRefresh, fairRefresh,
                             spaghettiRefresh, barRefresh, theaterRefresh, tacoRefresh,
-                            ballroomRefresh, gasOneRefresh, gasTwoRefresh, 10,
-                            gardenVisited, homeVisited,
-                            path + " GAS-THREE");
+                            ballroomRefresh, gasOneRefresh, gasTwoRefresh, 11,
+                            gardenVisited,
+                            path + " GAS3");
                 }
 
                 //  SANDWICH RESOURCE
@@ -324,10 +338,10 @@ public class DateMap
                 {
                     solveDate(currentNode, currentDirection, turnNumber + 1,
                             fuel, hunger + 40 - 4, thirst + 20 - 6, happiness - 8, time - 4,
-                            juiceRefresh, coffeeRefresh, 10, fairRefresh,
+                            juiceRefresh, coffeeRefresh, 11, fairRefresh,
                             spaghettiRefresh, barRefresh, theaterRefresh, tacoRefresh,
                             ballroomRefresh, gasOneRefresh, gasTwoRefresh, gasThreeRefresh,
-                            gardenVisited, homeVisited,
+                            gardenVisited,
                             path + " SANDWICH");
                 }
 
@@ -337,10 +351,10 @@ public class DateMap
                 {
                     solveDate(currentNode, currentDirection, turnNumber + 1,
                             fuel, hunger + 20 - 4, thirst + 20 - 6, happiness + 40 - 8, time - 4,
-                            juiceRefresh, coffeeRefresh, sandwichRefresh, 10,
+                            juiceRefresh, coffeeRefresh, sandwichRefresh, 11,
                             spaghettiRefresh, barRefresh, theaterRefresh, tacoRefresh,
                             ballroomRefresh, gasOneRefresh, gasTwoRefresh, gasThreeRefresh,
-                            gardenVisited, homeVisited,
+                            gardenVisited,
                             path + " FAIR");
                 }
 
@@ -351,9 +365,9 @@ public class DateMap
                     solveDate(currentNode, currentDirection, turnNumber + 1,
                             fuel, hunger + 60 - 4, thirst - 6, happiness - 8, time - 4,
                             juiceRefresh, coffeeRefresh, sandwichRefresh, fairRefresh,
-                            10, barRefresh, theaterRefresh, tacoRefresh,
+                            11, barRefresh, theaterRefresh, tacoRefresh,
                             ballroomRefresh, gasOneRefresh, gasTwoRefresh, gasThreeRefresh,
-                            gardenVisited, homeVisited,
+                            gardenVisited,
                             path + " ITALIAN");
                 }
 
@@ -364,9 +378,9 @@ public class DateMap
                     solveDate(currentNode, currentDirection, turnNumber + 1,
                             fuel, hunger - 4, thirst + 40 - 6, happiness + 40 - 8, time - 4,
                             juiceRefresh, coffeeRefresh, sandwichRefresh, fairRefresh,
-                            spaghettiRefresh, 10, theaterRefresh, tacoRefresh,
+                            spaghettiRefresh, 11, theaterRefresh, tacoRefresh,
                             ballroomRefresh, gasOneRefresh, gasTwoRefresh, gasThreeRefresh,
-                            gardenVisited, homeVisited,
+                            gardenVisited,
                             path + " BAR");
                 }
 
@@ -377,9 +391,9 @@ public class DateMap
                     solveDate(currentNode, currentDirection, turnNumber + 1,
                             fuel, hunger - 4, thirst - 6, happiness + 60 - 8, time - 4,
                             juiceRefresh, coffeeRefresh, sandwichRefresh, fairRefresh,
-                            spaghettiRefresh, barRefresh, 10, tacoRefresh,
+                            spaghettiRefresh, barRefresh, 11, tacoRefresh,
                             ballroomRefresh, gasOneRefresh, gasTwoRefresh, gasThreeRefresh,
-                            gardenVisited, homeVisited,
+                            gardenVisited,
                             path + " THEATER");
                 }
 
@@ -390,9 +404,9 @@ public class DateMap
                     solveDate(currentNode, currentDirection, turnNumber + 1,
                             fuel, hunger + 60 - 4, thirst - 6, happiness - 8, time - 4,
                             juiceRefresh, coffeeRefresh, sandwichRefresh, fairRefresh,
-                            spaghettiRefresh, barRefresh, theaterRefresh, 10,
+                            spaghettiRefresh, barRefresh, theaterRefresh, 11,
                             ballroomRefresh, gasOneRefresh, gasTwoRefresh, gasThreeRefresh,
-                            gardenVisited, homeVisited,
+                            gardenVisited,
                             path + " TACO");
                 }
 
@@ -404,8 +418,8 @@ public class DateMap
                             fuel, hunger - 10 - 4, thirst - 15 - 6, happiness + 100 - 8, time - 4,
                             juiceRefresh, coffeeRefresh, sandwichRefresh, fairRefresh,
                             spaghettiRefresh, barRefresh, theaterRefresh, tacoRefresh,
-                            10, gasOneRefresh, gasTwoRefresh, gasThreeRefresh,
-                            gardenVisited, homeVisited,
+                            11, gasOneRefresh, gasTwoRefresh, gasThreeRefresh,
+                            gardenVisited,
                             path + " BALLROOM");
                 }
 
@@ -417,39 +431,54 @@ public class DateMap
                             fuel, hunger - 10 - 4, thirst - 15 - 6, happiness + 100 - 8, time - 4,
                             juiceRefresh, coffeeRefresh, sandwichRefresh, fairRefresh,
                             spaghettiRefresh, barRefresh, theaterRefresh, tacoRefresh,
-                            10, gasOneRefresh, gasTwoRefresh, gasThreeRefresh,
-                            !gardenVisited, homeVisited,
+                            ballroomRefresh, gasOneRefresh, gasTwoRefresh, gasThreeRefresh,
+                            !gardenVisited,
                             path + " GARDEN");
                 }
             }
 
             //  HOME PATH
-            if (currentNode.isNextToHome() &&
-                    !homeVisited)
-            {
-                solveDate(currentNode, currentDirection, turnNumber + 1,
-                        fuel, hunger - 10 - 4, thirst - 15 - 6, happiness + 100 - 8, time - 4,
-                        juiceRefresh, coffeeRefresh, sandwichRefresh, fairRefresh,
-                        spaghettiRefresh, barRefresh, theaterRefresh, tacoRefresh,
-                        10, gasOneRefresh, gasTwoRefresh, gasThreeRefresh,
-                        !gardenVisited, !homeVisited,
-                        path + " HOME");
-            }
+            //  NOTE: WHEN DEBUGGING, WE WANT EVERY RESULT, BUT FOR NOW,
+            //      LOGGING A HOME PATH WITH THE DESIRED AFFECTION POINTS IS ENOUGH
+            if (currentNode.isNextToHome() && meetsAPThreshold(hunger, thirst, happiness, time))
+                results.add(new DateResult(ResultType.RETURNED_HOME, calculateAffectionPoints(hunger, thirst, happiness, time), path + " HOME"));
 
         }
         else if(time <= 0)
         {
+            if(fuel > 0 && happiness > 0 && hunger > 0 && thirst > 0
+                && meetsAPThreshold(hunger, thirst, happiness))
+                results.add(new DateResult(ResultType.SUCCESS, calculateAffectionPoints(hunger, thirst, happiness), path));
+
+            /*
             if(fuel <= 0 || happiness <= 0 || hunger <= 0 || thirst <= 0)
-                results.add(new DateResult(fuel, hunger, thirst, happiness, time, "FAILURE", path));
-            else
-                results.add(new DateResult(fuel, hunger, thirst, happiness, time, "SUCCESS", path));
+                // results.add(new DateResult(fuel, hunger, thirst, happiness, time, "FAILURE", path));
+                results.add(new DateResult(ResultType.OUT_OF_RESOURCE, 0, path));
+            else if(meetsAPThreshold(hunger, thirst, happiness))
+                // results.add(new DateResult(fuel, hunger, thirst, happiness, time, "SUCCESS", path));
+                results.add(new DateResult(ResultType.SUCCESS, calculateAffectionPoints(hunger, thirst, happiness), path));
+             */
         }
-        else if(homeVisited)
-            results.add(new DateResult(fuel, hunger, thirst, happiness, time, "HOME", path));
-        else
-            results.add(new DateResult(fuel, hunger, thirst, happiness, time, "FAILURE", path));
+        // else
+            // results.add(new DateResult(fuel, hunger, thirst, happiness, time, "FAILURE", path));
+            // results.add(new DateResult(ResultType.OUT_OF_RESOURCE, 0, path));
+
+        //  NOTE: TO CONSERVE MEMORY IN THE HEAP, I HAVE TO STOP STORING RESULTS
+        //      THAT END IN FAILURE.
 
         return;
+    }
+
+    //  HELPER: CALCULATE AFFECTION POINTS USING A FORMULA
+    private int calculateAffectionPoints(int hunger, int thirst, int happiness)
+    {
+        return (int)Math.ceil((double)(hunger + thirst + happiness) / 6);
+    }
+
+    //  HELPER: CALCULATE AFFEECTION POINTS W/ TIME
+    private int calculateAffectionPoints(int hunger, int thirst, int happiness, int time)
+    {
+        return (int)Math.ceil(((double)(hunger + thirst + happiness) / 6) * ((double)(100 - time) / 100));
     }
 
     //  CONSTRUCT NODES - INITIALIZE/INSTANTIATE, PUT THEM IN A LIST
@@ -460,10 +489,13 @@ public class DateMap
         for(String nodeEncoding : mapEncodingArray)
         {
             if(nodeNumberIncrement < 82)
-                nodeMap.add(new DateNode(nodeNumberIncrement++, nodeEncoding));
-            else
+                nodeMap.add(new DateNode(nodeNumberIncrement, nodeEncoding));
+            else if(nodeNumberIncrement == 82)
                 playerDirection = nodeEncoding;
+            else if(nodeNumberIncrement == 83)
+                desiredAffectionPoints = Integer.parseInt(nodeEncoding);
 
+            nodeNumberIncrement++;
         }
     }
 
@@ -609,15 +641,53 @@ public class DateMap
          barRefreshTime, theaterRefreshTime, tacoRefreshTime, ballroomRefreshTime;
     */
 
+    //  HELPER: Check if end result meets the desired affection points
+    //  NOTE: IF DATE FAILS, DON'T EVEN RUN THIS; ASSUMPTION IS DATE ENDS SUCCESSFUL
+    private boolean meetsAPThreshold(int hunger, int thirst, int happiness)
+    {
+        return calculateAffectionPoints(hunger, thirst, happiness) >= desiredAffectionPoints;
+    }
+
+    //  NOTE: OVERLOADED version of 'meetsAPThreshold' function, with additional parameter time
+    //      For use in the event the pathfinding ends at home (early)
+    private boolean meetsAPThreshold(int hunger, int thirst, int happiness, int time)
+    {
+        return calculateAffectionPoints(hunger, thirst, happiness, time) >= desiredAffectionPoints;
+    }
+
+    //  DISPLAY HIGHEST RESULT
+    public void displayHighestResult()
+    {
+        System.out.println("HIGHEST RESULT:");
+
+        DateResult highestResult = null;
+
+        for(DateResult result : results)
+        {
+            if(highestResult != null)
+            {
+                if(result.getAffectionPoints() <= highestResult.getAffectionPoints())
+                    continue;
+            }
+
+            highestResult = result;
+        }
+
+        if(highestResult == null)
+            System.out.println("NO RESULTS FOUND!");
+        else
+            System.out.println(highestResult);
+    }
+
     //  DISPLAY RESULTS FUNCTION - ITERATE THROUGH LIST OF RESULTS
     public void displayResults()
     {
         for(DateResult result : results)
         {
-            // if(result.getStatus().equals("SUCCESS") && result.getAffectionPoints() >= 0)
-            //     System.out.println(result);
+            if(result.getResultType() == ResultType.RETURNED_HOME ||
+                result.getResultType() == ResultType.SUCCESS)
+                System.out.println(result);
         }
     }
 
 }
-

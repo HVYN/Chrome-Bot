@@ -5,13 +5,17 @@ public class DateResult
 {
     private int fuel, hunger, thirst, happiness, time;
     private int resultNum;
+    private int affectionPoints;
 
     private String status;
 
     private String path;
 
+    private ResultType resultType;
+
     private static int resultCountingNum = 0;
 
+    //  CONSTRUCTOR: ISSUES include OutofMemory, must found alternative
     public DateResult(int fuel, int hunger, int thirst, int happiness, int time,
                       String status, String path)
     {
@@ -21,6 +25,23 @@ public class DateResult
 
         this.status = status;
         this.path = path;
+
+        //  DEBUG: Assign number
+        resultNum = resultCountingNum;
+
+        //  DEBUG: Increment/Count results (Next result will use the
+        //      number as its 'designation'/ID
+        resultCountingNum++;
+    }
+
+    //  CONSTRUCTOR: Knowing exact resource information is unnecessary at the
+    //      finality, so just include ResultType for information instead
+    public DateResult(ResultType resultType, int affectionPoints, String path)
+    {
+        this.resultType = resultType;
+
+        this.path = path;
+        this.affectionPoints = affectionPoints;
 
         resultNum = resultCountingNum;
 
@@ -35,6 +56,12 @@ public class DateResult
 
     public String getPath()     {   return path;        }
 
+    public int getAffectionPoints() {   return affectionPoints; }
+
+    /*
+    //  * DEPRECATED *
+    //  Calculate Affection Points using this formula below:
+    //      (Affection Points) = ((Hunger + Thirst + Happiness) / 6) * ((100 - Remaining Time) / 100)
     public int getAffectionPoints()
     {
         if(status.equals("HOME") || status.equals("FAILURE"))
@@ -43,20 +70,24 @@ public class DateResult
         else
             return (int)Math.ceil((double)((getHunger() + getThirst() + getHappiness()) / 6));
     }
+    */
 
-    public String getStatus()   {   return status;      }
+    public ResultType getResultType()   {   return resultType;  }
+
+    // public String getStatus()   {   return status;      }
 
     public static int getResultCountingNum() {  return resultCountingNum;    }
 
     @Override
     public String toString()
     {
-        return "[RESULT " + resultNum + " | " + getStatus() + "]\n" +
-                "\tFUEL: " + getFuel() + "\n" +
-                "\tFOOD: " + getHunger() + "\n" +
-                "\tDRINK: " + getThirst() + "\n" +
-                "\tHAPPINESS: " + getHappiness() + "\n" +
-                "\tTIME: " + getTime() + "\n\n" +
+        return //"[RESULT " + resultNum + " | " + getStatus() + "]\n" +
+               // "\tFUEL: " + getFuel() + "\n" +
+               // "\tFOOD: " + getHunger() + "\n" +
+               // "\tDRINK: " + getThirst() + "\n" +
+               // "\tHAPPINESS: " + getHappiness() + "\n" +
+               // "\tTIME: " + getTime() + "\n\n" +
+               "[RESULT " + resultNum + " | " + getResultType() + "]\n" +
                 "\t" + getPath() + "\n\n" +
                 "\tAP: " + getAffectionPoints() + "\n";
     }

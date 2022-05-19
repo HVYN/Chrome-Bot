@@ -23,7 +23,7 @@ public class DateNode
             nextToGasOne, nextToTheater, nextToFair, nextToJuice,
             nextToSandwich, nextToCoffee, nextToTaco, nextToGarden,
             nextToBar, nextToAirport, nextToBallroom, nextToSpaghetti,
-            nextToHome, nextToGasTwo, nextToGasThree,
+            nextToHome, nextToGasTwo, nextToGasThree, nextToMall,
             inaccessible;
 
     public DateNode(int nodeNumber, String adjacentAttributes)
@@ -35,9 +35,9 @@ public class DateNode
         // adjacentNodeNumbers = new ArrayList<>();
         leftNorthNode = rightNorthNode = topEastNode = bottomEastNode =
                 leftSouthNode = rightSouthNode = topWestNode = bottomWestNode =
-                centralNorthNode = centralEastNode = centralSouthNode = centralWestNode = null;
+                        centralNorthNode = centralEastNode = centralSouthNode = centralWestNode = null;
 
-        gasOneDesignated = gasTwoDesignated = false;
+        gasOneDesignated = gasTwoDesignated = gasThreeDesignated = false;
 
         currentPlayerNode = false;  inaccessible = false;
 
@@ -51,20 +51,22 @@ public class DateNode
             switch(adjacentAttributes.charAt(index))
             {
                 case('G'):
-                    if(!gasOneDesignated)
+                    if(adjacentAttributes.charAt(index + 1) == '1')
                     {
                         setNextToGasOne(true);
-                        gasOneDesignated = true;
+                        break;
                     }
-                    else if(!gasTwoDesignated)
+
+                    if(adjacentAttributes.charAt(index + 1) == '2')
                     {
                         setNextToGasTwo(true);
-                        gasTwoDesignated = true;
+                        break;
                     }
-                    else if(!gasThreeDesignated)
+
+                    if(adjacentAttributes.charAt(index + 1) == '3')
                     {
                         setNextToGasThree(true);
-                        gasThreeDesignated = true;
+                        break;
                     }
 
                     // setNextToGas(true);
@@ -108,6 +110,8 @@ public class DateNode
                     break;
                 case('H'):
                     setNextToHome(true);
+                case('U'):
+                    setNextToMall(true);
                     break;
                 default:
                     break;
@@ -174,6 +178,7 @@ public class DateNode
     public void setNextToBallroom(boolean nextToBallroom)   {   this.nextToBallroom = nextToBallroom;   }
     public void setNextToSpaghetti(boolean nextToSpaghetti) {   this.nextToSpaghetti = nextToSpaghetti; }
     public void setNextToHome(boolean nextToHome)           {   this.nextToHome = nextToHome;           }
+    public void setNextToMall(boolean nextToMall)           {   this.nextToMall = nextToMall;           }
 
     public boolean isNextToGasOne()     {   return nextToGasOne;       }
     public boolean isNextToGasTwo()     {   return nextToGasTwo;    }
