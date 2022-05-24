@@ -82,14 +82,14 @@ public class DateResult
     public String toString()
     {
         return //"[RESULT " + resultNum + " | " + getStatus() + "]\n" +
-               // "\tFUEL: " + getFuel() + "\n" +
-               // "\tFOOD: " + getHunger() + "\n" +
-               // "\tDRINK: " + getThirst() + "\n" +
-               // "\tHAPPINESS: " + getHappiness() + "\n" +
-               // "\tTIME: " + getTime() + "\n\n" +
-               "[RESULT " + resultNum + " | " + getResultType() + "]\n" +
-                "\t" + getPath() + "\n\n" +
-                "\tAP: " + getAffectionPoints() + "\n";
+                // "\tFUEL: " + getFuel() + "\n" +
+                // "\tFOOD: " + getHunger() + "\n" +
+                // "\tDRINK: " + getThirst() + "\n" +
+                // "\tHAPPINESS: " + getHappiness() + "\n" +
+                // "\tTIME: " + getTime() + "\n\n" +
+                "[RESULT " + resultNum + " | " + getResultType() + "]\n" +
+                        "\t" + getPath() + "\n\n" +
+                        "\tAP: " + getAffectionPoints() + "\n";
     }
 
 }
