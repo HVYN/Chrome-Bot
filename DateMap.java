@@ -8,25 +8,23 @@
 //      that goes into solving the date board problem.
 
 import java.util.ArrayList;
-import java.util.LinkedHashSet;
+import java.util.LinkedList;
 import java.util.Set;
 
 public class DateMap
 {
     private ArrayList<DateNode> nodeMap;
 
-    private Set<DateResult> results;
-
-    private Set<String> pathsTaken;
+    private LinkedList<DateResult> results;
+    //  private LinkedList<String> pathsTaken;
 
     private String[] mapEncodingArray;
 
     private String playerDirection;
 
-    // private int fuel, hunger, thirst, happiness, time;
-
     private int startingNodeNumber;
-    private int desiredAffectionPoints;
+
+    private int currentHighestScore;
 
     private int juiceRefreshTime, coffeeRefreshTime, gasOneRefreshTime, sandwichRefreshTime,
             gasTwoRefreshTime, gasThreeRefreshTime, fairRefreshTime, spaghettiRefreshTime,
@@ -39,18 +37,24 @@ public class DateMap
 
         nodeMap = new ArrayList<>();
 
-        results = new LinkedHashSet<>();
-
-        pathsTaken = new LinkedHashSet<>();
+        //  NOTE: I used a Set to store paths because I thought it wouldn't
+        //      store duplicates, but that doesn't apply because even if it's the
+        //      same score, it takes a different path, so I was misguided in my
+        //      attempts at conserving heap space.
+        results = new LinkedList<>();
+        //  pathsTaken = new LinkedList<>();
 
         //  STARTING NODE IS ALWAYS AT THE SAME LOCATION, SO WE CAN
         //      DEFINE IT EARLY
         startingNodeNumber = 79;
 
+        currentHighestScore = -1;
+
         constructNodes();
         linkNodes();
     }
 
+    //  NOTE: Starter function, jump starts its other counterpart.
     public void solveDate()
     {
         solveDate(nodeMap.get(startingNodeNumber), playerDirection, 1,
@@ -58,16 +62,19 @@ public class DateMap
                 0, 0, 0, 0,
                 0, 0, 0, 0,
                 0, 0, 0, 0,
-                false,
-                "[" + startingNodeNumber + "]");
+                false, false,
+                "[START] ");
     }
 
+    //  NOTE: This version of 'solveDate' is the actual workhorse of the
+    //      program, being called recursively to brute-force its way to the
+    //      answer.
     public void solveDate(DateNode currentNode, String currentDirection, int turnNumber,
                           int fuel, int hunger, int thirst, int happiness, int time,
                           int juiceRefresh, int coffeeRefresh, int sandwichRefresh, int fairRefresh,
                           int spaghettiRefresh, int barRefresh, int theaterRefresh, int tacoRefresh,
                           int ballroomRefresh, int gasOneRefresh, int gasTwoRefresh, int gasThreeRefresh,
-                          boolean gardenVisited,
+                          boolean gardenVisited, boolean mallVisited,
                           String path)
     {
         /*
@@ -114,11 +121,14 @@ public class DateMap
         if(gasThreeRefresh < 0)
             gasThreeRefresh = 0;
 
+        //  NOTE: This checks if the bot can still go on.
+        //      a. Resources have not been depleted
+        //      b. There is still time to run down
         if(time > 0 && fuel > 0 && happiness > 0 &&
                 hunger > 0 && thirst > 0)
         {
-            // System.out.println("TEST");
-
+            //  NOTE: IF bot is currently facing RIGHT/EAST
+            //      The bot, in this state, can move UP/NORTH, RIGHT/EAST, or DOWN/SOUTH
             if(currentDirection.equals("RIGHT"))
             {
                 if(!(currentNode.getRightNorthNode() == null) &&
@@ -128,8 +138,8 @@ public class DateMap
                             juiceRefresh, coffeeRefresh, sandwichRefresh, fairRefresh,
                             spaghettiRefresh, barRefresh, theaterRefresh, tacoRefresh,
                             ballroomRefresh, gasOneRefresh, gasTwoRefresh, gasThreeRefresh,
-                            gardenVisited,
-                          //  path + " UP [" + currentNode.getRightNorthNode().getNodeNumber() + "] ");
+                            gardenVisited, mallVisited,
+                            //  path + " UP [" + currentNode.getRightNorthNode().getNodeNumber() + "] ");
                             path + " UP");
 
                 if(!(currentNode.getCentralEastNode() == null) &&
@@ -139,8 +149,8 @@ public class DateMap
                             juiceRefresh, coffeeRefresh, sandwichRefresh, fairRefresh,
                             spaghettiRefresh, barRefresh, theaterRefresh, tacoRefresh,
                             ballroomRefresh, gasOneRefresh, gasTwoRefresh, gasThreeRefresh,
-                            gardenVisited,
-                          //  path + " RIGHT [" + currentNode.getCentralEastNode().getNodeNumber() + "] ");
+                            gardenVisited, mallVisited,
+                            //  path + " RIGHT [" + currentNode.getCentralEastNode().getNodeNumber() + "] ");
                             path + " RIGHT");
 
                 if(!(currentNode.getRightSouthNode() == null) &&
@@ -150,8 +160,8 @@ public class DateMap
                             juiceRefresh, coffeeRefresh, sandwichRefresh, fairRefresh,
                             spaghettiRefresh, barRefresh, theaterRefresh, tacoRefresh,
                             ballroomRefresh, gasOneRefresh, gasTwoRefresh, gasThreeRefresh,
-                            gardenVisited,
-                          //  path + " DOWN [" + currentNode.getRightSouthNode().getNodeNumber() + "] ");
+                            gardenVisited, mallVisited,
+                            //  path + " DOWN [" + currentNode.getRightSouthNode().getNodeNumber() + "] ");
                             path + " DOWN");
             }
             else if(currentDirection.equals("LEFT"))
@@ -164,8 +174,8 @@ public class DateMap
                             juiceRefresh, coffeeRefresh, sandwichRefresh, fairRefresh,
                             spaghettiRefresh, barRefresh, theaterRefresh, tacoRefresh,
                             ballroomRefresh, gasOneRefresh, gasTwoRefresh, gasThreeRefresh,
-                            gardenVisited,
-                          //  path + " UP [" + currentNode.getLeftNorthNode().getNodeNumber() + "] ");
+                            gardenVisited, mallVisited,
+                            //  path + " UP [" + currentNode.getLeftNorthNode().getNodeNumber() + "] ");
                             path + " UP");
 
                 if(!(currentNode.getCentralWestNode() == null) &&
@@ -175,8 +185,8 @@ public class DateMap
                             juiceRefresh, coffeeRefresh, sandwichRefresh, fairRefresh,
                             spaghettiRefresh, barRefresh, theaterRefresh, tacoRefresh,
                             ballroomRefresh, gasOneRefresh, gasTwoRefresh, gasThreeRefresh,
-                            gardenVisited,
-                         //   path + " LEFT [" + currentNode.getCentralWestNode().getNodeNumber() + "] ");
+                            gardenVisited, mallVisited,
+                            //   path + " LEFT [" + currentNode.getCentralWestNode().getNodeNumber() + "] ");
                             path + " LEFT");
 
                 if(!(currentNode.getLeftSouthNode() == null) &&
@@ -186,8 +196,8 @@ public class DateMap
                             juiceRefresh, coffeeRefresh, sandwichRefresh, fairRefresh,
                             spaghettiRefresh, barRefresh, theaterRefresh, tacoRefresh,
                             ballroomRefresh, gasOneRefresh, gasTwoRefresh, gasThreeRefresh,
-                            gardenVisited,
-                          //  path + " DOWN [" + currentNode.getLeftSouthNode().getNodeNumber() + "] ");
+                            gardenVisited, mallVisited,
+                            //  path + " DOWN [" + currentNode.getLeftSouthNode().getNodeNumber() + "] ");
                             path + " DOWN");
             }
             else if(currentDirection.equals("UP"))
@@ -200,8 +210,8 @@ public class DateMap
                             juiceRefresh, coffeeRefresh, sandwichRefresh, fairRefresh,
                             spaghettiRefresh, barRefresh, theaterRefresh, tacoRefresh,
                             ballroomRefresh, gasOneRefresh, gasTwoRefresh, gasThreeRefresh,
-                            gardenVisited,
-                          //  path + " LEFT [" + currentNode.getTopWestNode().getNodeNumber() + "] ");
+                            gardenVisited, mallVisited,
+                            //  path + " LEFT [" + currentNode.getTopWestNode().getNodeNumber() + "] ");
                             path + " LEFT");
 
                 if(!(currentNode.getCentralNorthNode() == null) &&
@@ -211,8 +221,8 @@ public class DateMap
                             juiceRefresh, coffeeRefresh, sandwichRefresh, fairRefresh,
                             spaghettiRefresh, barRefresh, theaterRefresh, tacoRefresh,
                             ballroomRefresh, gasOneRefresh, gasTwoRefresh, gasThreeRefresh,
-                            gardenVisited,
-                          //  path + " UP [" + currentNode.getCentralNorthNode().getNodeNumber() + "] ");
+                            gardenVisited, mallVisited,
+                            //  path + " UP [" + currentNode.getCentralNorthNode().getNodeNumber() + "] ");
                             path + " UP");
 
                 if(!(currentNode.getTopEastNode() == null) &&
@@ -222,8 +232,8 @@ public class DateMap
                             juiceRefresh, coffeeRefresh, sandwichRefresh, fairRefresh,
                             spaghettiRefresh, barRefresh, theaterRefresh, tacoRefresh,
                             ballroomRefresh, gasOneRefresh, gasTwoRefresh, gasThreeRefresh,
-                            gardenVisited,
-                          //  path + " RIGHT [" + currentNode.getTopEastNode().getNodeNumber() + "] ");
+                            gardenVisited, mallVisited,
+                            //  path + " RIGHT [" + currentNode.getTopEastNode().getNodeNumber() + "] ");
                             path + " RIGHT");
             }
             else if(currentDirection.equals("DOWN"))
@@ -236,8 +246,8 @@ public class DateMap
                             juiceRefresh, coffeeRefresh, sandwichRefresh, fairRefresh,
                             spaghettiRefresh, barRefresh, theaterRefresh, tacoRefresh,
                             ballroomRefresh, gasOneRefresh, gasTwoRefresh, gasThreeRefresh,
-                            gardenVisited,
-                          //  path + " LEFT [" + currentNode.getBottomWestNode().getNodeNumber() + "] ");
+                            gardenVisited, mallVisited,
+                            //  path + " LEFT [" + currentNode.getBottomWestNode().getNodeNumber() + "] ");
                             path + " LEFT");
 
                 if(!(currentNode.getCentralSouthNode() == null) &&
@@ -247,8 +257,8 @@ public class DateMap
                             juiceRefresh, coffeeRefresh, sandwichRefresh, fairRefresh,
                             spaghettiRefresh, barRefresh, theaterRefresh, tacoRefresh,
                             ballroomRefresh, gasOneRefresh, gasTwoRefresh, gasThreeRefresh,
-                            gardenVisited,
-                          //  path + " DOWN [" + currentNode.getCentralSouthNode().getNodeNumber() + "] ");
+                            gardenVisited, mallVisited,
+                            //  path + " DOWN [" + currentNode.getCentralSouthNode().getNodeNumber() + "] ");
                             path + " DOWN");
                 if(!(currentNode.getBottomEastNode() == null) &&
                         !currentNode.getBottomEastNode().isInaccessible())
@@ -257,14 +267,13 @@ public class DateMap
                             juiceRefresh, coffeeRefresh, sandwichRefresh, fairRefresh,
                             spaghettiRefresh, barRefresh, theaterRefresh, tacoRefresh,
                             ballroomRefresh, gasOneRefresh, gasTwoRefresh, gasThreeRefresh,
-                            gardenVisited,
-                          //  path + " RIGHT [" + currentNode.getBottomEastNode().getNodeNumber() + "] ");
+                            gardenVisited, mallVisited,
+                            //  path + " RIGHT [" + currentNode.getBottomEastNode().getNodeNumber() + "] ");
                             path + " RIGHT");
             }
 
             //  OBSERVE RESOURCES SURROUNDING CURRENT NODE
             //  AND ACT UPON THEM (Recursion?)
-
             if(!currentNode.hasNoResources())
             {
                 //  JUICE RESOURCE
@@ -276,7 +285,7 @@ public class DateMap
                             11, coffeeRefresh, sandwichRefresh, fairRefresh,
                             spaghettiRefresh, barRefresh, theaterRefresh, tacoRefresh,
                             ballroomRefresh, gasOneRefresh, gasTwoRefresh, gasThreeRefresh,
-                            gardenVisited,
+                            gardenVisited, mallVisited,
                             path + " JUICE");
                 }
 
@@ -289,7 +298,7 @@ public class DateMap
                             juiceRefresh, 11, sandwichRefresh, fairRefresh,
                             spaghettiRefresh, barRefresh, theaterRefresh, tacoRefresh,
                             ballroomRefresh, gasOneRefresh, gasTwoRefresh, gasThreeRefresh,
-                            gardenVisited,
+                            gardenVisited, mallVisited,
                             path + " COFFEE");
                 }
 
@@ -302,7 +311,7 @@ public class DateMap
                             juiceRefresh, coffeeRefresh, sandwichRefresh, fairRefresh,
                             spaghettiRefresh, barRefresh, theaterRefresh, tacoRefresh,
                             ballroomRefresh, 11, gasTwoRefresh, gasThreeRefresh,
-                            gardenVisited,
+                            gardenVisited, mallVisited,
                             path + " GAS1");
                 }
 
@@ -315,7 +324,7 @@ public class DateMap
                             juiceRefresh, coffeeRefresh, sandwichRefresh, fairRefresh,
                             spaghettiRefresh, barRefresh, theaterRefresh, tacoRefresh,
                             ballroomRefresh, gasOneRefresh, 11, gasThreeRefresh,
-                            gardenVisited,
+                            gardenVisited, mallVisited,
                             path + " GAS2");
                 }
 
@@ -328,7 +337,7 @@ public class DateMap
                             juiceRefresh, coffeeRefresh, sandwichRefresh, fairRefresh,
                             spaghettiRefresh, barRefresh, theaterRefresh, tacoRefresh,
                             ballroomRefresh, gasOneRefresh, gasTwoRefresh, 11,
-                            gardenVisited,
+                            gardenVisited, mallVisited,
                             path + " GAS3");
                 }
 
@@ -341,7 +350,7 @@ public class DateMap
                             juiceRefresh, coffeeRefresh, 11, fairRefresh,
                             spaghettiRefresh, barRefresh, theaterRefresh, tacoRefresh,
                             ballroomRefresh, gasOneRefresh, gasTwoRefresh, gasThreeRefresh,
-                            gardenVisited,
+                            gardenVisited, mallVisited,
                             path + " SANDWICH");
                 }
 
@@ -354,7 +363,7 @@ public class DateMap
                             juiceRefresh, coffeeRefresh, sandwichRefresh, 11,
                             spaghettiRefresh, barRefresh, theaterRefresh, tacoRefresh,
                             ballroomRefresh, gasOneRefresh, gasTwoRefresh, gasThreeRefresh,
-                            gardenVisited,
+                            gardenVisited, mallVisited,
                             path + " FAIR");
                 }
 
@@ -367,7 +376,7 @@ public class DateMap
                             juiceRefresh, coffeeRefresh, sandwichRefresh, fairRefresh,
                             11, barRefresh, theaterRefresh, tacoRefresh,
                             ballroomRefresh, gasOneRefresh, gasTwoRefresh, gasThreeRefresh,
-                            gardenVisited,
+                            gardenVisited, mallVisited,
                             path + " ITALIAN");
                 }
 
@@ -380,7 +389,7 @@ public class DateMap
                             juiceRefresh, coffeeRefresh, sandwichRefresh, fairRefresh,
                             spaghettiRefresh, 11, theaterRefresh, tacoRefresh,
                             ballroomRefresh, gasOneRefresh, gasTwoRefresh, gasThreeRefresh,
-                            gardenVisited,
+                            gardenVisited, mallVisited,
                             path + " BAR");
                 }
 
@@ -393,7 +402,7 @@ public class DateMap
                             juiceRefresh, coffeeRefresh, sandwichRefresh, fairRefresh,
                             spaghettiRefresh, barRefresh, 11, tacoRefresh,
                             ballroomRefresh, gasOneRefresh, gasTwoRefresh, gasThreeRefresh,
-                            gardenVisited,
+                            gardenVisited, mallVisited,
                             path + " THEATER");
                 }
 
@@ -406,7 +415,7 @@ public class DateMap
                             juiceRefresh, coffeeRefresh, sandwichRefresh, fairRefresh,
                             spaghettiRefresh, barRefresh, theaterRefresh, 11,
                             ballroomRefresh, gasOneRefresh, gasTwoRefresh, gasThreeRefresh,
-                            gardenVisited,
+                            gardenVisited, mallVisited,
                             path + " TACO");
                 }
 
@@ -419,7 +428,7 @@ public class DateMap
                             juiceRefresh, coffeeRefresh, sandwichRefresh, fairRefresh,
                             spaghettiRefresh, barRefresh, theaterRefresh, tacoRefresh,
                             11, gasOneRefresh, gasTwoRefresh, gasThreeRefresh,
-                            gardenVisited,
+                            gardenVisited, mallVisited,
                             path + " BALLROOM");
                 }
 
@@ -428,27 +437,44 @@ public class DateMap
                         !gardenVisited)
                 {
                     solveDate(currentNode, currentDirection, turnNumber + 1,
-                            fuel, hunger - 10 - 4, thirst - 15 - 6, happiness + 100 - 8, time - 4,
+                            fuel, hunger - 4, thirst - 6, happiness + 100 - 8, time - 4,
                             juiceRefresh, coffeeRefresh, sandwichRefresh, fairRefresh,
                             spaghettiRefresh, barRefresh, theaterRefresh, tacoRefresh,
                             ballroomRefresh, gasOneRefresh, gasTwoRefresh, gasThreeRefresh,
-                            !gardenVisited,
+                            true, mallVisited,
                             path + " GARDEN");
+                }
+
+                //  MALL RESOURCE
+                if(currentNode.isNextToMall() &&
+                        !mallVisited)
+                {
+                    solveDate(currentNode, currentDirection, turnNumber + 1,
+                            fuel, hunger - 4, thirst - 6, happiness - 8, time - 4,
+                            juiceRefresh, coffeeRefresh, sandwichRefresh, fairRefresh,
+                            spaghettiRefresh, barRefresh, theaterRefresh, tacoRefresh,
+                            ballroomRefresh, gasOneRefresh, gasTwoRefresh, gasThreeRefresh,
+                            gardenVisited, true,
+                            path + " MALL");
                 }
             }
 
             //  HOME PATH
             //  NOTE: WHEN DEBUGGING, WE WANT EVERY RESULT, BUT FOR NOW,
             //      LOGGING A HOME PATH WITH THE DESIRED AFFECTION POINTS IS ENOUGH
-            if (currentNode.isNextToHome() && meetsAPThreshold(hunger, thirst, happiness, time))
-                results.add(new DateResult(ResultType.RETURNED_HOME, calculateAffectionPoints(hunger, thirst, happiness, time), path + " HOME"));
+            if (currentNode.isNextToHome())
+                results.add(new DateResult(ResultType.RETURNED_HOME, calculateAffectionPoints(hunger, thirst, happiness, time, mallVisited), path + " HOME"));
 
         }
         else if(time <= 0)
         {
-            if(fuel > 0 && happiness > 0 && hunger > 0 && thirst > 0
-                && meetsAPThreshold(hunger, thirst, happiness))
-                results.add(new DateResult(ResultType.SUCCESS, calculateAffectionPoints(hunger, thirst, happiness), path));
+            //  NOTE: Running down the clock is the goal here, but if the user runs
+            //      out of any resource after doing so, it will be a failure as well.
+            if(fuel > 0 && happiness > 0 && hunger > 0 && thirst > 0)
+                results.add(new DateResult(ResultType.SUCCESS, calculateAffectionPoints(hunger, thirst, happiness, mallVisited), path));
+
+            //  NOTE: TO CONSERVE MEMORY IN THE HEAP, I HAVE TO STOP STORING RESULTS
+            //      THAT END IN FAILURE.
 
             /*
             if(fuel <= 0 || happiness <= 0 || hunger <= 0 || thirst <= 0)
@@ -460,25 +486,10 @@ public class DateMap
              */
         }
         // else
-            // results.add(new DateResult(fuel, hunger, thirst, happiness, time, "FAILURE", path));
-            // results.add(new DateResult(ResultType.OUT_OF_RESOURCE, 0, path));
-
-        //  NOTE: TO CONSERVE MEMORY IN THE HEAP, I HAVE TO STOP STORING RESULTS
-        //      THAT END IN FAILURE.
+        // results.add(new DateResult(fuel, hunger, thirst, happiness, time, "FAILURE", path));
+        // results.add(new DateResult(ResultType.OUT_OF_RESOURCE, 0, path));
 
         return;
-    }
-
-    //  HELPER: CALCULATE AFFECTION POINTS USING A FORMULA
-    private int calculateAffectionPoints(int hunger, int thirst, int happiness)
-    {
-        return (int)Math.ceil((double)(hunger + thirst + happiness) / 6);
-    }
-
-    //  HELPER: CALCULATE AFFEECTION POINTS W/ TIME
-    private int calculateAffectionPoints(int hunger, int thirst, int happiness, int time)
-    {
-        return (int)Math.ceil(((double)(hunger + thirst + happiness) / 6) * ((double)(100 - time) / 100));
     }
 
     //  CONSTRUCT NODES - INITIALIZE/INSTANTIATE, PUT THEM IN A LIST
@@ -492,8 +503,6 @@ public class DateMap
                 nodeMap.add(new DateNode(nodeNumberIncrement, nodeEncoding));
             else if(nodeNumberIncrement == 82)
                 playerDirection = nodeEncoding;
-            else if(nodeNumberIncrement == 83)
-                desiredAffectionPoints = Integer.parseInt(nodeEncoding);
 
             nodeNumberIncrement++;
         }
@@ -580,7 +589,6 @@ public class DateMap
                 nodeMap.get(index).setBottomWestNode(null);
             }
 
-            // nodeMap.get(index).displayAdjacentNodes();
         }
     }
 
@@ -632,7 +640,6 @@ public class DateMap
             System.out.println();
         }
 
-        // System.out.println(nodeMap);
     }
 
     /*
@@ -641,19 +648,44 @@ public class DateMap
          barRefreshTime, theaterRefreshTime, tacoRefreshTime, ballroomRefreshTime;
     */
 
+    //  HELPER: CALCULATE AFFECTION POINTS USING A FORMULA
+    private int calculateAffectionPoints(int hunger, int thirst, int happiness, boolean mallVisited)
+    {
+        int affectionPoints = (int)((double)(hunger + thirst + happiness) / 6);
+
+        if(mallVisited)
+            affectionPoints += 30;
+
+        return affectionPoints;
+    }
+
+    //  HELPER: CALCULATE AFFEECTION POINTS W/ TIME
+    private int calculateAffectionPoints(int hunger, int thirst, int happiness, int time, boolean mallVisited)
+    {
+        int affectionPoints = (int)(((double)(hunger + thirst + happiness) / 6) * ((double)(100 - time) / 100));
+
+        if(mallVisited)
+            affectionPoints += 30;
+
+        return affectionPoints;
+    }
+
+    //  NOTE: BELOW CHECK FUNCTIONS I HAVE MADE THE DECISION TO NOT IMPLEMENT
+    //      BECAUSE GIVING THE HIGHEST RESULT SHOULD SUFFICE FOR USER NEEDS.
+
     //  HELPER: Check if end result meets the desired affection points
     //  NOTE: IF DATE FAILS, DON'T EVEN RUN THIS; ASSUMPTION IS DATE ENDS SUCCESSFUL
-    private boolean meetsAPThreshold(int hunger, int thirst, int happiness)
-    {
-        return calculateAffectionPoints(hunger, thirst, happiness) >= desiredAffectionPoints;
-    }
+    // private boolean meetsAPThreshold(int hunger, int thirst, int happiness)
+    // {
+    //     return calculateAffectionPoints(hunger, thirst, happiness) >= desiredAffectionPoints;
+    // }
 
     //  NOTE: OVERLOADED version of 'meetsAPThreshold' function, with additional parameter time
     //      For use in the event the pathfinding ends at home (early)
-    private boolean meetsAPThreshold(int hunger, int thirst, int happiness, int time)
-    {
-        return calculateAffectionPoints(hunger, thirst, happiness, time) >= desiredAffectionPoints;
-    }
+    // private boolean meetsAPThreshold(int hunger, int thirst, int happiness, int time)
+    // {
+    //     return calculateAffectionPoints(hunger, thirst, happiness, time) >= desiredAffectionPoints;
+    // }
 
     //  DISPLAY HIGHEST RESULT
     public void displayHighestResult()
@@ -677,17 +709,6 @@ public class DateMap
             System.out.println("NO RESULTS FOUND!");
         else
             System.out.println(highestResult);
-    }
-
-    //  DISPLAY RESULTS FUNCTION - ITERATE THROUGH LIST OF RESULTS
-    public void displayResults()
-    {
-        for(DateResult result : results)
-        {
-            if(result.getResultType() == ResultType.RETURNED_HOME ||
-                result.getResultType() == ResultType.SUCCESS)
-                System.out.println(result);
-        }
     }
 
 }

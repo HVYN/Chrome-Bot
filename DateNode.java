@@ -1,17 +1,11 @@
 
 //  Node Class to represent areas of the Map
 
-import java.util.ArrayList;
-import java.util.Date;
-
 public class DateNode
 {
     private int nodeNumber;
     private String adjacentAttributes;
 
-    private static boolean gasOneDesignated, gasTwoDesignated, gasThreeDesignated;
-
-    // private ArrayList<Integer> adjacentNodeNumbers;
     private DateNode leftNorthNode, rightNorthNode,
             topEastNode, bottomEastNode,
             leftSouthNode, rightSouthNode,
@@ -32,12 +26,9 @@ public class DateNode
 
         this.adjacentAttributes = adjacentAttributes;
 
-        // adjacentNodeNumbers = new ArrayList<>();
         leftNorthNode = rightNorthNode = topEastNode = bottomEastNode =
                 leftSouthNode = rightSouthNode = topWestNode = bottomWestNode =
                         centralNorthNode = centralEastNode = centralSouthNode = centralWestNode = null;
-
-        gasOneDesignated = gasTwoDesignated = gasThreeDesignated = false;
 
         currentPlayerNode = false;  inaccessible = false;
 
@@ -69,9 +60,7 @@ public class DateNode
                         break;
                     }
 
-                    // setNextToGas(true);
                     break;
-
                 case('X'):
                     setInaccessible(true);
                     break;
@@ -110,6 +99,7 @@ public class DateNode
                     break;
                 case('H'):
                     setNextToHome(true);
+                    break;
                 case('U'):
                     setNextToMall(true);
                     break;
@@ -195,13 +185,14 @@ public class DateNode
     public boolean isNextToBallroom()   {   return nextToBallroom;  }
     public boolean isNextToSpaghetti()  {   return nextToSpaghetti; }
     public boolean isNextToHome()       {   return nextToHome;      }
+    public boolean isNextToMall()       {   return nextToMall;      }
 
     public boolean hasNoResources()
     {
         return !(isNextToGasOne() || isNextToTheater() || isNextToFair() || isNextToJuice() ||
                 isNextToSandwich() || isNextToCoffee() || isNextToTaco() || isNextToGarden() ||
                 isNextToBar() || isNextToBallroom() || isNextToSpaghetti() || isNextToGasTwo() ||
-                isNextToGasThree());
+                isNextToGasThree() || isNextToMall());
     }
 
     public boolean isNodeMostWest()
