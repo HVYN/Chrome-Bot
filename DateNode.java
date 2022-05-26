@@ -1,6 +1,8 @@
 
 //  Node Class to represent areas of the Map
 
+import java.util.Date;
+
 public class DateNode
 {
     private int nodeNumber;
@@ -20,6 +22,7 @@ public class DateNode
             nextToHome, nextToGasTwo, nextToGasThree, nextToMall,
             inaccessible;
 
+    /*
     public DateNode(int nodeNumber, String adjacentAttributes)
     {
         this.nodeNumber = nodeNumber;
@@ -35,6 +38,76 @@ public class DateNode
         processAdjacentAttributes(adjacentAttributes);
     }
 
+     */
+
+    public DateNode(int nodeNumber)
+    {
+        this.nodeNumber = nodeNumber;
+
+        leftNorthNode = rightNorthNode = topEastNode = bottomEastNode =
+                leftSouthNode = rightSouthNode = topWestNode = bottomWestNode =
+                        centralNorthNode = centralEastNode = centralSouthNode = centralWestNode = null;
+
+        currentPlayerNode = false;  inaccessible = false;
+    }
+
+    public void linkNodeToResource(String resource)
+    {
+        switch(resource)
+        {
+            case "JUICE":
+                setNextToJuice(true);
+                break;
+            case "MALL":
+                setNextToMall(true);
+                break;
+            case "SPAGHETTI":
+                setNextToSpaghetti(true);
+                break;
+            case "FAIR":
+                setNextToFair(true);
+                break;
+            case "SANDWICH":
+                setNextToSandwich(true);
+                break;
+            case "BAR":
+                setNextToBar(true);
+                break;
+            case "AIRPLANE":
+                setNextToAirport(true);
+                break;
+            case "THEATER":
+                setNextToTheater(true);
+                break;
+            case "TACO":
+                setNextToTaco(true);
+                break;
+            case "COFFEE":
+                setNextToCoffee(true);
+                break;
+            case "GARDEN":
+                setNextToGarden(true);
+                break;
+            case "BALLROOM":
+                setNextToBallroom(true);
+                break;
+            case "HOME":
+                setNextToHome(true);
+                break;
+            case "GAS1":
+                setNextToGasOne(true);
+                break;
+            case "GAS2":
+                setNextToGasTwo(true);
+                break;
+            case "GAS3":
+                setNextToGasThree(true);
+                break;
+        }
+
+    }
+
+    /*
     public void processAdjacentAttributes(String adjacentAttributes)
     {
         for(int index = 0; index < adjacentAttributes.length(); index++)
@@ -108,6 +181,8 @@ public class DateNode
             }
         }
     }
+
+     */
 
     public void setCentralNorthNode(DateNode centralNorthNode)  {   this.centralNorthNode = centralNorthNode;   }
     public void setCentralEastNode(DateNode centralEastNode)    {   this.centralEastNode = centralEastNode;     }
