@@ -2,20 +2,19 @@
 
 ## Side Project - Karuta Bot's Date Solver
 
-> GOAL - Solve Dates given an input
-
-```
 GOAL REACHED -> DATES ARE ALL BEING SOLVED (05/21/2022)
-  NEW GOALS ->
-      a. OPTIMIZE ALGORITHM (To conserve HEAP memory)
-      b. IMPLEMENT IMAGE READER (So people literally don't have to input a cipher to use the bot)
-      c. CONVERT TO JAVASCRIPT? (Spread usable code everywhere for free is funny)
+
+> * OPTIMIZE ALGORITHM (To conserve HEAP memory)
+> * <del>IMPLEMENT IMAGE READER (So people literally don't have to input a cipher to use the bot)</del>
+> * CONVERT TO JAVASCRIPT? (Spread usable code everywhere for free is funny)
 
 GOAL REACHED -> IMAGE PARSING (05/26/2022)
-      * OPTIMIZE PIXEL COMPARING
-      * ADD WEDDING RING PARSING
-      * ADD THE ABILITY TO SOLVE PARTIALLY COMPLETED DATES
 
+> * OPTIMIZE PIXEL COMPARING
+> * ADD WEDDING RING PARSING
+> * ADD THE ABILITY TO SOLVE PARTIALLY COMPLETED DATES
+
+```
     REPRESENT NODES / VERTICES / LOCATIONS
         WITH LETTERS AND NUMBERS
     LETTERS WILL REPRESENT ADJACENT ATTRIBUTES TO 'NODES'
