@@ -2,12 +2,15 @@
 //  SUIKA BOT LISTENER
 //  04/03/2022
 
+import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
+import net.dv8tion.jda.api.events.message.MessageUpdateEvent;
 import net.dv8tion.jda.api.events.message.react.MessageReactionAddEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 
 import javax.imageio.ImageIO;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -46,6 +49,8 @@ public class ChromeBotListener extends ListenerAdapter
 
     //  private HashMap<String, LinkedList<Integer>> userEggsMissing = new HashMap<>();
 
+    //  OVERRIDE: Bend this method to my will by customizing what I want the bot
+    //      to do when it hears a message.
     @Override
     public void onMessageReceived(MessageReceivedEvent messageReceivedEvent)
     {
@@ -57,11 +62,12 @@ public class ChromeBotListener extends ListenerAdapter
         String rawMessageContent = message.getContentRaw();
         String messageSenderId = messageSender.getId();
 
-        //  PARSE KARUTA MESSAGES
+        //  NOTE: Check to see if the message received (in the channel)
+        //      is from Karuta bot.
         if(fromKaruta(messageSenderId))
         {
             //  ASSUMPTION: KARUTA MESSAGES WITH 0 LENGTH TYPICALLY ARE
-            //  EMBED MESSAGES.
+            //      EMBED MESSAGES.
             if (rawMessageContent.length() == 0)
             {
                 if(!message.getEmbeds().isEmpty())
@@ -79,12 +85,21 @@ public class ChromeBotListener extends ListenerAdapter
 
                             ChromeBotMapSolver mapSolver = new ChromeBotMapSolver();
 
-                            ChromeBotMapParser.parseMapImage(mapImage, mapSolver);
+                            if(ChromeBotMapParser.parseMapImage(mapImage, mapSolver))
+                            {
+                                EmbedBuilder dateSolveMessageBuilder = new EmbedBuilder()
+                                        .setTitle("Date Solution")
+                                        .setColor(new Color(0x5D5C5B));
 
-                            mapSolver.solveDate();
+                                mapSolver.solveDate();
 
-                            mapSolver.displayHighestResult();
-                            messageChannel.sendMessage(mapSolver.getHighestResult().getPath()).queue();
+                                mapSolver.displayHighestResult();
+
+                                dateSolveMessageBuilder.setDescription(mapSolver.getHighestResult().getPath() +
+                                        "\n**AP: " + mapSolver.getHighestResult().getAffectionPoints() + "**");
+
+                                messageChannel.sendMessageEmbeds(dateSolveMessageBuilder.build()).queue();
+                            }
                         }
                         catch (IOException ioe)
                         {
@@ -178,7 +193,68 @@ public class ChromeBotListener extends ListenerAdapter
                 }
             }
         }
+    }
 
+    //  OVERRIDE: Main way for bot to respond to messages being updated.
+    @Override
+    public void onMessageUpdate(MessageUpdateEvent messageUpdateEvent)
+    {
+        Guild messageGuild = messageUpdateEvent.getGuild();
+        MessageChannel messageChannel = messageUpdateEvent.getChannel();
+        User messageSender = messageUpdateEvent.getAuthor();
+        Message message = messageUpdateEvent.getMessage();
+
+        String rawMessageContent = message.getContentRaw();
+        String messageSenderId = messageSender.getId();
+
+        //  NOTE: Check from Karuta; when users click the date option,
+        //      Karuta Bot will edit its own message.
+        if(fromKaruta(messageSenderId))
+        {
+            //  NOTE: Check for date mini-game embed from Karuta, which
+            //      always has no 'raw' content, only embed content.
+            if(rawMessageContent.length() == 0)
+            {
+                if(!message.getEmbeds().isEmpty())
+                {
+                    //  IF THERE ARE EMBED ELEMENTS, BEGIN PARSING THEM HERE.
+                    MessageEmbed embedMessage = message.getEmbeds().get(0);
+
+                    if(embedMessage.getTitle().equals("Date Minigame"))
+                    {
+                        try
+                        {
+                            URL mapImageURL = new URL(embedMessage.getImage().getProxyUrl());
+
+                            BufferedImage mapImage = ImageIO.read(mapImageURL);
+
+                            ChromeBotMapSolver mapSolver = new ChromeBotMapSolver();
+
+                            if(ChromeBotMapParser.parseMapImage(mapImage, mapSolver))
+                            {
+                                EmbedBuilder dateSolveMessageBuilder = new EmbedBuilder()
+                                        .setTitle("Date Solution")
+                                        .setColor(new Color(0x5D5C5B));
+
+                                mapSolver.solveDate();
+
+                                mapSolver.displayHighestResult();
+
+                                dateSolveMessageBuilder.setDescription(mapSolver.getHighestResult().getPath() +
+                                        "\n**AP: " + mapSolver.getHighestResult().getAffectionPoints() + "**");
+
+                                messageChannel.sendMessageEmbeds(dateSolveMessageBuilder.build()).queue();
+                            }
+                        }
+                        catch (IOException ioe)
+                        {
+                            ioe.printStackTrace();
+                        }
+
+                    }
+                }
+            }
+        }
     }
 
     @Override

@@ -62,7 +62,7 @@ public class ChromeBotMapSolver
                 0, 0, 0, 0,
                 0, 0, 0, 0,
                 false, false,
-                "[START] ");
+                "");
     }
 
     //  NOTE: This version of 'solveDate' is the actual workhorse of the

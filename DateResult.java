@@ -3,6 +3,8 @@
 
 public class DateResult
 {
+    private static int resultCountingNum = 0;
+
     private int fuel, hunger, thirst, happiness, time;
     private int resultNum;
     private int affectionPoints;
@@ -13,8 +15,7 @@ public class DateResult
 
     private ResultType resultType;
 
-    private static int resultCountingNum = 0;
-
+    /*
     //  CONSTRUCTOR: ISSUES include OutofMemory, must found alternative
     public DateResult(int fuel, int hunger, int thirst, int happiness, int time,
                       String status, String path)
@@ -33,6 +34,8 @@ public class DateResult
         //      number as its 'designation'/ID
         resultCountingNum++;
     }
+
+     */
 
     //  CONSTRUCTOR: Knowing exact resource information is unnecessary at the
     //      finality, so just include ResultType for information instead
