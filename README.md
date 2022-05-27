@@ -1,4 +1,4 @@
-# * Karuta Date Solver
+# a. Karuta Date Solver
 
 ## Karuta Bot's Date Mini-game Solver
 
@@ -44,7 +44,7 @@ GOAL REACHED -> IMAGE PARSING (05/26/2022)
         A - (AIRPORT) -> REROLL, -10 ENTERTAINMENT
 ```
 
-# * ROCK, PAPER, SCISSORS
+# b. ROCK, PAPER, SCISSORS
 
 ## Let two discord users challenge each other to a game of rock, paper, scissors!
 
