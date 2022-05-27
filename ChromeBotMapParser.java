@@ -17,44 +17,83 @@ public class ChromeBotMapParser
     //  For the time being, the approach is a static function
     //      so I don't have to instantiate an object -> use
     //      the object's method; just use class method.
-    public static void parseMapImage(BufferedImage mapImage, ChromeBotMapSolver mapSolver)
+
+    /*
+        Parameters:
+            'mapImage' (BufferedImage)
+                Image file (.png) of the date board (given by Karuta bot, accessed through Discord
+                Proxy URL).
+            'mapSolver' (ChromeBotMapSolver)
+                Reference to the instance of the class responsible for solving the actual date
+                mini-game.
+
+         Return:
+            true
+                'Everything' is in order (i.e. all resources accounted for (hopefully), player
+                direction is determined, and inaccessible nodes have been identified.
+            false
+                Player has already moved off starting node (Node 79).
+                Date has already been started/tampered with, or a critical resource could
+                not be found.
+     */
+    public static boolean parseMapImage(BufferedImage mapImage, ChromeBotMapSolver mapSolver)
     {
-        checkIfHome(mapImage, mapSolver);
-        checkIfBallroom(mapImage, mapSolver);
-        checkIfGas(mapImage, mapSolver);
-        checkIfGarden(mapImage, mapSolver);
-        checkIfCoffee(mapImage, mapSolver);
-        checkIfTaco(mapImage, mapSolver);
-        checkIfTheater(mapImage, mapSolver);
-        checkIfAirplane(mapImage, mapSolver);
-        checkIfBar(mapImage, mapSolver);
-        checkIfSandwich(mapImage, mapSolver);
-        checkIfFair(mapImage, mapSolver);
-        checkIfSpaghetti(mapImage, mapSolver);
-        checkIfJuice(mapImage, mapSolver);
+        //  NOTE: IF ANY CRITICAL RESOURCE CANNOT BE FOUND, STOP SOLVING PROCESS.
+        if(!checkStartDirection(mapImage, mapSolver) || !checkIfHome(mapImage, mapSolver) || !checkIfBallroom(mapImage, mapSolver) ||
+            !checkIfGas(mapImage, mapSolver) || !checkIfGarden(mapImage, mapSolver) || !checkIfCoffee(mapImage, mapSolver) ||
+            !checkIfTaco(mapImage, mapSolver) || !checkIfTheater(mapImage, mapSolver) || !checkIfAirplane(mapImage, mapSolver) ||
+            !checkIfBar(mapImage, mapSolver) || !checkIfSandwich(mapImage, mapSolver) || !checkIfFair(mapImage, mapSolver) ||
+            !checkIfSpaghetti(mapImage, mapSolver) || !checkIfJuice(mapImage, mapSolver))
+            return false;
+
+        //  NOTE: Shopping Mall is NOT a CRITICAL resource.
         checkIfMall(mapImage, mapSolver);
 
         System.out.println();
-
         checkInaccessibleNodes(mapImage, mapSolver);
 
-        checkStartDirection(mapImage, mapSolver);
+        return true;
     }
 
-    private static void checkStartDirection(BufferedImage mapImage, ChromeBotMapSolver mapSolver)
+    /*
+        NOTE: Track two specific pixels (@ Node 79) to determine what direction the car/player is
+          facing at the start of the date mini-game.
+
+        Parameters:
+            'mapImage' (BufferedImage)
+                Image file (.png) of the date board.
+            'mapSolver' (ChromeBotMapSolver)
+                Reference to the instance of the class responsible for solving the actual date
+                mini-game.
+
+        Return:
+            true
+                The player is @ Node 79, and faces either LEFT or RIGHT.
+            false
+                The player is NOT @ Node 79.
+     */
+    private static boolean checkStartDirection(BufferedImage mapImage, ChromeBotMapSolver mapSolver)
     {
         Color leftFacing = new Color(mapImage.getRGB(388, 571));
+        Color rightFacing = new Color(mapImage.getRGB(410, 571));
+
         if(leftFacing.equals(new Color(241, 230, 143)))
-            mapSolver.setPlayerDirection("LEFT");
-        else
         {
-            Color rightFacing = new Color(mapImage.getRGB(410, 571));
-            if(rightFacing.equals(new Color(241, 230, 143)))
-                mapSolver.setPlayerDirection("RIGHT");
+            mapSolver.setPlayerDirection("LEFT");
+
+            return true;
         }
+        else if(rightFacing.equals(new Color(241, 230, 143)))
+        {
+            mapSolver.setPlayerDirection("RIGHT");
+
+            return true;
+        }
+
+        return false;
     }
 
-    private static void checkIfJuice(BufferedImage mapImage, ChromeBotMapSolver mapSolver)
+    private static boolean checkIfJuice(BufferedImage mapImage, ChromeBotMapSolver mapSolver)
     {
         for(int x = 122; x < 735; x++)
         {
@@ -88,7 +127,7 @@ public class ChromeBotMapParser
 
                 System.out.println("JUICE DETECTED.\n");
                 determineSquareNumber(x, y, mapSolver, "JUICE");
-                return;
+                return true;
             }
 
             //  CHECK FOR MIRROR FORM
@@ -122,146 +161,15 @@ public class ChromeBotMapParser
 
                 System.out.println("JUICE DETECTED. (MIRROR)\n");
                 determineSquareNumber(x, y, mapSolver, "JUICE");
-                return;
+                return true;
             }
         }
 
         System.out.println("ERROR: JUICE NOT FOUND");
+        return false;
     }
 
-    private static void checkInaccessibleNodes(BufferedImage mapImage, ChromeBotMapSolver mapSolver)
-    {
-        if(!new Color(mapImage.getRGB(306, 180)).equals(new Color(95, 96, 95)))
-            mapSolver.getNode(6).setInaccessible(true);
-        if(!new Color(mapImage.getRGB(367, 180)).equals(new Color(96, 97, 96)))
-            mapSolver.getNode(7).setInaccessible(true);
-        if(!new Color(mapImage.getRGB(428, 180)).equals(new Color(93, 95, 94)))
-            mapSolver.getNode(8).setInaccessible(true);
-        if(!new Color(mapImage.getRGB(487, 180)).equals(new Color(96, 97, 96)))
-            mapSolver.getNode(9).setInaccessible(true);
-
-        if(!new Color(mapImage.getRGB(290, 197)).equals(new Color(95, 97, 95)))
-            mapSolver.getNode(11).setInaccessible(true);
-        if(!new Color(mapImage.getRGB(359, 197)).equals(new Color(92, 94, 92)))
-            mapSolver.getNode(12).setInaccessible(true);
-        if(!new Color(mapImage.getRGB(380, 197)).equals(new Color(94, 95, 94)))
-            mapSolver.getNode(13).setInaccessible(true);
-        if(!new Color(mapImage.getRGB(440, 197)).equals(new Color(92, 95, 93)))
-            mapSolver.getNode(14).setInaccessible(true);
-        if(!new Color(mapImage.getRGB(505, 197)).equals(new Color(95, 96, 94)))
-            mapSolver.getNode(15).setInaccessible(true);
-
-        if(!new Color(mapImage.getRGB(304, 215)).equals(new Color(92, 94, 92)))
-            mapSolver.getNode(17).setInaccessible(true);
-        if(!new Color(mapImage.getRGB(364, 215)).equals(new Color(92, 94, 92)))
-            mapSolver.getNode(18).setInaccessible(true);
-        if(!new Color(mapImage.getRGB(429, 215)).equals(new Color(92, 94, 92)))
-            mapSolver.getNode(19).setInaccessible(true);
-        if(!new Color(mapImage.getRGB(496, 215)).equals(new Color(89, 91, 90)))
-            mapSolver.getNode(20).setInaccessible(true);
-
-        if(!new Color(mapImage.getRGB(280, 231)).equals(new Color(93, 94, 92)))
-            mapSolver.getNode(22).setInaccessible(true);
-        if(!new Color(mapImage.getRGB(310, 231)).equals(new Color(94, 95, 94)))
-            mapSolver.getNode(23).setInaccessible(true);
-        if(!new Color(mapImage.getRGB(380, 231)).equals(new Color(93, 94, 92)))
-            mapSolver.getNode(24).setInaccessible(true);
-        if(!new Color(mapImage.getRGB(450, 231)).equals(new Color(93, 95, 94)))
-            mapSolver.getNode(25).setInaccessible(true);
-        if(!new Color(mapImage.getRGB(515, 231)).equals(new Color(94, 95, 94)))
-            mapSolver.getNode(26).setInaccessible(true);
-
-        if(!new Color(mapImage.getRGB(295, 250)).equals(new Color(92, 94, 92)))
-            mapSolver.getNode(28).setInaccessible(true);
-        if(!new Color(mapImage.getRGB(366, 250)).equals(new Color(92, 94, 92)))
-            mapSolver.getNode(29).setInaccessible(true);
-        if(!new Color(mapImage.getRGB(440, 250)).equals(new Color(92, 93, 91)))
-            mapSolver.getNode(30).setInaccessible(true);
-        if(!new Color(mapImage.getRGB(504, 250)).equals(new Color(95, 96, 95)))
-            mapSolver.getNode(31).setInaccessible(true);
-
-        if(!new Color(mapImage.getRGB(250, 275)).equals(new Color(92, 94, 92)))
-            mapSolver.getNode(33).setInaccessible(true);
-        if(!new Color(mapImage.getRGB(330, 275)).equals(new Color(95, 97, 96)))
-            mapSolver.getNode(34).setInaccessible(true);
-        if(!new Color(mapImage.getRGB(400, 275)).equals(new Color(93, 95, 94)))
-            mapSolver.getNode(35).setInaccessible(true);
-        if(!new Color(mapImage.getRGB(454, 275)).equals(new Color(93, 95, 94)))
-            mapSolver.getNode(36).setInaccessible(true);
-        if(!new Color(mapImage.getRGB(530, 275)).equals(new Color(93, 95, 94)))
-            mapSolver.getNode(37).setInaccessible(true);
-
-        if(!new Color(mapImage.getRGB(278, 295)).equals(new Color(95, 96, 95)))
-            mapSolver.getNode(39).setInaccessible(true);
-        if(!new Color(mapImage.getRGB(357, 295)).equals(new Color(95, 96, 95)))
-            mapSolver.getNode(40).setInaccessible(true);
-        if(!new Color(mapImage.getRGB(435, 295)).equals(new Color(95, 96, 95)))
-            mapSolver.getNode(41).setInaccessible(true);
-        if(!new Color(mapImage.getRGB(522, 295)).equals(new Color(94, 95, 94)))
-            mapSolver.getNode(42).setInaccessible(true);
-
-        if(!new Color(mapImage.getRGB(232, 325)).equals(new Color(91, 92, 91)))
-            mapSolver.getNode(44).setInaccessible(true);
-        if(!new Color(mapImage.getRGB(316, 325)).equals(new Color(91, 92, 91)))
-            mapSolver.getNode(45).setInaccessible(true);
-        if(!new Color(mapImage.getRGB(400, 325)).equals(new Color(91, 92, 91)))
-            mapSolver.getNode(46).setInaccessible(true);
-        if(!new Color(mapImage.getRGB(485, 325)).equals(new Color(93, 95, 93)))
-            mapSolver.getNode(47).setInaccessible(true);
-        if(!new Color(mapImage.getRGB(565, 325)).equals(new Color(92, 93, 91)))
-            mapSolver.getNode(48).setInaccessible(true);
-
-        if(!new Color(mapImage.getRGB(262, 355)).equals(new Color(91, 94, 92)))
-            mapSolver.getNode(50).setInaccessible(true);
-        if(!new Color(mapImage.getRGB(352, 355)).equals(new Color(92, 95, 92)))
-            mapSolver.getNode(51).setInaccessible(true);
-        if(!new Color(mapImage.getRGB(441, 355)).equals(new Color(93, 96, 93)))
-            mapSolver.getNode(52).setInaccessible(true);
-        if(!new Color(mapImage.getRGB(536, 355)).equals(new Color(92, 95, 93)))
-            mapSolver.getNode(53).setInaccessible(true);
-
-        if(!new Color(mapImage.getRGB(208, 395)).equals(new Color(92, 93, 92)))
-            mapSolver.getNode(55).setInaccessible(true);
-        if(!new Color(mapImage.getRGB(306, 395)).equals(new Color(92, 93, 92)))
-            mapSolver.getNode(56).setInaccessible(true);
-        if(!new Color(mapImage.getRGB(400, 395)).equals(new Color(91, 92, 91)))
-            mapSolver.getNode(57).setInaccessible(true);
-        if(!new Color(mapImage.getRGB(495, 395)).equals(new Color(91, 92, 91)))
-            mapSolver.getNode(58).setInaccessible(true);
-        if(!new Color(mapImage.getRGB(590, 395)).equals(new Color(92, 93, 91)))
-            mapSolver.getNode(59).setInaccessible(true);
-
-        if(!new Color(mapImage.getRGB(244, 430)).equals(new Color(91, 93, 91)))
-            mapSolver.getNode(61).setInaccessible(true);
-        if(!new Color(mapImage.getRGB(345, 430)).equals(new Color(91, 93, 91)))
-            mapSolver.getNode(62).setInaccessible(true);
-        if(!new Color(mapImage.getRGB(447, 430)).equals(new Color(92, 94, 92)))
-            mapSolver.getNode(63).setInaccessible(true);
-        if(!new Color(mapImage.getRGB(548, 430)).equals(new Color(91, 94, 92)))
-            mapSolver.getNode(64).setInaccessible(true);
-
-        if(!new Color(mapImage.getRGB(182, 471)).equals(new Color(92, 93, 91)))
-            mapSolver.getNode(66).setInaccessible(true);
-        if(!new Color(mapImage.getRGB(291, 471)).equals(new Color(92, 93, 91)))
-            mapSolver.getNode(67).setInaccessible(true);
-        if(!new Color(mapImage.getRGB(400, 471)).equals(new Color(91, 92, 91)))
-            mapSolver.getNode(68).setInaccessible(true);
-        if(!new Color(mapImage.getRGB(510, 471)).equals(new Color(92, 94, 92)))
-            mapSolver.getNode(69).setInaccessible(true);
-        if(!new Color(mapImage.getRGB(620, 471)).equals(new Color(91, 93, 91)))
-            mapSolver.getNode(70).setInaccessible(true);
-
-        if(!new Color(mapImage.getRGB(220, 522)).equals(new Color(91, 93, 91)))
-            mapSolver.getNode(72).setInaccessible(true);
-        if(!new Color(mapImage.getRGB(337, 522)).equals(new Color(92, 94, 92)))
-            mapSolver.getNode(73).setInaccessible(true);
-        if(!new Color(mapImage.getRGB(452, 522)).equals(new Color(91, 93, 91)))
-            mapSolver.getNode(74).setInaccessible(true);
-        if(!new Color(mapImage.getRGB(570, 522)).equals(new Color(92, 95, 92)))
-            mapSolver.getNode(75).setInaccessible(true);
-    }
-
-    private static void checkIfSpaghetti(BufferedImage mapImage, ChromeBotMapSolver mapSolver)
+    private static boolean checkIfSpaghetti(BufferedImage mapImage, ChromeBotMapSolver mapSolver)
     {
         for(int x = 122; x < 735; x++)
         {
@@ -291,9 +199,22 @@ public class ChromeBotMapParser
                 if(!checkRectanglePattern(sauce, mapImage, x + 2, y - 9, 4, 0))
                     continue;
 
+                Color fork = new Color(mapImage.getRGB(x + 14, y - 13));
+                if(fork.getRed() < 130 || fork.getRed() > 170)
+                    continue;
+                if(fork.getGreen() < 150 || fork.getGreen() > 195)
+                    continue;
+                if(fork.getBlue() < 150 || fork.getBlue() > 200)
+                    continue;
+
+                if(!checkRectanglePattern(fork, mapImage, x + 13, y - 14, 2, 0))
+                    continue;
+                if(!checkRectanglePattern(fork, mapImage, x + 13, y - 15, 2, 0))
+                    continue;
+
                 System.out.println("SPAGHETTI DETECTED.\n");
                 determineSquareNumber(x, y, mapSolver, "SPAGHETTI");
-                return;
+                return true;
             }
 
             //  CHECK FOR MIRROR FORM
@@ -323,27 +244,41 @@ public class ChromeBotMapParser
                 if(!checkRectanglePattern(sauce, mapImage, x - 3, y - 9, 4, 0))
                     continue;
 
+                Color fork = new Color(mapImage.getRGB(x - 14, y - 13));
+                if(fork.getRed() < 130 || fork.getRed() > 170)
+                    continue;
+                if(fork.getGreen() < 150 || fork.getGreen() > 195)
+                    continue;
+                if(fork.getBlue() < 150 || fork.getBlue() > 200)
+                    continue;
+
+                if(!checkRectanglePattern(fork, mapImage, x - 14, y - 14, 2, 0))
+                    continue;
+                if(!checkRectanglePattern(fork, mapImage, x - 14, y - 15, 2, 0))
+                    continue;
+
                 System.out.println("SPAGHETTI DETECTED. (MIRROR)\n");
                 determineSquareNumber(x, y, mapSolver, "SPAGHETTI");
-                return;
+                return true;
             }
         }
 
         System.out.println("ERROR: SPAGHETTI NOT FOUND");
+        return false;
     }
 
-    private static void checkIfFair(BufferedImage mapImage, ChromeBotMapSolver mapSolver)
+    private static boolean checkIfFair(BufferedImage mapImage, ChromeBotMapSolver mapSolver)
     {
         for(int x = 122; x < 735; x++)
         {
             for(int y = 150; y < 572; y++)
             {
                 Color blueCart = new Color(mapImage.getRGB(x, y));
-                if(blueCart.getRed() < 60 || blueCart.getRed() > 100)
+                if(blueCart.getRed() < 40 || blueCart.getRed() > 100)
                     continue;
                 if(blueCart.getGreen() < 120 || blueCart.getGreen() > 160)
                     continue;
-                if(blueCart.getBlue() < 220)
+                if(blueCart.getBlue() < 195)
                     continue;
 
                 if(!checkRectanglePattern(blueCart, mapImage, x, y, 3, 0))
@@ -351,16 +286,32 @@ public class ChromeBotMapParser
                 if(!checkRectanglePattern(blueCart, mapImage, x + 22, y, 3, 0))
                     continue;
 
+                Color diagonal = new Color(mapImage.getRGB(x + 2, y + 2));
+                if(diagonal.getRed() < 145 || diagonal.getRed() > 195)
+                    continue;
+                if(diagonal.getGreen() < 170 || diagonal.getGreen() > 200)
+                    continue;
+                if(diagonal.getBlue() < 170 || diagonal.getBlue() > 225)
+                    continue;
+
+                if(!diagonal.equals(new Color(mapImage.getRGB(x + 3, y + 3))))
+                    continue;
+                if(!diagonal.equals(new Color(mapImage.getRGB(x + 22, y + 3))))
+                    continue;
+                if(!diagonal.equals(new Color(mapImage.getRGB(x + 23, y + 2))))
+                    continue;
+
                 System.out.println("FAIR DETECTED.\n");
                 determineSquareNumber(x, y, mapSolver, "FAIR");
-                return;
+                return true;
             }
         }
 
         System.out.println("ERROR: FAIR NOT FOUND");
+        return false;
     }
 
-    private static void checkIfSandwich(BufferedImage mapImage, ChromeBotMapSolver mapSolver)
+    private static boolean checkIfSandwich(BufferedImage mapImage, ChromeBotMapSolver mapSolver)
     {
         for(int x = 122; x < 735; x++)
         {
@@ -379,14 +330,15 @@ public class ChromeBotMapParser
 
                 System.out.println("SANDWICH DETECTED.\n");
                 determineSquareNumber(x, y, mapSolver, "SANDWICH");
-                return;
+                return true;
             }
         }
 
         System.out.println("ERROR: SANDWICH NOT FOUND");
+        return false;
     }
 
-    private static void checkIfBar(BufferedImage mapImage, ChromeBotMapSolver mapSolver)
+    private static boolean checkIfBar(BufferedImage mapImage, ChromeBotMapSolver mapSolver)
     {
         for(int x = 122; x < 735; x++)
         {
@@ -404,9 +356,9 @@ public class ChromeBotMapParser
                     continue;
 
                 Color liquid = new Color(mapImage.getRGB(x - 2, y + 8));
-                if(liquid.getRed() < 215)
+                if(liquid.getRed() < 195)
                     continue;
-                if(liquid.getGreen() < 120 || liquid.getGreen() > 155)
+                if(liquid.getGreen() < 120 || liquid.getGreen() > 165)
                     continue;
                 if(liquid.getBlue() > 45)
                     continue;
@@ -420,7 +372,7 @@ public class ChromeBotMapParser
 
                 System.out.println("BAR DETECTED.\n");
                 determineSquareNumber(x, y, mapSolver, "BAR");
-                return;
+                return true;
             }
 
             //  CHECK FOR MIRROR FORM
@@ -438,9 +390,9 @@ public class ChromeBotMapParser
                     continue;
 
                 Color liquid = new Color(mapImage.getRGB(x + 2, y + 8));
-                if(liquid.getRed() < 215)
+                if(liquid.getRed() < 195)
                     continue;
-                if(liquid.getGreen() < 120 || liquid.getGreen() > 155)
+                if(liquid.getGreen() < 120 || liquid.getGreen() > 165)
                     continue;
                 if(liquid.getBlue() > 45)
                     continue;
@@ -454,14 +406,15 @@ public class ChromeBotMapParser
 
                 System.out.println("BAR DETECTED. (MIRROR)\n");
                 determineSquareNumber(x, y, mapSolver, "BAR");
-                return;
+                return true;
             }
         }
 
         System.out.println("ERROR: BAR NOT FOUND");
+        return false;
     }
 
-    private static void checkIfTheater(BufferedImage mapImage, ChromeBotMapSolver mapSolver)
+    private static boolean checkIfTheater(BufferedImage mapImage, ChromeBotMapSolver mapSolver)
     {
         for(int x = 122; x < 735; x++)
         {
@@ -490,7 +443,7 @@ public class ChromeBotMapParser
 
                 System.out.println("THEATER DETECTED.\n");
                 determineSquareNumber(x, y, mapSolver, "THEATER");
-                return;
+                return true;
             }
 
             //  CHECK FOR MIRROR FORM
@@ -519,14 +472,15 @@ public class ChromeBotMapParser
 
                 System.out.println("THEATER DETECTED. (MIRROR)\n");
                 determineSquareNumber(x, y, mapSolver, "THEATER");
-                return;
+                return true;
             }
         }
 
         System.out.println("ERROR: THEATER NOT FOUND");
+        return false;
     }
 
-    private static void checkIfTaco(BufferedImage mapImage, ChromeBotMapSolver mapSolver)
+    private static boolean checkIfTaco(BufferedImage mapImage, ChromeBotMapSolver mapSolver)
     {
         for(int x = 122; x < 735; x++)
         {
@@ -551,7 +505,7 @@ public class ChromeBotMapParser
 
                 System.out.println("TACO DETECTED.\n");
                 determineSquareNumber(x, y, mapSolver, "TACO");
-                return;
+                return true;
             }
 
             //  CHECK FOR MIRROR FORM
@@ -576,12 +530,15 @@ public class ChromeBotMapParser
 
                 System.out.println("TACO DETECTED. (MIRROR)\n");
                 determineSquareNumber(x, y, mapSolver, "TACO");
-                return;
+                return true;
             }
         }
+
+        System.out.println("ERROR: TACO NOT FOUND");
+        return false;
     }
 
-    private static void checkIfGarden(BufferedImage mapImage, ChromeBotMapSolver mapSolver)
+    private static boolean checkIfGarden(BufferedImage mapImage, ChromeBotMapSolver mapSolver)
     {
         for(int x = 122; x < 735; x++)
         {
@@ -615,14 +572,15 @@ public class ChromeBotMapParser
 
                 System.out.println("GARDEN DETECTED.\n");
                 determineSquareNumber(x, y, mapSolver, "GARDEN");
-                return;
+                return true;
             }
         }
 
         System.out.println("ERROR: GARDEN NOT FOUND");
+        return false;
     }
 
-    private static void checkIfAirplane(BufferedImage mapImage, ChromeBotMapSolver mapSolver)
+    private static boolean checkIfAirplane(BufferedImage mapImage, ChromeBotMapSolver mapSolver)
     {
         for(int x = 122; x < 735; x++)
         {
@@ -648,7 +606,7 @@ public class ChromeBotMapParser
 
                 System.out.println("AIRPLANE DETECTED.\n");
                 determineSquareNumber(x, y, mapSolver, "AIRPLANE");
-                return;
+                return true;
             }
 
             //  CHECK FOR MIRROR FORM
@@ -674,14 +632,15 @@ public class ChromeBotMapParser
 
                 System.out.println("AIRPLANE DETECTED. (MIRROR)\n");
                 determineSquareNumber(x, y, mapSolver, "AIRPLANE");
-                return;
+                return true;
             }
         }
 
         System.out.println("ERROR: AIRPLANE NOT FOUND");
+        return false;
     }
 
-    private static void checkIfGas(BufferedImage mapImage, ChromeBotMapSolver mapSolver)
+    private static boolean checkIfGas(BufferedImage mapImage, ChromeBotMapSolver mapSolver)
     {
         int numberOfGasPumps = 0;
 
@@ -725,10 +684,15 @@ public class ChromeBotMapParser
         }
 
         if(numberOfGasPumps < 3)
+        {
             System.out.println("ERROR: ONE OR MORE GAS PUMP(S) NOT FOUND");
+            return false;
+        }
+
+        return true;
     }
 
-    private static void checkIfBallroom(BufferedImage mapImage, ChromeBotMapSolver mapSolver)
+    private static boolean checkIfBallroom(BufferedImage mapImage, ChromeBotMapSolver mapSolver)
     {
         for(int x = 122; x < 735; x++)
         {
@@ -740,16 +704,16 @@ public class ChromeBotMapParser
 
                 if(outwardLeg.getRed() < 220)
                     continue;
-                if(outwardLeg.getGreen() < 215 || outwardLeg.getGreen() > 235)
+                if(outwardLeg.getGreen() < 205 || outwardLeg.getGreen() > 235)
                     continue;
-                if(outwardLeg.getBlue() < 80 || outwardLeg.getBlue() > 100)
+                if(outwardLeg.getBlue() < 80 || outwardLeg.getBlue() > 110)
                     continue;
 
                 if(outwardLeg.equals(standLeg) && outwardLeg.equals(forehead))
                 {
                     System.out.println("BALLROOM DETECTED.\n");
                     determineSquareNumber(x, y, mapSolver, "BALLROOM");
-                    return;
+                    return true;
                 }
             }
 
@@ -762,24 +726,25 @@ public class ChromeBotMapParser
 
                 if(outwardLeg.getRed() < 220)
                     continue;
-                if(outwardLeg.getGreen() < 215 || outwardLeg.getGreen() > 235)
+                if(outwardLeg.getGreen() < 205 || outwardLeg.getGreen() > 235)
                     continue;
-                if(outwardLeg.getBlue() < 80 || outwardLeg.getBlue() > 100)
+                if(outwardLeg.getBlue() < 80 || outwardLeg.getBlue() > 110)
                     continue;
 
                 if(outwardLeg.equals(standLeg) && outwardLeg.equals(forehead))
                 {
                     System.out.println("BALLROOM DETECTED. (MIRROR)\n");
                     determineSquareNumber(x, y, mapSolver, "BALLROOM");
-                    return;
+                    return true;
                 }
             }
         }
 
         System.out.println("ERROR: BALLROOM NOT FOUND");
+        return false;
     }
 
-    private static void checkIfCoffee(BufferedImage mapImage, ChromeBotMapSolver mapSolver)
+    private static boolean checkIfCoffee(BufferedImage mapImage, ChromeBotMapSolver mapSolver)
     {
         for(int x = 122; x < 735; x++)
         {
@@ -790,7 +755,7 @@ public class ChromeBotMapParser
                     continue;
                 if(trail.getGreen() < 145 || trail.getGreen() > 180)
                     continue;
-                if(trail.getBlue() < 110 || trail.getBlue() > 140)
+                if(trail.getBlue() < 110 || trail.getBlue() > 150)
                     continue;
 
                 //  CHECK TRAIL POINTS
@@ -807,7 +772,7 @@ public class ChromeBotMapParser
 
                 System.out.println("COFFEE PATTERN DETECTED.\n");
                 determineSquareNumber(x, y, mapSolver, "COFFEE");
-                return;
+                return true;
             }
 
             //  CHECK FOR MIRROR FORM
@@ -818,7 +783,7 @@ public class ChromeBotMapParser
                     continue;
                 if(trail.getGreen() < 145 || trail.getGreen() > 180)
                     continue;
-                if(trail.getBlue() < 110 || trail.getBlue() > 140)
+                if(trail.getBlue() < 110 || trail.getBlue() > 150)
                     continue;
 
                 if(!trail.equals(new Color(mapImage.getRGB(x, y + 1))))
@@ -834,11 +799,12 @@ public class ChromeBotMapParser
 
                 System.out.println("COFFEE PATTERN DETECTED. (MIRROR)\n");
                 determineSquareNumber(x, y, mapSolver, "COFFEE");
-                return;
+                return true;
             }
         }
 
         System.out.println("ERROR: COFFEE NOT FOUND");
+        return false;
     }
 
     private static void checkIfMall(BufferedImage mapImage, ChromeBotMapSolver mapSolver)
@@ -918,7 +884,7 @@ public class ChromeBotMapParser
         }
     }
 
-    private static void checkIfHome(BufferedImage mapImage, ChromeBotMapSolver mapSolver)
+    private static boolean checkIfHome(BufferedImage mapImage, ChromeBotMapSolver mapSolver)
     {
         for(int x = 122; x < 735; x++)
         {
@@ -948,7 +914,7 @@ public class ChromeBotMapParser
                     System.out.println("[" + x + " " + y + "] | HOME DETECTED.\n");
                     determineSquareNumber(x, y, mapSolver, "HOME");
 
-                    return;
+                    return true;
                 }
             }
 
@@ -979,12 +945,13 @@ public class ChromeBotMapParser
                     System.out.println("HOME PATTERN DETECTED. (MIRROR)\n");
                     determineSquareNumber(x, y, mapSolver, "HOME");
 
-                    return;
+                    return true;
                 }
             }
         }
 
         System.out.println("ERROR: HOME NOT FOUND");
+        return false;
     }
 
     private static void determineSquareNumber(int x, int y, ChromeBotMapSolver mapSolver, String resource)
@@ -1384,6 +1351,138 @@ public class ChromeBotMapParser
                 mapSolver.getNode(0).linkNodeToResource(resource);
             }
         }
+    }
+
+    private static void checkInaccessibleNodes(BufferedImage mapImage, ChromeBotMapSolver mapSolver)
+    {
+        if(!new Color(mapImage.getRGB(306, 180)).equals(new Color(95, 96, 95)))
+            mapSolver.getNode(6).setInaccessible(true);
+        if(!new Color(mapImage.getRGB(367, 180)).equals(new Color(96, 97, 96)))
+            mapSolver.getNode(7).setInaccessible(true);
+        if(!new Color(mapImage.getRGB(428, 180)).equals(new Color(93, 95, 94)))
+            mapSolver.getNode(8).setInaccessible(true);
+        if(!new Color(mapImage.getRGB(487, 180)).equals(new Color(96, 97, 96)))
+            mapSolver.getNode(9).setInaccessible(true);
+
+        if(!new Color(mapImage.getRGB(290, 197)).equals(new Color(95, 97, 95)))
+            mapSolver.getNode(11).setInaccessible(true);
+        if(!new Color(mapImage.getRGB(359, 197)).equals(new Color(92, 94, 92)))
+            mapSolver.getNode(12).setInaccessible(true);
+        if(!new Color(mapImage.getRGB(380, 197)).equals(new Color(94, 95, 94)))
+            mapSolver.getNode(13).setInaccessible(true);
+        if(!new Color(mapImage.getRGB(440, 197)).equals(new Color(92, 95, 93)))
+            mapSolver.getNode(14).setInaccessible(true);
+        if(!new Color(mapImage.getRGB(505, 197)).equals(new Color(95, 96, 94)))
+            mapSolver.getNode(15).setInaccessible(true);
+
+        if(!new Color(mapImage.getRGB(304, 215)).equals(new Color(92, 94, 92)))
+            mapSolver.getNode(17).setInaccessible(true);
+        if(!new Color(mapImage.getRGB(364, 215)).equals(new Color(92, 94, 92)))
+            mapSolver.getNode(18).setInaccessible(true);
+        if(!new Color(mapImage.getRGB(429, 215)).equals(new Color(92, 94, 92)))
+            mapSolver.getNode(19).setInaccessible(true);
+        if(!new Color(mapImage.getRGB(496, 215)).equals(new Color(89, 91, 90)))
+            mapSolver.getNode(20).setInaccessible(true);
+
+        if(!new Color(mapImage.getRGB(280, 231)).equals(new Color(93, 94, 92)))
+            mapSolver.getNode(22).setInaccessible(true);
+        if(!new Color(mapImage.getRGB(310, 231)).equals(new Color(94, 95, 94)))
+            mapSolver.getNode(23).setInaccessible(true);
+        if(!new Color(mapImage.getRGB(380, 231)).equals(new Color(93, 94, 92)))
+            mapSolver.getNode(24).setInaccessible(true);
+        if(!new Color(mapImage.getRGB(450, 231)).equals(new Color(93, 95, 94)))
+            mapSolver.getNode(25).setInaccessible(true);
+        if(!new Color(mapImage.getRGB(515, 231)).equals(new Color(94, 95, 94)))
+            mapSolver.getNode(26).setInaccessible(true);
+
+        if(!new Color(mapImage.getRGB(295, 250)).equals(new Color(92, 94, 92)))
+            mapSolver.getNode(28).setInaccessible(true);
+        if(!new Color(mapImage.getRGB(366, 250)).equals(new Color(92, 94, 92)))
+            mapSolver.getNode(29).setInaccessible(true);
+        if(!new Color(mapImage.getRGB(440, 250)).equals(new Color(92, 93, 91)))
+            mapSolver.getNode(30).setInaccessible(true);
+        if(!new Color(mapImage.getRGB(504, 250)).equals(new Color(95, 96, 95)))
+            mapSolver.getNode(31).setInaccessible(true);
+
+        if(!new Color(mapImage.getRGB(250, 275)).equals(new Color(92, 94, 92)))
+            mapSolver.getNode(33).setInaccessible(true);
+        if(!new Color(mapImage.getRGB(330, 275)).equals(new Color(95, 97, 96)))
+            mapSolver.getNode(34).setInaccessible(true);
+        if(!new Color(mapImage.getRGB(400, 275)).equals(new Color(93, 95, 94)))
+            mapSolver.getNode(35).setInaccessible(true);
+        if(!new Color(mapImage.getRGB(454, 275)).equals(new Color(93, 95, 94)))
+            mapSolver.getNode(36).setInaccessible(true);
+        if(!new Color(mapImage.getRGB(530, 275)).equals(new Color(93, 95, 94)))
+            mapSolver.getNode(37).setInaccessible(true);
+
+        if(!new Color(mapImage.getRGB(278, 295)).equals(new Color(95, 96, 95)))
+            mapSolver.getNode(39).setInaccessible(true);
+        if(!new Color(mapImage.getRGB(357, 295)).equals(new Color(95, 96, 95)))
+            mapSolver.getNode(40).setInaccessible(true);
+        if(!new Color(mapImage.getRGB(435, 295)).equals(new Color(95, 96, 95)))
+            mapSolver.getNode(41).setInaccessible(true);
+        if(!new Color(mapImage.getRGB(522, 295)).equals(new Color(94, 95, 94)))
+            mapSolver.getNode(42).setInaccessible(true);
+
+        if(!new Color(mapImage.getRGB(232, 325)).equals(new Color(91, 92, 91)))
+            mapSolver.getNode(44).setInaccessible(true);
+        if(!new Color(mapImage.getRGB(316, 325)).equals(new Color(91, 92, 91)))
+            mapSolver.getNode(45).setInaccessible(true);
+        if(!new Color(mapImage.getRGB(400, 325)).equals(new Color(91, 92, 91)))
+            mapSolver.getNode(46).setInaccessible(true);
+        if(!new Color(mapImage.getRGB(485, 325)).equals(new Color(93, 95, 93)))
+            mapSolver.getNode(47).setInaccessible(true);
+        if(!new Color(mapImage.getRGB(565, 325)).equals(new Color(92, 93, 91)))
+            mapSolver.getNode(48).setInaccessible(true);
+
+        if(!new Color(mapImage.getRGB(262, 355)).equals(new Color(91, 94, 92)))
+            mapSolver.getNode(50).setInaccessible(true);
+        if(!new Color(mapImage.getRGB(352, 355)).equals(new Color(92, 95, 92)))
+            mapSolver.getNode(51).setInaccessible(true);
+        if(!new Color(mapImage.getRGB(441, 355)).equals(new Color(93, 96, 93)))
+            mapSolver.getNode(52).setInaccessible(true);
+        if(!new Color(mapImage.getRGB(536, 355)).equals(new Color(92, 95, 93)))
+            mapSolver.getNode(53).setInaccessible(true);
+
+        if(!new Color(mapImage.getRGB(208, 395)).equals(new Color(92, 93, 92)))
+            mapSolver.getNode(55).setInaccessible(true);
+        if(!new Color(mapImage.getRGB(306, 395)).equals(new Color(92, 93, 92)))
+            mapSolver.getNode(56).setInaccessible(true);
+        if(!new Color(mapImage.getRGB(400, 395)).equals(new Color(91, 92, 91)))
+            mapSolver.getNode(57).setInaccessible(true);
+        if(!new Color(mapImage.getRGB(495, 395)).equals(new Color(91, 92, 91)))
+            mapSolver.getNode(58).setInaccessible(true);
+        if(!new Color(mapImage.getRGB(590, 395)).equals(new Color(92, 93, 91)))
+            mapSolver.getNode(59).setInaccessible(true);
+
+        if(!new Color(mapImage.getRGB(244, 430)).equals(new Color(91, 93, 91)))
+            mapSolver.getNode(61).setInaccessible(true);
+        if(!new Color(mapImage.getRGB(345, 430)).equals(new Color(91, 93, 91)))
+            mapSolver.getNode(62).setInaccessible(true);
+        if(!new Color(mapImage.getRGB(447, 430)).equals(new Color(92, 94, 92)))
+            mapSolver.getNode(63).setInaccessible(true);
+        if(!new Color(mapImage.getRGB(548, 430)).equals(new Color(91, 94, 92)))
+            mapSolver.getNode(64).setInaccessible(true);
+
+        if(!new Color(mapImage.getRGB(182, 471)).equals(new Color(92, 93, 91)))
+            mapSolver.getNode(66).setInaccessible(true);
+        if(!new Color(mapImage.getRGB(291, 471)).equals(new Color(92, 93, 91)))
+            mapSolver.getNode(67).setInaccessible(true);
+        if(!new Color(mapImage.getRGB(400, 471)).equals(new Color(91, 92, 91)))
+            mapSolver.getNode(68).setInaccessible(true);
+        if(!new Color(mapImage.getRGB(510, 471)).equals(new Color(92, 94, 92)))
+            mapSolver.getNode(69).setInaccessible(true);
+        if(!new Color(mapImage.getRGB(620, 471)).equals(new Color(91, 93, 91)))
+            mapSolver.getNode(70).setInaccessible(true);
+
+        if(!new Color(mapImage.getRGB(220, 522)).equals(new Color(91, 93, 91)))
+            mapSolver.getNode(72).setInaccessible(true);
+        if(!new Color(mapImage.getRGB(337, 522)).equals(new Color(92, 94, 92)))
+            mapSolver.getNode(73).setInaccessible(true);
+        if(!new Color(mapImage.getRGB(452, 522)).equals(new Color(91, 93, 91)))
+            mapSolver.getNode(74).setInaccessible(true);
+        if(!new Color(mapImage.getRGB(570, 522)).equals(new Color(92, 95, 92)))
+            mapSolver.getNode(75).setInaccessible(true);
     }
 
     private static boolean checkRectanglePattern(Color anchor, BufferedImage mapImage, int x, int y, int maxOffsetX, int maxOffsetY)
