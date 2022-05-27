@@ -1,6 +1,6 @@
-# Karuta Date Solver
+# * Karuta Date Solver
 
-## Side Project - Karuta Bot's Date Solver
+## Karuta Bot's Date Mini-game Solver
 
 GOAL REACHED -> DATES ARE ALL BEING SOLVED (05/21/2022)
 
@@ -42,4 +42,10 @@ GOAL REACHED -> IMAGE PARSING (05/26/2022)
         W - (RING) -> UNLOCK MARRIAGE OPTION
         H - (HOME) -> END DATE EARLY (AP DEDUCTED BASED ON TIME REMAINING)
         A - (AIRPORT) -> REROLL, -10 ENTERTAINMENT
- 
+```
+
+# * ROCK, PAPER, SCISSORS
+
+## Let two discord users challenge each other to a game of rock, paper, scissors!
+
+SHOULD USE BUTTONS!
