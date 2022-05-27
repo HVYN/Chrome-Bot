@@ -22,11 +22,13 @@ public class ChromeBotMapSolver
 
     private int startingNodeNumber;
 
-    private int currentHighestScore;
+    //  private int currentHighestScore;
 
-    private int juiceRefreshTime, coffeeRefreshTime, gasOneRefreshTime, sandwichRefreshTime,
+    /*
+        private int juiceRefreshTime, coffeeRefreshTime, gasOneRefreshTime, sandwichRefreshTime,
             gasTwoRefreshTime, gasThreeRefreshTime, fairRefreshTime, spaghettiRefreshTime,
             barRefreshTime, theaterRefreshTime, tacoRefreshTime, ballroomRefreshTime;
+     */
 
     public ChromeBotMapSolver()
     {
@@ -45,7 +47,7 @@ public class ChromeBotMapSolver
         //      DEFINE IT EARLY
         startingNodeNumber = 79;
 
-        currentHighestScore = -1;
+        //  currentHighestScore = -1;
 
         constructNodes();
         linkNodes();
@@ -599,6 +601,12 @@ public class ChromeBotMapSolver
                 nodeArray.get(index).setBottomWestNode(null);
             }
         }
+    }
+
+    //  HELPER: PRINT PATH USING EMOJIS (USER-FRIENDLY)
+    public void displayPathEmotes()
+    {
+
     }
 
     //  HELPER: GET HIGHEST RESULT

@@ -1,12 +1,12 @@
 
-//  Node Class to represent areas of the Map
-
-import java.util.Date;
+/*
+    DateNode
+ */
 
 public class DateNode
 {
     private int nodeNumber;
-    private String adjacentAttributes;
+    //  private String adjacentAttributes;
 
     private DateNode leftNorthNode, rightNorthNode,
             topEastNode, bottomEastNode,
@@ -225,8 +225,8 @@ public class DateNode
     public void setInaccessible(boolean inaccessible)   {   this.inaccessible = inaccessible;   }
     public boolean isInaccessible()     {   return inaccessible;    }
 
-    public void setCurrentPlayerNode(boolean currentPlayerNode) {   this.currentPlayerNode = currentPlayerNode; }
-    public boolean isCurrentPlayerNode()    {   return currentPlayerNode;   }
+    //  public void setCurrentPlayerNode(boolean currentPlayerNode) {   this.currentPlayerNode = currentPlayerNode; }
+    //  public boolean isCurrentPlayerNode()    {   return currentPlayerNode;   }
 
     public void setNextToGasOne(boolean nextToGasOne)       {   this.nextToGasOne = nextToGasOne;       }
     public void setNextToGasTwo(boolean nextToGasTwo)       {   this.nextToGasTwo = nextToGasTwo;       }
@@ -321,8 +321,9 @@ public class DateNode
                 nodeNumber == 77 || nodeNumber == 78 || nodeNumber == 79 || nodeNumber == 80 || nodeNumber == 81;
     }
 
-    public int getNodeNumber()  {   return nodeNumber;  }
+    //  public int getNodeNumber()  {   return nodeNumber;  }
 
+    /*
     public void displayAdjacentNodes()
     {
         System.out.println("\n\tLEFT NORTH NODE: " + getLeftNorthNode() + "\n" +
@@ -339,10 +340,12 @@ public class DateNode
                 "\tBOTTOM WEST NODE: " + getBottomWestNode() + "\n");
     }
 
+     */
+
     @Override
     public String toString()
     {
-        return "(NODE " + nodeNumber + " | " + adjacentAttributes + ")";
+        return "(NODE " + nodeNumber + ")";
     }
 
 }

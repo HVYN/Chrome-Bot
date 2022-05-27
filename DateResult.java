@@ -5,11 +5,11 @@ public class DateResult
 {
     private static int resultCountingNum = 0;
 
-    private int fuel, hunger, thirst, happiness, time;
+    //  private int fuel, hunger, thirst, happiness, time;
     private int resultNum;
     private int affectionPoints;
 
-    private String status;
+    //  private String status;
 
     private String path;
 
@@ -51,15 +51,17 @@ public class DateResult
         resultCountingNum++;
     }
 
-    public int getFuel()        {   return fuel;        }
-    public int getHunger()      {   return hunger;      }
-    public int getThirst()      {   return thirst;      }
-    public int getHappiness()   {   return happiness;   }
-    public int getTime()        {   return time;        }
+    //  public int getFuel()        {   return fuel;        }
+    //  public int getHunger()      {   return hunger;      }
+    //  public int getThirst()      {   return thirst;      }
+    //  public int getHappiness()   {   return happiness;   }
+    //  public int getTime()        {   return time;        }
 
     public String getPath()     {   return path;        }
 
     public int getAffectionPoints() {   return affectionPoints; }
+
+    public ResultType getResultType()   {   return resultType;  }
 
     /*
     //  * DEPRECATED *
@@ -75,11 +77,9 @@ public class DateResult
     }
     */
 
-    public ResultType getResultType()   {   return resultType;  }
+    //  public String getStatus()   {   return status;      }
 
-    // public String getStatus()   {   return status;      }
-
-    public static int getResultCountingNum() {  return resultCountingNum;    }
+    //  public static int getResultCountingNum() {  return resultCountingNum;    }
 
     @Override
     public String toString()

@@ -85,12 +85,12 @@ public class ChromeBotListener extends ListenerAdapter
 
                             ChromeBotMapSolver mapSolver = new ChromeBotMapSolver();
 
+                            EmbedBuilder dateSolveMessageBuilder = new EmbedBuilder()
+                                    .setTitle("Date Solution")
+                                    .setColor(new Color(0x5D5C5B));
+
                             if(ChromeBotMapParser.parseMapImage(mapImage, mapSolver))
                             {
-                                EmbedBuilder dateSolveMessageBuilder = new EmbedBuilder()
-                                        .setTitle("Date Solution")
-                                        .setColor(new Color(0x5D5C5B));
-
                                 mapSolver.solveDate();
 
                                 mapSolver.displayHighestResult();
@@ -99,13 +99,17 @@ public class ChromeBotListener extends ListenerAdapter
                                         "\n**AP: " + mapSolver.getHighestResult().getAffectionPoints() + "**");
 
                                 messageChannel.sendMessageEmbeds(dateSolveMessageBuilder.build()).queue();
+                                return;
                             }
+
+                            dateSolveMessageBuilder.setDescription("I'm sorry, something went wrong while trying to find the best path!");
+
+                            messageChannel.sendMessageEmbeds(dateSolveMessageBuilder.build()).queue();
                         }
                         catch (IOException ioe)
                         {
                             ioe.printStackTrace();
                         }
-
                     }
                 }
 
@@ -230,18 +234,26 @@ public class ChromeBotListener extends ListenerAdapter
 
                             ChromeBotMapSolver mapSolver = new ChromeBotMapSolver();
 
-                            if(ChromeBotMapParser.parseMapImage(mapImage, mapSolver))
+                            EmbedBuilder dateSolveMessageBuilder = new EmbedBuilder()
+                                    .setTitle("Date Solution")
+                                    .setColor(new Color(0x5D5C5B));
+
+                            if(ChromeBotMapParser.checkStartDirection(mapImage, mapSolver))
                             {
-                                EmbedBuilder dateSolveMessageBuilder = new EmbedBuilder()
-                                        .setTitle("Date Solution")
-                                        .setColor(new Color(0x5D5C5B));
+                                if (ChromeBotMapParser.parseMapImage(mapImage, mapSolver))
+                                {
+                                    mapSolver.solveDate();
 
-                                mapSolver.solveDate();
+                                    mapSolver.displayHighestResult();
 
-                                mapSolver.displayHighestResult();
+                                    dateSolveMessageBuilder.setDescription(mapSolver.getHighestResult().getPath() +
+                                            "\n**AP: " + mapSolver.getHighestResult().getAffectionPoints() + "**");
 
-                                dateSolveMessageBuilder.setDescription(mapSolver.getHighestResult().getPath() +
-                                        "\n**AP: " + mapSolver.getHighestResult().getAffectionPoints() + "**");
+                                    messageChannel.sendMessageEmbeds(dateSolveMessageBuilder.build()).queue();
+                                    return;
+                                }
+
+                                dateSolveMessageBuilder.setDescription("I'm sorry, something went wrong while trying to find the best path!");
 
                                 messageChannel.sendMessageEmbeds(dateSolveMessageBuilder.build()).queue();
                             }

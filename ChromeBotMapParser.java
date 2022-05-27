@@ -39,7 +39,7 @@ public class ChromeBotMapParser
     public static boolean parseMapImage(BufferedImage mapImage, ChromeBotMapSolver mapSolver)
     {
         //  NOTE: IF ANY CRITICAL RESOURCE CANNOT BE FOUND, STOP SOLVING PROCESS.
-        if(!checkStartDirection(mapImage, mapSolver) || !checkIfHome(mapImage, mapSolver) || !checkIfBallroom(mapImage, mapSolver) ||
+        if(!checkIfHome(mapImage, mapSolver) || !checkIfBallroom(mapImage, mapSolver) ||
             !checkIfGas(mapImage, mapSolver) || !checkIfGarden(mapImage, mapSolver) || !checkIfCoffee(mapImage, mapSolver) ||
             !checkIfTaco(mapImage, mapSolver) || !checkIfTheater(mapImage, mapSolver) || !checkIfAirplane(mapImage, mapSolver) ||
             !checkIfBar(mapImage, mapSolver) || !checkIfSandwich(mapImage, mapSolver) || !checkIfFair(mapImage, mapSolver) ||
@@ -72,7 +72,7 @@ public class ChromeBotMapParser
             false
                 The player is NOT @ Node 79.
      */
-    private static boolean checkStartDirection(BufferedImage mapImage, ChromeBotMapSolver mapSolver)
+    public static boolean checkStartDirection(BufferedImage mapImage, ChromeBotMapSolver mapSolver)
     {
         Color leftFacing = new Color(mapImage.getRGB(388, 571));
         Color rightFacing = new Color(mapImage.getRGB(410, 571));
@@ -891,11 +891,11 @@ public class ChromeBotMapParser
             for(int y = 150; y < 572; y++)
             {
                 Color topLeftWindow = new Color(mapImage.getRGB(x, y));
-                if(topLeftWindow.getRed() < 70 || topLeftWindow.getRed() > 115)
+                if(topLeftWindow.getRed() < 60 || topLeftWindow.getRed() > 115)
                     continue;
-                if(topLeftWindow.getGreen() < 160 || topLeftWindow.getGreen() > 180)
+                if(topLeftWindow.getGreen() < 160 || topLeftWindow.getGreen() > 190)
                     continue;
-                if(topLeftWindow.getBlue() < 220 || topLeftWindow.getBlue() > 255)
+                if(topLeftWindow.getBlue() < 210 || topLeftWindow.getBlue() > 255)
                     continue;
 
                 if(!checkRectanglePattern(topLeftWindow, mapImage, x, y, 1, 1))
@@ -922,11 +922,11 @@ public class ChromeBotMapParser
             for(int y = 150; y < 572; y++)
             {
                 Color topRightWindow = new Color(mapImage.getRGB(x, y));
-                if(topRightWindow.getRed() < 70 || topRightWindow.getRed() > 115)
+                if(topRightWindow.getRed() < 60 || topRightWindow.getRed() > 115)
                     continue;
-                if(topRightWindow.getGreen() < 160 || topRightWindow.getGreen() > 180)
+                if(topRightWindow.getGreen() < 160 || topRightWindow.getGreen() > 190)
                     continue;
-                if(topRightWindow.getBlue() < 220 || topRightWindow.getBlue() > 255)
+                if(topRightWindow.getBlue() < 210 || topRightWindow.getBlue() > 255)
                     continue;
 
                 if(!checkRectanglePattern(topRightWindow, mapImage, x, y, 1, 1))
