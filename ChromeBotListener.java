@@ -1,24 +1,22 @@
 
-//  SUIKA BOT LISTENER
+//  CHROME-BOT (Listener Class)
 //  04/03/2022
 
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.*;
+import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.events.message.MessageUpdateEvent;
 import net.dv8tion.jda.api.events.message.react.MessageReactionAddEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
+import net.dv8tion.jda.api.interactions.components.buttons.Button;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.Random;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -36,18 +34,25 @@ public class ChromeBotListener extends ListenerAdapter
 
     //  private final String EGG_REGEX = "(stEgg\\d{1,2}[ab])";
     //  private final String EGG_NAME_REGEX = "(Springtide Egg #\\d{1,})";
-    //  private final String USER_REGEX = "(@\\d{1,})";
+    private final String USER_REGEX = "<@(\\d{1,})>";
     //  private final String USER_REPLACE_REGEX = "/[<@!>]/g";
 
     //  private Pattern numberRegex = Pattern.compile("(\\d{1,2})");
     //  private Pattern eggRegex = Pattern.compile(EGG_REGEX);
     //  private Pattern eggNameRegex = Pattern.compile(EGG_NAME_REGEX);
-    //  private Pattern userRegex = Pattern.compile(USER_REGEX);
+    private Pattern userRegex = Pattern.compile(USER_REGEX);
 
     //  private LinkedList<Long> whitelistedMessageIds = new LinkedList<>();
     //  private LinkedList<String> userMentions = new LinkedList<>();
 
     //  private HashMap<String, LinkedList<Integer>> userEggsMissing = new HashMap<>();
+
+    //  OVERRIDE: 'Listen' for button interactions (clicks).
+    @Override
+    public void onButtonInteraction(ButtonInteractionEvent buttonInteractionEvent)
+    {
+
+    }
 
     //  OVERRIDE: Bend this method to my will by customizing what I want the bot
     //      to do when it hears a message.
@@ -61,6 +66,19 @@ public class ChromeBotListener extends ListenerAdapter
 
         String rawMessageContent = message.getContentRaw();
         String messageSenderId = messageSender.getId();
+
+        /*
+        if(fromDeveloper(messageSenderId))
+        {
+            Matcher userMatcher = userRegex.matcher(message.getContentRaw());
+            userMatcher.find();
+
+            messageGuild.retrieveMemberById(userMatcher.group(0)).queue(member -> {
+                message.reply(member.getUser().getAsTag()).queue();
+            });
+        }
+
+         */
 
         //  NOTE: Check to see if the message received (in the channel)
         //      is from Karuta bot.
@@ -76,100 +94,20 @@ public class ChromeBotListener extends ListenerAdapter
                     MessageEmbed embedMessage = message.getEmbeds().get(0);
 
                     if(embedMessage.getTitle().equals("Date Minigame"))
-                    {
-                        try
-                        {
-                            URL mapImageURL = new URL(embedMessage.getImage().getProxyUrl());
-
-                            BufferedImage mapImage = ImageIO.read(mapImageURL);
-
-                            ChromeBotMapSolver mapSolver = new ChromeBotMapSolver();
-
-                            EmbedBuilder dateSolveMessageBuilder = new EmbedBuilder()
-                                    .setTitle("Date Solution")
-                                    .setColor(new Color(0x5D5C5B));
-
-                            if(ChromeBotMapParser.parseMapImage(mapImage, mapSolver))
-                            {
-                                mapSolver.solveDate();
-
-                                mapSolver.displayHighestResult();
-
-                                dateSolveMessageBuilder.setDescription(mapSolver.getHighestResult().getPath() +
-                                        "\n**AP: " + mapSolver.getHighestResult().getAffectionPoints() + "**");
-
-                                messageChannel.sendMessageEmbeds(dateSolveMessageBuilder.build()).queue();
-                                return;
-                            }
-
-                            dateSolveMessageBuilder.setDescription("I'm sorry, something went wrong while trying to find the best path!");
-
-                            messageChannel.sendMessageEmbeds(dateSolveMessageBuilder.build()).queue();
-                        }
-                        catch (IOException ioe)
-                        {
-                            ioe.printStackTrace();
-                        }
-                    }
+                        processDateMiniGame(message, embedMessage);
                 }
 
-                /*
-                if (!messageReceivedEvent.getMessage().getEmbeds().isEmpty())
-                {
-                    MessageEmbed embedMessage = messageReceivedEvent.getMessage().getEmbeds().get(0);
-
-                    if (embedMessage.getTitle().equals("Hamako's Springtide Shack"))
-                    {
-                        //  MAGNIFYING GLASS EMOTE REACT
-                        messageReceivedEvent.getMessage().addReaction("\uD83D\uDD0E")
-                                .queue();
-
-                        //  WHITE-LIST THIS MESSAGE.
-                        whitelistedMessageIds.add(messageReceivedEvent.getMessageIdLong());
-                    }
-                }
-
-                 */
             }
             //  CHECK IF WISHLIST IS DROPPING.
             else if (wishListIsDropping(messageReceivedEvent))
                 messageChannel.sendMessage("**SOMEONE'S WISHLIST IS DROPPING!** :scream: "
                         + messageGuild.getRoleById(EVENT_ROLE_ID).getAsMention())
                         .queue();
-            /*
-            else if (rawMessageContent.contains("into your basket!"))
-            {
-                Matcher userMentionMatcher = userRegex.matcher(rawMessageContent);
-                Matcher eggNumberMatcher = numberRegex.matcher(rawMessageContent.substring(rawMessageContent.length() - 40));
 
-                userMentionMatcher.find();
-                eggNumberMatcher.find();
-
-                if (userEggsMissing.containsKey(userMentionMatcher.group(0).substring(1)))
-                {
-                    System.out.println("BEFORE REMOVAL: " + userEggsMissing.get(userMentionMatcher.group(0).substring(1)));
-                    System.out.println("EGG NUMBER: " + eggNumberMatcher.group(0));
-
-                    for (int index = 0; index < userEggsMissing.get(userMentionMatcher.group(0).substring(1)).size(); index++)
-                    {
-                        if (userEggsMissing.get(userMentionMatcher.group(0).substring(1)).get(index) ==
-                                Integer.parseInt(eggNumberMatcher.group(0)))
-                        {
-                            userEggsMissing.get(userMentionMatcher.group(0).substring(1)).remove(index);
-
-                            break;
-                        }
-                    }
-
-                    System.out.println("AFTER REMOVAL: " + userEggsMissing.get(userMentionMatcher.group(0).substring(1)));
-                }
-
-            }
-
-             */
         }
         else
         {
+            //  NOTE: Check messages from other users/authors.
             if(rawMessageContent.length() >= 1)
             {
                 //  if(messageSenderId.equals(DEVELOPER_ID))
@@ -203,8 +141,8 @@ public class ChromeBotListener extends ListenerAdapter
     @Override
     public void onMessageUpdate(MessageUpdateEvent messageUpdateEvent)
     {
-        Guild messageGuild = messageUpdateEvent.getGuild();
-        MessageChannel messageChannel = messageUpdateEvent.getChannel();
+        //  Guild messageGuild = messageUpdateEvent.getGuild();
+        //  MessageChannel messageChannel = messageUpdateEvent.getChannel();
         User messageSender = messageUpdateEvent.getAuthor();
         Message message = messageUpdateEvent.getMessage();
 
@@ -225,45 +163,7 @@ public class ChromeBotListener extends ListenerAdapter
                     MessageEmbed embedMessage = message.getEmbeds().get(0);
 
                     if(embedMessage.getTitle().equals("Date Minigame"))
-                    {
-                        try
-                        {
-                            URL mapImageURL = new URL(embedMessage.getImage().getProxyUrl());
-
-                            BufferedImage mapImage = ImageIO.read(mapImageURL);
-
-                            ChromeBotMapSolver mapSolver = new ChromeBotMapSolver();
-
-                            EmbedBuilder dateSolveMessageBuilder = new EmbedBuilder()
-                                    .setTitle("Date Solution")
-                                    .setColor(new Color(0x5D5C5B));
-
-                            if(ChromeBotMapParser.checkStartDirection(mapImage, mapSolver))
-                            {
-                                if (ChromeBotMapParser.parseMapImage(mapImage, mapSolver))
-                                {
-                                    mapSolver.solveDate();
-
-                                    mapSolver.displayHighestResult();
-
-                                    dateSolveMessageBuilder.setDescription(mapSolver.getHighestResult().getPath() +
-                                            "\n**AP: " + mapSolver.getHighestResult().getAffectionPoints() + "**");
-
-                                    messageChannel.sendMessageEmbeds(dateSolveMessageBuilder.build()).queue();
-                                    return;
-                                }
-
-                                dateSolveMessageBuilder.setDescription("I'm sorry, something went wrong while trying to find the best path!");
-
-                                messageChannel.sendMessageEmbeds(dateSolveMessageBuilder.build()).queue();
-                            }
-                        }
-                        catch (IOException ioe)
-                        {
-                            ioe.printStackTrace();
-                        }
-
-                    }
+                        processDateMiniGame(message, embedMessage);
                 }
             }
         }
@@ -276,107 +176,7 @@ public class ChromeBotListener extends ListenerAdapter
         MessageChannel reactionChannel = messageReactionAddEvent.getChannel();
         MessageReaction.ReactionEmote reactionEmote = messageReactionAddEvent.getReactionEmote();
 
-        /*
-        //  CHECK IF REACTOR IS IN THE GAMBLING CHANNEL
-        //      AND IF IT IS KARUTA BOT.
-        //  THEN CHECK IF IT IS AN EGG.
-        if(reactionIsEgg(messageReactionAddEvent))
-        {
-            userMentions.clear();
 
-            Matcher eggNoMatcher = numberRegex.matcher(reactionEmote.getName());
-                eggNoMatcher.find();
-
-            String eggMentions = "";
-
-            int eggReactionNumber = Integer.parseInt(eggNoMatcher.group(0));
-            System.out.println("EGG REACTION NUMBER: " + eggReactionNumber);
-
-            for(String userId : userEggsMissing.keySet())
-            {
-                for(Integer missingEgg : userEggsMissing.get(userId))
-                {
-                    if(missingEgg == eggReactionNumber)
-                    {
-                        System.out.println("MISSING EGG FROM A USER DETECTED. " + userId);
-
-                        reactionGuild.retrieveMemberById(userId).queue(member ->
-                        {
-                            System.out.println("MENTION: " + member.getAsMention());
-
-                            userMentions.add(member.getAsMention());
-                        });
-
-                        break;
-                    }
-                }
-            }
-
-            System.out.println("USER MENTIONS ARRAY: " + userMentions);
-            for(String mention : userMentions)
-                eggMentions += (mention + " ");
-
-            if(eggMentions.equals(""))
-            {
-                eggMentions += reactionGuild.getRoleById(EVENT_ROLE_ID).getAsMention();
-
-                reactionChannel.sendMessage(":melon:  __Don't forget to type__ `k!event` __and click on the__ :mag: !  :melon:")
-                        .queue();
-            }
-
-            reactionChannel.sendMessage(eggMentions + ", :mag_right:  **I FOUND AN EGG!**  :mag:")
-                    .queue();
-        }
-        else if(reactionIsGlass(messageReactionAddEvent) &&
-                !messageReactionAddEvent.getUser().isBot())
-        {
-            reactionChannel.retrieveMessageById(messageReactionAddEvent.getMessageId())
-                    .queue((message ->
-                    {
-                        if(!message.getEmbeds().isEmpty() && message.getAuthor().getId().equals(KARUTA_ID)
-                            && whitelistedMessageIds.contains(message.getIdLong()))
-                        {
-                            if(!message.getEmbeds().get(0).getFields().isEmpty())
-                            {
-                                Matcher eggMatcher = eggRegex.matcher(message.getEmbeds().get(0)
-                                        .getFields().get(0).getValue());
-
-                                String missingEggs = "**Egg(s)**: ";
-
-                                String reactorId = messageReactionAddEvent.getUserId().replace(USER_REPLACE_REGEX, "");
-
-                                System.out.println(reactorId);
-
-                                if(!userEggsMissing.containsKey(reactorId))
-                                    userEggsMissing.put(reactorId, new LinkedList<>());
-
-                                //  FRESH RESTART FOR MISSING EGGS.
-                                userEggsMissing.get(reactorId).clear();
-
-                                while(eggMatcher.find())
-                                {
-                                    String egg = eggMatcher.group(0);
-
-                                    if(egg.contains("b"))
-                                    {
-                                        userEggsMissing.get(reactorId).add(Integer.parseInt(egg.substring(5, egg.length() - 1)));
-
-                                        missingEggs += " [" + egg.substring(5, egg.length() - 1) + "]";
-                                    }
-                                }
-
-                                message.reply(messageReactionAddEvent.getUser().getAsMention() + " *Looks like you're missing some eggs! Let me help with that!*  :sunglasses:").queue();
-
-                                System.out.println(userEggsMissing.get(reactorId));
-
-                                //  DON'T LISTEN TO THE MESSAGE ANYMORE.
-                                whitelistedMessageIds.remove(message.getIdLong());
-                            }
-                        }
-                    }));
-        }
-
-         */
     }
 
     //  SCAN MESSAGE FOR WISHLIST DROP
@@ -389,23 +189,105 @@ public class ChromeBotListener extends ListenerAdapter
     //  CHECK IF ID IS KARUTA BOT'S
     private boolean fromKaruta(String id)   {   return id.equals(KARUTA_ID);    }
 
-    /*
-    //  SCAN REACTIONS FOR EGGS
-    private boolean reactionIsEgg(MessageReactionAddEvent messageReactionAddEvent)
+    //  CHECK IF ID IS MINE
+    private boolean fromDeveloper(String id)    {   return id.equals(DEVELOPER_ID); }
+
+    //  HELPER: Since this series of actions is called when a message is edited and/or sent,
+    //      I moved it to a separate function to make readability better, and stop
+    //      spam.
+    private void processDateMiniGame(Message message, MessageEmbed embedMessage)
     {
-        if(messageReactionAddEvent.getReactionEmote().getName().length() < 5)
-            return false;
+        //  NOTE: Use Matcher class, with pre-defined 'USER_REGEX' Pattern object to
+        //      find user ID; we then put the user's name/tag into the footer of the
+        //      embed message we return (unless the parser fails, in which case we
+        //      return an error message in the footer).
+        Matcher userMatcher = userRegex.matcher(embedMessage.getDescription());
+        userMatcher.find();
 
-        return (fromKaruta(messageReactionAddEvent.getUser().getId()) &&
-                messageReactionAddEvent.getReactionEmote().getName().substring(0, 5).equals("stEgg"));
+        try
+        {
+            URL mapImageURL = new URL(embedMessage.getImage().getProxyUrl());
+
+            BufferedImage mapImage = ImageIO.read(mapImageURL);
+
+            ChromeBotMapSolver mapSolver = new ChromeBotMapSolver();
+
+            EmbedBuilder dateSolveMessageBuilder = new EmbedBuilder()
+                    .setTitle("Date Solution")
+                    .setColor(new Color(0x5D5C5B));
+
+            if(!ChromeBotMapParser.hasDateBegun(mapImage))
+            {
+                if (ChromeBotMapParser.checkStartDirection(mapImage, mapSolver))
+                {
+                    //  NOTE: Store error message from parsing process.
+                    String errorMessage = ChromeBotMapParser.parseMapImage(mapImage, mapSolver);
+
+                    if (errorMessage.equals(""))
+                    {
+                        //  NOTE: Once the player direction is determined, and the critical resources
+                        //      have been identified, proceed to solving the date.
+                        mapSolver.solveDate();
+
+                        //  DEBUG: Print highest result to console for debugging purposes.
+                        mapSolver.displayHighestResult();
+
+                        String description;
+
+                        //  NOTE: If there isn't even a single result marked as 'SUCCESS', then the
+                        //      date board is un-winnable.
+                        if(mapSolver.getHighestResult() != null)
+                        {
+                            //  NOTE: Create description for embed message.
+                            description = mapSolver.getPathAsEmotes(mapSolver.getHighestResult().getPath()) +
+                                    "\n**AP: " + (mapSolver.getHighestResult().getAffectionPoints() - 1) + "-" + (mapSolver.getHighestResult().getAffectionPoints() + 1)
+                                    + "**";
+
+                            if (mapSolver.getHighestResult().getPath().contains("MALL"))
+                                description += " `" + (mapSolver.getHighestResult().getAffectionPoints() - 1 - 30) + "-" + (mapSolver.getHighestResult().getAffectionPoints() + 1)
+                                        + " + :shopping_bags";
+
+                            dateSolveMessageBuilder.setColor(new Color(0xBABABA));
+                        }
+                        else
+                            description = "Date could not be solved!\n**AP: 0**";
+
+                        //  NOTE: Create footer for embed message.
+                        String footer = "For " + message.getGuild().getMemberById(userMatcher.group(1)).getUser().getAsTag();
+
+                        dateSolveMessageBuilder.setDescription(description);
+                        dateSolveMessageBuilder.setFooter(footer);
+
+                        //  NOTE: In other words, there was no ring to get to begin with.
+                        if(mapSolver.getHighestResultWithRing() == null)
+                        {
+                            message.replyEmbeds(dateSolveMessageBuilder.build()).setActionRow(
+                                    Button.secondary("ring", Emoji.fromMarkdown("\uD83D\uDC8D")).asDisabled()
+                            ).queue();
+                        }
+                        else
+                        {
+                            message.replyEmbeds(dateSolveMessageBuilder.build()).setActionRow(
+                                    Button.secondary("ring", Emoji.fromMarkdown("\uD83D\uDC8D")).asDisabled()
+                            ).queue();
+                        }
+
+                        return;
+                    }
+
+                    dateSolveMessageBuilder.setDescription("I'm sorry, something went wrong while trying to find the best path!");
+                    dateSolveMessageBuilder.setFooter("ERROR: " + errorMessage);
+
+                    //  NOTE: Reply to Karuta date-board
+                    message.replyEmbeds(dateSolveMessageBuilder.build()).queue();
+                }
+            }
+        }
+        catch (IOException ioe)
+        {
+            System.out.println("ERROR: Image can't load for some reason.");
+            ioe.printStackTrace();
+        }
     }
-     */
-
-    /*
-    //  SCAN REACTIONS FOR MAGNIFYING GLASS
-    private boolean reactionIsGlass(MessageReactionAddEvent messageReactionAddEvent)
-        {   return messageReactionAddEvent.getReactionEmote().getName().equals("\uD83D\uDD0E");    }
-
-     */
 
 }

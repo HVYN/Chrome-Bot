@@ -20,7 +20,7 @@ public class DateNode
             nextToSandwich, nextToCoffee, nextToTaco, nextToGarden,
             nextToBar, nextToAirport, nextToBallroom, nextToSpaghetti,
             nextToHome, nextToGasTwo, nextToGasThree, nextToMall,
-            inaccessible;
+            nextToRing, inaccessible;
 
     /*
     public DateNode(int nodeNumber, String adjacentAttributes)
@@ -40,6 +40,7 @@ public class DateNode
 
      */
 
+    //
     public DateNode(int nodeNumber)
     {
         this.nodeNumber = nodeNumber;
@@ -102,6 +103,9 @@ public class DateNode
                 break;
             case "GAS3":
                 setNextToGasThree(true);
+                break;
+            case "RING":
+                setNextToRing(true);
                 break;
         }
 
@@ -244,6 +248,7 @@ public class DateNode
     public void setNextToSpaghetti(boolean nextToSpaghetti) {   this.nextToSpaghetti = nextToSpaghetti; }
     public void setNextToHome(boolean nextToHome)           {   this.nextToHome = nextToHome;           }
     public void setNextToMall(boolean nextToMall)           {   this.nextToMall = nextToMall;           }
+    public void setNextToRing(boolean nextToRing)           {   this.nextToRing = nextToRing;           }
 
     public boolean isNextToGasOne()     {   return nextToGasOne;       }
     public boolean isNextToGasTwo()     {   return nextToGasTwo;    }
@@ -256,18 +261,19 @@ public class DateNode
     public boolean isNextToTaco()       {   return nextToTaco;      }
     public boolean isNextToGarden()     {   return nextToGarden;    }
     public boolean isNextToBar()        {   return nextToBar;       }
-    public boolean isNextToAirport()    {   return nextToAirport;   }
+    //  public boolean isNextToAirport()    {   return nextToAirport;   }
     public boolean isNextToBallroom()   {   return nextToBallroom;  }
     public boolean isNextToSpaghetti()  {   return nextToSpaghetti; }
     public boolean isNextToHome()       {   return nextToHome;      }
     public boolean isNextToMall()       {   return nextToMall;      }
+    public boolean isNextToRing()       {   return nextToRing;      }
 
     public boolean hasNoResources()
     {
         return !(isNextToGasOne() || isNextToTheater() || isNextToFair() || isNextToJuice() ||
                 isNextToSandwich() || isNextToCoffee() || isNextToTaco() || isNextToGarden() ||
                 isNextToBar() || isNextToBallroom() || isNextToSpaghetti() || isNextToGasTwo() ||
-                isNextToGasThree() || isNextToMall());
+                isNextToGasThree() || isNextToMall() || isNextToRing());
     }
 
     public boolean isNodeMostWest()
@@ -321,7 +327,8 @@ public class DateNode
                 nodeNumber == 77 || nodeNumber == 78 || nodeNumber == 79 || nodeNumber == 80 || nodeNumber == 81;
     }
 
-    //  public int getNodeNumber()  {   return nodeNumber;  }
+    //  DEBUG: Return node number
+    public int getNodeNumber()  {   return nodeNumber;  }
 
     /*
     public void displayAdjacentNodes()

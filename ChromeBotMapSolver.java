@@ -9,27 +9,24 @@
 //      DOES THE PARSING WORK NOW.
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.LinkedList;
 
 public class ChromeBotMapSolver
 {
     private ArrayList<DateNode> nodeArray;
 
-    private LinkedList<DateResult> results;
+    //  DEBUG: When I was first programming the solver, I had the program store
+    //      every result (Success and Failure), to check if it was being thorough.
+    //  private LinkedList<DateResult> results;
+
+    private DateResult highestResult;
+    private DateResult highestResultWithRing;
 
     private String playerDirection;
 
     private int startingNodeNumber;
 
     //  private int currentHighestScore;
-
-    /*
-        private int juiceRefreshTime, coffeeRefreshTime, gasOneRefreshTime, sandwichRefreshTime,
-            gasTwoRefreshTime, gasThreeRefreshTime, fairRefreshTime, spaghettiRefreshTime,
-            barRefreshTime, theaterRefreshTime, tacoRefreshTime, ballroomRefreshTime;
-     */
-
     public ChromeBotMapSolver()
     {
         //  mapEncodingArray = mapEncoding.split("\\s+");
@@ -40,14 +37,14 @@ public class ChromeBotMapSolver
         //      store duplicates, but that doesn't apply because even if it's the
         //      same score, it takes a different path, so I was misguided in my
         //      attempts at conserving heap space.
-        results = new LinkedList<>();
+        //  results = new LinkedList<>();
         //  pathsTaken = new LinkedList<>();
+
+        highestResultWithRing = highestResult = null;
 
         //  STARTING NODE IS ALWAYS AT THE SAME LOCATION, SO WE CAN
         //      DEFINE IT EARLY
         startingNodeNumber = 79;
-
-        //  currentHighestScore = -1;
 
         constructNodes();
         linkNodes();
@@ -56,14 +53,14 @@ public class ChromeBotMapSolver
     //  NOTE: Starter function, jump starts its other counterpart.
     public void solveDate()
     {
-        System.out.println(playerDirection);
+        System.out.println("FACING " + playerDirection);
 
         solveDate(nodeArray.get(startingNodeNumber), playerDirection, 1,
                 100, 50, 50, 75, 100,
                 0, 0, 0, 0,
                 0, 0, 0, 0,
                 0, 0, 0, 0,
-                false, false,
+                false, false, false,
                 "");
     }
 
@@ -75,15 +72,9 @@ public class ChromeBotMapSolver
                           int juiceRefresh, int coffeeRefresh, int sandwichRefresh, int fairRefresh,
                           int spaghettiRefresh, int barRefresh, int theaterRefresh, int tacoRefresh,
                           int ballroomRefresh, int gasOneRefresh, int gasTwoRefresh, int gasThreeRefresh,
-                          boolean gardenVisited, boolean mallVisited,
+                          boolean gardenVisited, boolean mallVisited, boolean ringVisited,
                           String path)
     {
-        /*
-            juiceRefreshTime, coffeeRefreshTime, gasOneRefreshTime, sandwichRefreshTime,
-            gasTwoRefreshTime, gasThreeRefreshTime, fairRefreshTime, spaghettiRefreshTime,
-            barRefreshTime, theaterRefreshTime, tacoRefreshTime, ballroomRefreshTime;
-         */
-
         //  MAX RESOURCE CAP IS 100; ADJUST IF THEY ARE OVER THE LIMIT TO
         //      AVOID ANY MISCALCULATIONS GOING FORWARD
         if(hunger > 100)
@@ -139,7 +130,7 @@ public class ChromeBotMapSolver
                             juiceRefresh, coffeeRefresh, sandwichRefresh, fairRefresh,
                             spaghettiRefresh, barRefresh, theaterRefresh, tacoRefresh,
                             ballroomRefresh, gasOneRefresh, gasTwoRefresh, gasThreeRefresh,
-                            gardenVisited, mallVisited,
+                            gardenVisited, mallVisited, ringVisited,
                             //  path + " UP [" + currentNode.getRightNorthNode().getNodeNumber() + "] ");
                             path + " UP");
 
@@ -150,7 +141,7 @@ public class ChromeBotMapSolver
                             juiceRefresh, coffeeRefresh, sandwichRefresh, fairRefresh,
                             spaghettiRefresh, barRefresh, theaterRefresh, tacoRefresh,
                             ballroomRefresh, gasOneRefresh, gasTwoRefresh, gasThreeRefresh,
-                            gardenVisited, mallVisited,
+                            gardenVisited, mallVisited, ringVisited,
                             //  path + " RIGHT [" + currentNode.getCentralEastNode().getNodeNumber() + "] ");
                             path + " RIGHT");
 
@@ -161,7 +152,7 @@ public class ChromeBotMapSolver
                             juiceRefresh, coffeeRefresh, sandwichRefresh, fairRefresh,
                             spaghettiRefresh, barRefresh, theaterRefresh, tacoRefresh,
                             ballroomRefresh, gasOneRefresh, gasTwoRefresh, gasThreeRefresh,
-                            gardenVisited, mallVisited,
+                            gardenVisited, mallVisited, ringVisited,
                             //  path + " DOWN [" + currentNode.getRightSouthNode().getNodeNumber() + "] ");
                             path + " DOWN");
             }
@@ -175,7 +166,7 @@ public class ChromeBotMapSolver
                             juiceRefresh, coffeeRefresh, sandwichRefresh, fairRefresh,
                             spaghettiRefresh, barRefresh, theaterRefresh, tacoRefresh,
                             ballroomRefresh, gasOneRefresh, gasTwoRefresh, gasThreeRefresh,
-                            gardenVisited, mallVisited,
+                            gardenVisited, mallVisited, ringVisited,
                             //  path + " UP [" + currentNode.getLeftNorthNode().getNodeNumber() + "] ");
                             path + " UP");
 
@@ -186,7 +177,7 @@ public class ChromeBotMapSolver
                             juiceRefresh, coffeeRefresh, sandwichRefresh, fairRefresh,
                             spaghettiRefresh, barRefresh, theaterRefresh, tacoRefresh,
                             ballroomRefresh, gasOneRefresh, gasTwoRefresh, gasThreeRefresh,
-                            gardenVisited, mallVisited,
+                            gardenVisited, mallVisited, ringVisited,
                             //   path + " LEFT [" + currentNode.getCentralWestNode().getNodeNumber() + "] ");
                             path + " LEFT");
 
@@ -197,7 +188,7 @@ public class ChromeBotMapSolver
                             juiceRefresh, coffeeRefresh, sandwichRefresh, fairRefresh,
                             spaghettiRefresh, barRefresh, theaterRefresh, tacoRefresh,
                             ballroomRefresh, gasOneRefresh, gasTwoRefresh, gasThreeRefresh,
-                            gardenVisited, mallVisited,
+                            gardenVisited, mallVisited, ringVisited,
                             //  path + " DOWN [" + currentNode.getLeftSouthNode().getNodeNumber() + "] ");
                             path + " DOWN");
             }
@@ -211,7 +202,7 @@ public class ChromeBotMapSolver
                             juiceRefresh, coffeeRefresh, sandwichRefresh, fairRefresh,
                             spaghettiRefresh, barRefresh, theaterRefresh, tacoRefresh,
                             ballroomRefresh, gasOneRefresh, gasTwoRefresh, gasThreeRefresh,
-                            gardenVisited, mallVisited,
+                            gardenVisited, mallVisited, ringVisited,
                             //  path + " LEFT [" + currentNode.getTopWestNode().getNodeNumber() + "] ");
                             path + " LEFT");
 
@@ -222,7 +213,7 @@ public class ChromeBotMapSolver
                             juiceRefresh, coffeeRefresh, sandwichRefresh, fairRefresh,
                             spaghettiRefresh, barRefresh, theaterRefresh, tacoRefresh,
                             ballroomRefresh, gasOneRefresh, gasTwoRefresh, gasThreeRefresh,
-                            gardenVisited, mallVisited,
+                            gardenVisited, mallVisited, ringVisited,
                             //  path + " UP [" + currentNode.getCentralNorthNode().getNodeNumber() + "] ");
                             path + " UP");
 
@@ -233,7 +224,7 @@ public class ChromeBotMapSolver
                             juiceRefresh, coffeeRefresh, sandwichRefresh, fairRefresh,
                             spaghettiRefresh, barRefresh, theaterRefresh, tacoRefresh,
                             ballroomRefresh, gasOneRefresh, gasTwoRefresh, gasThreeRefresh,
-                            gardenVisited, mallVisited,
+                            gardenVisited, mallVisited, ringVisited,
                             //  path + " RIGHT [" + currentNode.getTopEastNode().getNodeNumber() + "] ");
                             path + " RIGHT");
             }
@@ -247,7 +238,7 @@ public class ChromeBotMapSolver
                             juiceRefresh, coffeeRefresh, sandwichRefresh, fairRefresh,
                             spaghettiRefresh, barRefresh, theaterRefresh, tacoRefresh,
                             ballroomRefresh, gasOneRefresh, gasTwoRefresh, gasThreeRefresh,
-                            gardenVisited, mallVisited,
+                            gardenVisited, mallVisited, ringVisited,
                             //  path + " LEFT [" + currentNode.getBottomWestNode().getNodeNumber() + "] ");
                             path + " LEFT");
 
@@ -258,7 +249,7 @@ public class ChromeBotMapSolver
                             juiceRefresh, coffeeRefresh, sandwichRefresh, fairRefresh,
                             spaghettiRefresh, barRefresh, theaterRefresh, tacoRefresh,
                             ballroomRefresh, gasOneRefresh, gasTwoRefresh, gasThreeRefresh,
-                            gardenVisited, mallVisited,
+                            gardenVisited, mallVisited, ringVisited,
                             //  path + " DOWN [" + currentNode.getCentralSouthNode().getNodeNumber() + "] ");
                             path + " DOWN");
                 if(!(currentNode.getBottomEastNode() == null) &&
@@ -268,7 +259,7 @@ public class ChromeBotMapSolver
                             juiceRefresh, coffeeRefresh, sandwichRefresh, fairRefresh,
                             spaghettiRefresh, barRefresh, theaterRefresh, tacoRefresh,
                             ballroomRefresh, gasOneRefresh, gasTwoRefresh, gasThreeRefresh,
-                            gardenVisited, mallVisited,
+                            gardenVisited, mallVisited, ringVisited,
                             //  path + " RIGHT [" + currentNode.getBottomEastNode().getNodeNumber() + "] ");
                             path + " RIGHT");
             }
@@ -286,7 +277,7 @@ public class ChromeBotMapSolver
                             11, coffeeRefresh, sandwichRefresh, fairRefresh,
                             spaghettiRefresh, barRefresh, theaterRefresh, tacoRefresh,
                             ballroomRefresh, gasOneRefresh, gasTwoRefresh, gasThreeRefresh,
-                            gardenVisited, mallVisited,
+                            gardenVisited, mallVisited, ringVisited,
                             path + " JUICE");
                 }
 
@@ -299,7 +290,7 @@ public class ChromeBotMapSolver
                             juiceRefresh, 11, sandwichRefresh, fairRefresh,
                             spaghettiRefresh, barRefresh, theaterRefresh, tacoRefresh,
                             ballroomRefresh, gasOneRefresh, gasTwoRefresh, gasThreeRefresh,
-                            gardenVisited, mallVisited,
+                            gardenVisited, mallVisited, ringVisited,
                             path + " COFFEE");
                 }
 
@@ -312,7 +303,7 @@ public class ChromeBotMapSolver
                             juiceRefresh, coffeeRefresh, sandwichRefresh, fairRefresh,
                             spaghettiRefresh, barRefresh, theaterRefresh, tacoRefresh,
                             ballroomRefresh, 11, gasTwoRefresh, gasThreeRefresh,
-                            gardenVisited, mallVisited,
+                            gardenVisited, mallVisited, ringVisited,
                             path + " GAS1");
                 }
 
@@ -325,7 +316,7 @@ public class ChromeBotMapSolver
                             juiceRefresh, coffeeRefresh, sandwichRefresh, fairRefresh,
                             spaghettiRefresh, barRefresh, theaterRefresh, tacoRefresh,
                             ballroomRefresh, gasOneRefresh, 11, gasThreeRefresh,
-                            gardenVisited, mallVisited,
+                            gardenVisited, mallVisited, ringVisited,
                             path + " GAS2");
                 }
 
@@ -338,7 +329,7 @@ public class ChromeBotMapSolver
                             juiceRefresh, coffeeRefresh, sandwichRefresh, fairRefresh,
                             spaghettiRefresh, barRefresh, theaterRefresh, tacoRefresh,
                             ballroomRefresh, gasOneRefresh, gasTwoRefresh, 11,
-                            gardenVisited, mallVisited,
+                            gardenVisited, mallVisited, ringVisited,
                             path + " GAS3");
                 }
 
@@ -351,7 +342,7 @@ public class ChromeBotMapSolver
                             juiceRefresh, coffeeRefresh, 11, fairRefresh,
                             spaghettiRefresh, barRefresh, theaterRefresh, tacoRefresh,
                             ballroomRefresh, gasOneRefresh, gasTwoRefresh, gasThreeRefresh,
-                            gardenVisited, mallVisited,
+                            gardenVisited, mallVisited, ringVisited,
                             path + " SANDWICH");
                 }
 
@@ -364,7 +355,7 @@ public class ChromeBotMapSolver
                             juiceRefresh, coffeeRefresh, sandwichRefresh, 11,
                             spaghettiRefresh, barRefresh, theaterRefresh, tacoRefresh,
                             ballroomRefresh, gasOneRefresh, gasTwoRefresh, gasThreeRefresh,
-                            gardenVisited, mallVisited,
+                            gardenVisited, mallVisited, ringVisited,
                             path + " FAIR");
                 }
 
@@ -377,7 +368,7 @@ public class ChromeBotMapSolver
                             juiceRefresh, coffeeRefresh, sandwichRefresh, fairRefresh,
                             11, barRefresh, theaterRefresh, tacoRefresh,
                             ballroomRefresh, gasOneRefresh, gasTwoRefresh, gasThreeRefresh,
-                            gardenVisited, mallVisited,
+                            gardenVisited, mallVisited, ringVisited,
                             path + " ITALIAN");
                 }
 
@@ -390,7 +381,7 @@ public class ChromeBotMapSolver
                             juiceRefresh, coffeeRefresh, sandwichRefresh, fairRefresh,
                             spaghettiRefresh, 11, theaterRefresh, tacoRefresh,
                             ballroomRefresh, gasOneRefresh, gasTwoRefresh, gasThreeRefresh,
-                            gardenVisited, mallVisited,
+                            gardenVisited, mallVisited, ringVisited,
                             path + " BAR");
                 }
 
@@ -403,7 +394,7 @@ public class ChromeBotMapSolver
                             juiceRefresh, coffeeRefresh, sandwichRefresh, fairRefresh,
                             spaghettiRefresh, barRefresh, 11, tacoRefresh,
                             ballroomRefresh, gasOneRefresh, gasTwoRefresh, gasThreeRefresh,
-                            gardenVisited, mallVisited,
+                            gardenVisited, mallVisited, ringVisited,
                             path + " THEATER");
                 }
 
@@ -416,7 +407,7 @@ public class ChromeBotMapSolver
                             juiceRefresh, coffeeRefresh, sandwichRefresh, fairRefresh,
                             spaghettiRefresh, barRefresh, theaterRefresh, 11,
                             ballroomRefresh, gasOneRefresh, gasTwoRefresh, gasThreeRefresh,
-                            gardenVisited, mallVisited,
+                            gardenVisited, mallVisited, ringVisited,
                             path + " TACO");
                 }
 
@@ -429,7 +420,7 @@ public class ChromeBotMapSolver
                             juiceRefresh, coffeeRefresh, sandwichRefresh, fairRefresh,
                             spaghettiRefresh, barRefresh, theaterRefresh, tacoRefresh,
                             11, gasOneRefresh, gasTwoRefresh, gasThreeRefresh,
-                            gardenVisited, mallVisited,
+                            gardenVisited, mallVisited, ringVisited,
                             path + " BALLROOM");
                 }
 
@@ -442,7 +433,7 @@ public class ChromeBotMapSolver
                             juiceRefresh, coffeeRefresh, sandwichRefresh, fairRefresh,
                             spaghettiRefresh, barRefresh, theaterRefresh, tacoRefresh,
                             ballroomRefresh, gasOneRefresh, gasTwoRefresh, gasThreeRefresh,
-                            true, mallVisited,
+                            true, mallVisited, ringVisited,
                             path + " GARDEN");
                 }
 
@@ -455,8 +446,21 @@ public class ChromeBotMapSolver
                             juiceRefresh, coffeeRefresh, sandwichRefresh, fairRefresh,
                             spaghettiRefresh, barRefresh, theaterRefresh, tacoRefresh,
                             ballroomRefresh, gasOneRefresh, gasTwoRefresh, gasThreeRefresh,
-                            gardenVisited, true,
+                            gardenVisited, true, ringVisited,
                             path + " MALL");
+                }
+
+                //  RING RESOURCE
+                if(currentNode.isNextToRing() &&
+                        !ringVisited)
+                {
+                    solveDate(currentNode, currentDirection, turnNumber + 1,
+                            fuel, hunger - 4, thirst - 6, happiness - 8, time - 4,
+                            juiceRefresh, coffeeRefresh, sandwichRefresh, fairRefresh,
+                            spaghettiRefresh, barRefresh, theaterRefresh, tacoRefresh,
+                            ballroomRefresh, gasOneRefresh, gasTwoRefresh, gasThreeRefresh,
+                            gardenVisited, mallVisited, true,
+                            path + " RING");
                 }
             }
 
@@ -464,39 +468,50 @@ public class ChromeBotMapSolver
             //  NOTE: WHEN DEBUGGING, WE WANT EVERY RESULT, BUT FOR NOW,
             //      LOGGING A HOME PATH WITH THE DESIRED AFFECTION POINTS IS ENOUGH
             if (currentNode.isNextToHome())
-                results.add(new DateResult(ResultType.RETURNED_HOME, calculateAffectionPoints(hunger, thirst, happiness, time, mallVisited), path + " HOME"));
+            {
+                DateResult homeResult = new DateResult(ResultType.RETURNED_HOME, calculateAffectionPoints(hunger, thirst, happiness, time, mallVisited), path + " HOME");
 
+                if(ringVisited && (highestResultWithRing == null || homeResult.getAffectionPoints() > highestResultWithRing.getAffectionPoints()))
+                {
+                    highestResultWithRing = homeResult;
+                    return;
+                }
+
+                if(highestResult == null || homeResult.getAffectionPoints() > highestResult.getAffectionPoints())
+                    highestResult = homeResult;
+
+            }
         }
         else if(time <= 0)
         {
             //  NOTE: Running down the clock is the goal here, but if the user runs
             //      out of any resource after doing so, it will be a failure as well.
             if(fuel > 0 && happiness > 0 && hunger > 0 && thirst > 0)
-                results.add(new DateResult(ResultType.SUCCESS, calculateAffectionPoints(hunger, thirst, happiness, mallVisited), path));
+            {
+                DateResult successResult = new DateResult(ResultType.SUCCESS, calculateAffectionPoints(hunger, thirst, happiness, mallVisited), path);
+
+                if(ringVisited && (highestResultWithRing == null || successResult.getAffectionPoints() > highestResultWithRing.getAffectionPoints()))
+                {
+                    highestResultWithRing = successResult;
+                    return;
+                }
+
+                if(highestResult == null || successResult.getAffectionPoints() > highestResult.getAffectionPoints())
+                    highestResult = successResult;
+
+            }
 
             //  NOTE: TO CONSERVE MEMORY IN THE HEAP, I HAVE TO STOP STORING RESULTS
             //      THAT END IN FAILURE.
-
-            /*
-            if(fuel <= 0 || happiness <= 0 || hunger <= 0 || thirst <= 0)
-                // results.add(new DateResult(fuel, hunger, thirst, happiness, time, "FAILURE", path));
-                results.add(new DateResult(ResultType.OUT_OF_RESOURCE, 0, path));
-            else if(meetsAPThreshold(hunger, thirst, happiness))
-                // results.add(new DateResult(fuel, hunger, thirst, happiness, time, "SUCCESS", path));
-                results.add(new DateResult(ResultType.SUCCESS, calculateAffectionPoints(hunger, thirst, happiness), path));
-             */
         }
-        // else
-        // results.add(new DateResult(fuel, hunger, thirst, happiness, time, "FAILURE", path));
-        // results.add(new DateResult(ResultType.OUT_OF_RESOURCE, 0, path));
 
-        return;
     }
 
     //  HELPER: CALCULATE AFFECTION POINTS USING A FORMULA
     private int calculateAffectionPoints(int hunger, int thirst, int happiness, boolean mallVisited)
     {
-        int affectionPoints = (int)((double)(hunger + thirst + happiness) / 6);
+        double resourceAverage = (hunger + thirst + happiness) / 6.0;
+        int affectionPoints = (int)(resourceAverage);
 
         if(mallVisited)
             affectionPoints += 30;
@@ -507,7 +522,10 @@ public class ChromeBotMapSolver
     //  HELPER: CALCULATE AFFEECTION POINTS W/ TIME
     private int calculateAffectionPoints(int hunger, int thirst, int happiness, int time, boolean mallVisited)
     {
-        int affectionPoints = (int)(((double)(hunger + thirst + happiness) / 6) * ((double)(100 - time) / 100));
+        double resourceAverage = (hunger + thirst + happiness) / 6.0;
+        double timeWeight = (100 - time - 4) / 100.0;
+
+        int affectionPoints = (int)(resourceAverage * timeWeight);
 
         if(mallVisited)
             affectionPoints += 30;
@@ -604,47 +622,108 @@ public class ChromeBotMapSolver
     }
 
     //  HELPER: PRINT PATH USING EMOJIS (USER-FRIENDLY)
-    public void displayPathEmotes()
+    public String getPathAsEmotes(String path)
     {
+        //  ASSUMPTION: 'path' will actually exist.
 
+        String newPath = "";
+
+        //  NOTE: Split path into separate Strings, and convert them accordingly
+        //      to respective emojis/emotes.
+        for(String spot : path.split(" "))
+        {
+            switch(spot)
+            {
+                case "UP":
+                    newPath += ":arrow_up: ";
+                    break;
+                case "RIGHT":
+                    newPath += ":arrow_right: ";
+                    break;
+                case "DOWN":
+                    newPath += ":arrow_down: ";
+                    break;
+                case "LEFT":
+                    newPath += ":arrow_left: ";
+                    break;
+                case "BAR":
+                    newPath += ":tropical_drink: ";
+                    break;
+                case "GARDEN":
+                    newPath += ":blossom: ";
+                    break;
+                case "ITALIAN":
+                    newPath += ":spaghetti: ";
+                    break;
+                case "TACO":
+                    newPath += ":taco: ";
+                    break;
+                case "SANDWICH":
+                    newPath += ":sandwich: ";
+                    break;
+                case "JUICE":
+                    newPath += ":beverage_box: ";
+                    break;
+                case "GAS1":
+                case "GAS2":
+                case "GAS3":
+                    newPath += ":fuelpump: ";
+                    break;
+                case "FAIR":
+                    newPath += ":ferris_wheel: ";
+                    break;
+                case "THEATER":
+                    newPath += ":performing_arts: ";
+                    break;
+                case "MALL":
+                    newPath += ":shopping_bags: ";
+                    break;
+                case "COFFEE":
+                    newPath += ":coffee: ";
+                    break;
+                case "HOME":
+                    newPath += ":house: ";
+                    break;
+                case "BALLROOM":
+                    newPath += ":dancer: ";
+                    break;
+                case "RING":
+                    newPath += ":ring: ";
+                    break;
+
+                default:
+                    //  newPath += ":grey_question: ";
+                    break;
+            }
+        }
+
+        return newPath;
     }
 
     //  HELPER: GET HIGHEST RESULT
-    public DateResult getHighestResult()
-    {
-        DateResult highestResult = results.get(0);
+    public DateResult getHighestResult()    {   return highestResult;   }
 
-        for(DateResult result : results)
-        {
-            if(result.getAffectionPoints() <= highestResult.getAffectionPoints())
-                continue;
-
-            highestResult = result;
-        }
-
-        return highestResult;
-    }
+    //  HELPER: GET HIGHEST RESULT W/ RING
+    public DateResult getHighestResultWithRing()    {   return highestResultWithRing;   }
 
     //  HELPER: DISPLAY HIGHEST RESULT
     public void displayHighestResult()
     {
         System.out.println("HIGHEST RESULT:");
 
-        DateResult highestResult = null;
-
-        for(DateResult result : results)
-        {
-            if(highestResult != null)
-            {
-                if(result.getAffectionPoints() <= highestResult.getAffectionPoints())
-                    continue;
-            }
-
-            highestResult = result;
-        }
-
         if(highestResult == null)
             System.out.println("NO RESULTS FOUND!");
+        else
+            System.out.println(highestResult);
+    }
+
+    //  HELPER: DISPLAY HIGHEST RESULT W/ RING
+    public void displayHighestResultWithRing()
+    {
+        System.out.println("HIGHEST RESULT (WITH RING):");
+
+        if(highestResultWithRing == null)
+            System.out.println("NO RESULTS (WITH RING) FOUND!");
         else
             System.out.println(highestResult);
     }
@@ -653,7 +732,7 @@ public class ChromeBotMapSolver
     public void setPlayerDirection(String playerDirection)    {   this.playerDirection = playerDirection;   }
 
     //  GETTER: Access node array
-    //  public ArrayList<DateNode> getNodeArray()   {   return nodeArray;   }
+    public ArrayList<DateNode> getNodeArray()   {   return nodeArray;   }
 
     //  GETTER: Access individual nodes, from their ID/number
     public DateNode getNode(int nodeNumber)     {   return nodeArray.get(nodeNumber);   }
