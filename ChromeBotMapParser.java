@@ -28,31 +28,48 @@ public class ChromeBotMapParser
                 mini-game.
 
          Return:
-            true
-                'Everything' is in order (i.e. all resources accounted for (hopefully), player
-                direction is determined, and inaccessible nodes have been identified.
-            false
-                Player has already moved off starting node (Node 79).
-                Date has already been started/tampered with, or a critical resource could
-                not be found.
+            String -> Return an error message to indicate what exactly went wrong in the parsing
+            process.
      */
-    public static boolean parseMapImage(BufferedImage mapImage, ChromeBotMapSolver mapSolver)
+    public static String parseMapImage(BufferedImage mapImage, ChromeBotMapSolver mapSolver)
     {
+
         //  NOTE: IF ANY CRITICAL RESOURCE CANNOT BE FOUND, STOP SOLVING PROCESS.
-        if(!checkIfHome(mapImage, mapSolver) || !checkIfBallroom(mapImage, mapSolver) ||
-            !checkIfGas(mapImage, mapSolver) || !checkIfGarden(mapImage, mapSolver) || !checkIfCoffee(mapImage, mapSolver) ||
-            !checkIfTaco(mapImage, mapSolver) || !checkIfTheater(mapImage, mapSolver) || !checkIfAirplane(mapImage, mapSolver) ||
-            !checkIfBar(mapImage, mapSolver) || !checkIfSandwich(mapImage, mapSolver) || !checkIfFair(mapImage, mapSolver) ||
-            !checkIfSpaghetti(mapImage, mapSolver) || !checkIfJuice(mapImage, mapSolver))
-            return false;
+        if(!checkIfHome(mapImage, mapSolver))
+            return "HOME NOT FOUND";
+        if(!checkIfBallroom(mapImage, mapSolver))
+            return "BALLROOM NOT FOUND";
+        if(!checkIfGas(mapImage, mapSolver))
+            return "GAS NOT FOUND";
+        if(!checkIfGarden(mapImage, mapSolver))
+            return "GARDEN NOT FOUND";
+        if(!checkIfCoffee(mapImage, mapSolver))
+            return "COFFEE NOT FOUND";
+        if(!checkIfTaco(mapImage, mapSolver))
+            return "TACO NOT FOUND";
+        if(!checkIfTheater(mapImage, mapSolver))
+            return "THEATER NOT FOUND";
+        if(!checkIfBar(mapImage, mapSolver))
+            return "BAR NOT FOUND";
+        if(!checkIfSandwich(mapImage, mapSolver))
+            return "SANDWICH NOT FOUND";
+        if(!checkIfFair(mapImage, mapSolver))
+            return "FAIR NOT FOUND";
+        if(!checkIfSpaghetti(mapImage, mapSolver))
+            return "SPAGHETTI NOT FOUND";
+        if(!checkIfJuice(mapImage, mapSolver))
+            return "JUICE NOT FOUND";
 
         //  NOTE: Shopping Mall is NOT a CRITICAL resource.
         checkIfMall(mapImage, mapSolver);
 
-        System.out.println();
+        //  NOTE: Airport is NOT a CRITICAL resource.
+        //  checkIfAirplane(mapImage, mapSolver);
+
+        //  NOTE: MARK Inaccessible nodes
         checkInaccessibleNodes(mapImage, mapSolver);
 
-        return true;
+        return "";
     }
 
     /*
@@ -93,6 +110,35 @@ public class ChromeBotMapParser
         return false;
     }
 
+    /*
+        NOTE: Check if the date has already begun by looking at the Time gauge.
+
+        Parameters:
+            'mapImage' (BufferedImage)
+                Image file (.png) of the date board.
+
+        Return:
+            true
+                Return when the specific pixel is pure black (RGB: (0, 0, 0)), indicating
+                the bar has gone down due to being started.
+            false
+                The date has not yet begun, and is in its starting state.
+     */
+    public static boolean hasDateBegun(BufferedImage mapImage)
+    {
+        Color timeBar = new Color(mapImage.getRGB(703, 123));
+
+        if(timeBar.equals(new Color(0, 0, 0)))
+            return true;
+
+        return false;
+    }
+
+    /*
+        NOTE: The below 'CheckIf' methods all basically check for certain patterns of pixels
+            for respective resources.
+     */
+
     private static boolean checkIfJuice(BufferedImage mapImage, ChromeBotMapSolver mapSolver)
     {
         for(int x = 122; x < 735; x++)
@@ -115,11 +161,11 @@ public class ChromeBotMapParser
                     continue;
 
                 Color redArt = new Color(mapImage.getRGB(x + 10, y + 12));
-                if(redArt.getRed() < 225)
+                if(redArt.getRed() < 215)
                     continue;
-                if(redArt.getGreen() < 70 || redArt.getGreen() > 100)
+                if(redArt.getGreen() < 70 || redArt.getGreen() > 110)
                     continue;
-                if(redArt.getBlue() < 85 || redArt.getBlue() > 140)
+                if(redArt.getBlue() < 90 || redArt.getBlue() > 140)
                     continue;
 
                 if(!checkRectanglePattern(redArt, mapImage, x + 10, y + 12, 4, 0))
@@ -136,7 +182,7 @@ public class ChromeBotMapParser
                 Color straw = new Color(mapImage.getRGB(x, y));
                 if(straw.getRed() < 190 || straw.getRed() > 220)
                     continue;
-                if(straw.getGreen() < 205 || straw.getGreen() > 225)
+                if(straw.getGreen() < 200 || straw.getGreen() > 225)
                     continue;
                 if(straw.getBlue() < 205 || straw.getBlue() > 240)
                     continue;
@@ -149,11 +195,11 @@ public class ChromeBotMapParser
                     continue;
 
                 Color redArt = new Color(mapImage.getRGB(x - 14, y + 12));
-                if(redArt.getRed() < 225)
+                if(redArt.getRed() < 215)
                     continue;
-                if(redArt.getGreen() < 70 || redArt.getGreen() > 100)
+                if(redArt.getGreen() < 70 || redArt.getGreen() > 110)
                     continue;
-                if(redArt.getBlue() < 100 || redArt.getBlue() > 140)
+                if(redArt.getBlue() < 90 || redArt.getBlue() > 140)
                     continue;
 
                 if(!checkRectanglePattern(redArt, mapImage, x - 14, y + 12, 4, 0))
@@ -421,11 +467,11 @@ public class ChromeBotMapParser
             for(int y = 150; y < 572; y++)
             {
                 Color eyeMouth = new Color(mapImage.getRGB(x, y));
-                if(eyeMouth.getRed() < 110 || eyeMouth.getRed() > 160)
+                if(eyeMouth.getRed() < 110 || eyeMouth.getRed() > 170)
                     continue;
-                if(eyeMouth.getGreen() < 95 || eyeMouth.getGreen() > 120)
+                if(eyeMouth.getGreen() < 90 || eyeMouth.getGreen() > 120)
                     continue;
-                if(eyeMouth.getBlue() < 190 || eyeMouth.getBlue() > 220)
+                if(eyeMouth.getBlue() < 185 || eyeMouth.getBlue() > 220)
                     continue;
 
                 if(!eyeMouth.equals(new Color(mapImage.getRGB(x + 7, y))))
@@ -450,11 +496,11 @@ public class ChromeBotMapParser
             for(int y = 150; y < 572; y++)
             {
                 Color eyeMouth = new Color(mapImage.getRGB(x, y));
-                if(eyeMouth.getRed() < 110 || eyeMouth.getRed() > 160)
+                if(eyeMouth.getRed() < 110 || eyeMouth.getRed() > 170)
                     continue;
-                if(eyeMouth.getGreen() < 95 || eyeMouth.getGreen() > 120)
+                if(eyeMouth.getGreen() < 90 || eyeMouth.getGreen() > 120)
                     continue;
-                if(eyeMouth.getBlue() < 190 || eyeMouth.getBlue() > 220)
+                if(eyeMouth.getBlue() < 185 || eyeMouth.getBlue() > 220)
                     continue;
 
                 if(!eyeMouth.equals(new Color(mapImage.getRGB(x - 7, y))))
@@ -545,7 +591,7 @@ public class ChromeBotMapParser
             for(int y = 150; y < 572; y++)
             {
                 Color face = new Color(mapImage.getRGB(x, y));
-                if(face.getRed() < 205)
+                if(face.getRed() < 195)
                     continue;
                 if(face.getGreen() < 125 || face.getGreen() > 175)
                     continue;
@@ -560,11 +606,11 @@ public class ChromeBotMapParser
                     continue;
 
                 Color stem = new Color(mapImage.getRGB(x - 4, y + 17));
-                if(stem.getRed() < 110 || stem.getRed() > 160)
+                if(stem.getRed() < 90 || stem.getRed() > 160)
                     continue;
                 if(stem.getGreen() < 150 || stem.getGreen() > 195)
                     continue;
-                if(stem.getBlue() < 50 || stem.getBlue() > 100)
+                if(stem.getBlue() < 50 || stem.getBlue() > 110)
                     continue;
 
                 if(!checkRectanglePattern(stem, mapImage, x - 4, y + 17, 9, 1))
@@ -577,66 +623,6 @@ public class ChromeBotMapParser
         }
 
         System.out.println("ERROR: GARDEN NOT FOUND");
-        return false;
-    }
-
-    private static boolean checkIfAirplane(BufferedImage mapImage, ChromeBotMapSolver mapSolver)
-    {
-        for(int x = 122; x < 735; x++)
-        {
-            for(int y = 150; y < 572; y++)
-            {
-                Color tailfin = new Color(mapImage.getRGB(x, y));
-                if(tailfin.getRed() < 70 || tailfin.getRed() > 105)
-                    continue;
-                if(tailfin.getGreen() < 155 || tailfin.getGreen() > 190)
-                    continue;
-                if(tailfin.getBlue() < 220)
-                    continue;
-
-                if(!checkRectanglePattern(tailfin, mapImage, x, y, 2, 1))
-                    continue;
-                if(!checkRectanglePattern(tailfin, mapImage, x + 1, y + 2, 1, 0))
-                    continue;
-
-                if(!checkRectanglePattern(tailfin, mapImage, x + 6, y + 6, 0, 1))
-                    continue;
-                if(!checkRectanglePattern(tailfin, mapImage, x + 7, y + 6, 1, 2))
-                    continue;
-
-                System.out.println("AIRPLANE DETECTED.\n");
-                determineSquareNumber(x, y, mapSolver, "AIRPLANE");
-                return true;
-            }
-
-            //  CHECK FOR MIRROR FORM
-            for(int y = 150; y < 572; y++)
-            {
-                Color tailfin = new Color(mapImage.getRGB(x, y));
-                if(tailfin.getRed() < 70 || tailfin.getRed() > 105)
-                    continue;
-                if(tailfin.getGreen() < 155 || tailfin.getGreen() > 190)
-                    continue;
-                if(tailfin.getBlue() < 220)
-                    continue;
-
-                if(!checkRectanglePattern(tailfin, mapImage, x, y, 2, 1))
-                    continue;
-                if(!checkRectanglePattern(tailfin, mapImage, x, y + 2, 1, 0))
-                    continue;
-
-                if(!checkRectanglePattern(tailfin, mapImage, x - 6, y + 6, 2, 1))
-                    continue;
-                if(!checkRectanglePattern(tailfin, mapImage, x - 6, y + 8, 1, 0))
-                    continue;
-
-                System.out.println("AIRPLANE DETECTED. (MIRROR)\n");
-                determineSquareNumber(x, y, mapSolver, "AIRPLANE");
-                return true;
-            }
-        }
-
-        System.out.println("ERROR: AIRPLANE NOT FOUND");
         return false;
     }
 
@@ -911,7 +897,7 @@ public class ChromeBotMapParser
 
                 if(topLeftWindow.equals(topRightWindow) && topLeftWindow.equals(bottomWindowOne))
                 {
-                    System.out.println("[" + x + " " + y + "] | HOME DETECTED.\n");
+                    System.out.println("HOME DETECTED.\n");
                     determineSquareNumber(x, y, mapSolver, "HOME");
 
                     return true;
@@ -954,6 +940,157 @@ public class ChromeBotMapParser
         return false;
     }
 
+    private static boolean checkIfRing(BufferedImage mapImage, ChromeBotMapSolver mapSolver)
+    {
+        for(int x = 122; x < 735; x++)
+        {
+            for(int y = 150; y < 572; y++)
+            {
+                Color darkShade = new Color(mapImage.getRGB(x, y));
+                if(darkShade.getRed() < 60 || darkShade.getRed() > 120)
+                    continue;
+                if(darkShade.getGreen() < 150 || darkShade.getGreen() > 195)
+                    continue;
+                if(darkShade.getBlue() < 215)
+                    continue;
+
+                if(!checkRectanglePattern(darkShade, mapImage, x, y, 5, 3))
+                    continue;
+                if(!checkRectanglePattern(darkShade, mapImage, x - 4, y + 5, 3, 2))
+                    continue;
+
+                Color topBand = new Color(mapImage.getRGB(x - 5, y + 9));
+                if(topBand.getRed() < 130 || topBand.getRed() > 180)
+                    continue;
+                if(topBand.getGreen() < 140 || topBand.getGreen() > 200)
+                    continue;
+                if(topBand.getBlue() < 150 || topBand.getBlue() > 210)
+                    continue;
+
+                if(!checkRectanglePattern(topBand, mapImage, x - 5, y + 9, 9, 3))
+                    continue;
+
+                System.out.println("RING DETECTED.\n");
+                determineSquareNumber(x, y, mapSolver, "RING");
+
+                return true;
+            }
+
+            //  CHECK FOR MIRROR FORM
+            for(int y = 150; y < 572; y++)
+            {
+                Color darkShade = new Color(mapImage.getRGB(x, y));
+                if(darkShade.getRed() < 60 || darkShade.getRed() > 120)
+                    continue;
+                if(darkShade.getGreen() < 150 || darkShade.getGreen() > 195)
+                    continue;
+                if(darkShade.getBlue() < 215)
+                    continue;
+
+                if(!checkRectanglePattern(darkShade, mapImage, x, y, 5, 3))
+                    continue;
+                if(!checkRectanglePattern(darkShade, mapImage, x + 6, y + 5, 3, 2))
+                    continue;
+
+                Color topBand = new Color(mapImage.getRGB(x - 5, y + 9));
+                if(topBand.getRed() < 130 || topBand.getRed() > 180)
+                    continue;
+                if(topBand.getGreen() < 140 || topBand.getGreen() > 200)
+                    continue;
+                if(topBand.getBlue() < 150 || topBand.getBlue() > 210)
+                    continue;
+
+                if(!checkRectanglePattern(topBand, mapImage, x + 1, y + 9, 9, 3))
+                    continue;
+
+                System.out.println("RING DETECTED. (MIRROR)\n");
+                determineSquareNumber(x, y, mapSolver, "RING");
+
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    //  NOTE: This method is most likely never going to actually see any use, but is still
+    //      good to have just in case.
+    private static boolean checkIfAirplane(BufferedImage mapImage, ChromeBotMapSolver mapSolver)
+    {
+        for(int x = 122; x < 735; x++)
+        {
+            for(int y = 150; y < 572; y++)
+            {
+                Color tailfin = new Color(mapImage.getRGB(x, y));
+                if(tailfin.getRed() < 60 || tailfin.getRed() > 105)
+                    continue;
+                if(tailfin.getGreen() < 155 || tailfin.getGreen() > 190)
+                    continue;
+                if(tailfin.getBlue() < 230)
+                    continue;
+
+                if(!checkRectanglePattern(tailfin, mapImage, x, y, 2, 1))
+                    continue;
+                if(!checkRectanglePattern(tailfin, mapImage, x + 1, y + 2, 1, 0))
+                    continue;
+
+                if(!checkRectanglePattern(tailfin, mapImage, x + 6, y + 6, 0, 1))
+                    continue;
+                if(!checkRectanglePattern(tailfin, mapImage, x + 7, y + 6, 1, 2))
+                    continue;
+
+                System.out.println("AIRPLANE DETECTED.\n");
+                determineSquareNumber(x, y, mapSolver, "AIRPLANE");
+                return true;
+            }
+
+            //  CHECK FOR MIRROR FORM
+            for(int y = 150; y < 572; y++)
+            {
+                Color tailfin = new Color(mapImage.getRGB(x, y));
+                if(tailfin.getRed() < 60 || tailfin.getRed() > 105)
+                    continue;
+                if(tailfin.getGreen() < 155 || tailfin.getGreen() > 190)
+                    continue;
+                if(tailfin.getBlue() < 230)
+                    continue;
+
+                if(!checkRectanglePattern(tailfin, mapImage, x, y, 2, 1))
+                    continue;
+                if(!checkRectanglePattern(tailfin, mapImage, x, y + 2, 1, 0))
+                    continue;
+
+                if(!checkRectanglePattern(tailfin, mapImage, x - 6, y + 6, 2, 1))
+                    continue;
+                if(!checkRectanglePattern(tailfin, mapImage, x - 6, y + 8, 1, 0))
+                    continue;
+
+                System.out.println("AIRPLANE DETECTED. (MIRROR)\n");
+                determineSquareNumber(x, y, mapSolver, "AIRPLANE");
+                return true;
+            }
+        }
+
+        System.out.println("ERROR: AIRPLANE NOT FOUND");
+        return false;
+    }
+
+    /*
+        HELPER: Given the [x, y] coordinates of a pixel, determine what square and nodes the specified
+            resource is linked to/associated with.
+
+        Parameters:
+            'x' (int)
+                x coordinate of a given pixel.
+            'y' (int)
+                y coordinate of a given pixel.
+            'mapSolver' (ChromeBotMapSolver)
+                Reference to the instance of the class responsible for solving the actual date
+                    mini-game.
+            'resource' (String)
+                Name of the resource that the pixel belongs to.
+
+     */
     private static void determineSquareNumber(int x, int y, ChromeBotMapSolver mapSolver, String resource)
     {
         System.out.print("\tROW ");
@@ -966,7 +1103,7 @@ public class ChromeBotMapParser
             //  COLUMN 4
             if(x > 600)
             {
-                System.out.println(" 4\n");
+                System.out.println(" 4");
 
                 mapSolver.getNode(81).linkNodeToResource(resource);
                 mapSolver.getNode(76).linkNodeToResource(resource);
@@ -976,7 +1113,7 @@ public class ChromeBotMapParser
                 //  COLUMN 3
             else if(x > 485)
             {
-                System.out.println(" 3\n");
+                System.out.println(" 3");
 
                 mapSolver.getNode(80).linkNodeToResource(resource);
                 mapSolver.getNode(75).linkNodeToResource(resource);
@@ -986,7 +1123,7 @@ public class ChromeBotMapParser
                 //  COLUMN 2
             else if(x > 365)
             {
-                System.out.println(" 2\n");
+                System.out.println(" 2");
 
                 mapSolver.getNode(79).linkNodeToResource(resource);
                 mapSolver.getNode(74).linkNodeToResource(resource);
@@ -996,7 +1133,7 @@ public class ChromeBotMapParser
                 //  COLUMN 1
             else if(x > 245)
             {
-                System.out.println(" 1\n");
+                System.out.println(" 1");
 
                 mapSolver.getNode(78).linkNodeToResource(resource);
                 mapSolver.getNode(73).linkNodeToResource(resource);
@@ -1006,7 +1143,7 @@ public class ChromeBotMapParser
                 //  COLUMN 0
             else
             {
-                System.out.println(" 0\n");
+                System.out.println(" 0");
 
                 mapSolver.getNode(77).linkNodeToResource(resource);
                 mapSolver.getNode(72).linkNodeToResource(resource);
@@ -1022,7 +1159,7 @@ public class ChromeBotMapParser
             //  COLUMN 4
             if(x > 575)
             {
-                System.out.println(" 4\n");
+                System.out.println(" 4");
 
                 mapSolver.getNode(70).linkNodeToResource(resource);
                 mapSolver.getNode(65).linkNodeToResource(resource);
@@ -1032,7 +1169,7 @@ public class ChromeBotMapParser
                 //  COLUMN 3
             else if(x > 475)
             {
-                System.out.println(" 3\n");
+                System.out.println(" 3");
 
                 mapSolver.getNode(69).linkNodeToResource(resource);
                 mapSolver.getNode(64).linkNodeToResource(resource);
@@ -1042,7 +1179,7 @@ public class ChromeBotMapParser
                 //  COLUMN 2
             else if(x > 360)
             {
-                System.out.println(" 2\n");
+                System.out.println(" 2");
 
                 mapSolver.getNode(68).linkNodeToResource(resource);
                 mapSolver.getNode(63).linkNodeToResource(resource);
@@ -1052,7 +1189,7 @@ public class ChromeBotMapParser
                 //  COLUMN 1
             else if(x > 265)
             {
-                System.out.println(" 1\n");
+                System.out.println(" 1");
 
                 mapSolver.getNode(67).linkNodeToResource(resource);
                 mapSolver.getNode(62).linkNodeToResource(resource);
@@ -1062,7 +1199,7 @@ public class ChromeBotMapParser
                 //  COLUMN 0
             else
             {
-                System.out.println(" 0\n");
+                System.out.println(" 0");
 
                 mapSolver.getNode(66).linkNodeToResource(resource);
                 mapSolver.getNode(61).linkNodeToResource(resource);
@@ -1078,7 +1215,7 @@ public class ChromeBotMapParser
             //  COLUMN 4
             if(x > 555)
             {
-                System.out.println(" 4\n");
+                System.out.println(" 4");
 
                 mapSolver.getNode(59).linkNodeToResource(resource);
                 mapSolver.getNode(54).linkNodeToResource(resource);
@@ -1088,7 +1225,7 @@ public class ChromeBotMapParser
                 //  COLUMN 3
             else if(x > 465)
             {
-                System.out.println(" 3\n");
+                System.out.println(" 3");
 
                 mapSolver.getNode(58).linkNodeToResource(resource);
                 mapSolver.getNode(53).linkNodeToResource(resource);
@@ -1098,7 +1235,7 @@ public class ChromeBotMapParser
                 //  COLUMN 2
             else if(x > 370)
             {
-                System.out.println(" 2\n");
+                System.out.println(" 2");
 
                 mapSolver.getNode(57).linkNodeToResource(resource);
                 mapSolver.getNode(52).linkNodeToResource(resource);
@@ -1108,7 +1245,7 @@ public class ChromeBotMapParser
                 //  COLUMN 1
             else if(x > 280)
             {
-                System.out.println(" 1\n");
+                System.out.println(" 1");
 
                 mapSolver.getNode(56).linkNodeToResource(resource);
                 mapSolver.getNode(51).linkNodeToResource(resource);
@@ -1118,7 +1255,7 @@ public class ChromeBotMapParser
                 //  COLUMN 0
             else
             {
-                System.out.println(" 0\n");
+                System.out.println(" 0");
 
                 mapSolver.getNode(55).linkNodeToResource(resource);
                 mapSolver.getNode(50).linkNodeToResource(resource);
@@ -1134,7 +1271,7 @@ public class ChromeBotMapParser
             //  COLUMN 4
             if(x > 540)
             {
-                System.out.println(" 4\n");
+                System.out.println(" 4");
 
                 mapSolver.getNode(48).linkNodeToResource(resource);
                 mapSolver.getNode(43).linkNodeToResource(resource);
@@ -1144,7 +1281,7 @@ public class ChromeBotMapParser
                 //  COLUMN 3
             else if(x > 455)
             {
-                System.out.println(" 3\n");
+                System.out.println(" 3");
 
                 mapSolver.getNode(47).linkNodeToResource(resource);
                 mapSolver.getNode(42).linkNodeToResource(resource);
@@ -1154,7 +1291,7 @@ public class ChromeBotMapParser
                 //  COLUMN 2
             else if(x > 375)
             {
-                System.out.println(" 2\n");
+                System.out.println(" 2");
 
                 mapSolver.getNode(46).linkNodeToResource(resource);
                 mapSolver.getNode(41).linkNodeToResource(resource);
@@ -1164,7 +1301,7 @@ public class ChromeBotMapParser
                 //  COLUMN 1
             else if(x > 295)
             {
-                System.out.println(" 1\n");
+                System.out.println(" 1");
 
                 mapSolver.getNode(45).linkNodeToResource(resource);
                 mapSolver.getNode(40).linkNodeToResource(resource);
@@ -1174,7 +1311,7 @@ public class ChromeBotMapParser
                 //  COLUMN 0
             else
             {
-                System.out.println(" 0\n");
+                System.out.println(" 0");
 
                 mapSolver.getNode(44).linkNodeToResource(resource);
                 mapSolver.getNode(39).linkNodeToResource(resource);
@@ -1190,7 +1327,7 @@ public class ChromeBotMapParser
             //  COLUMN 4
             if(x > 525)
             {
-                System.out.println(" 4\n");
+                System.out.println(" 4");
 
                 mapSolver.getNode(37).linkNodeToResource(resource);
                 mapSolver.getNode(32).linkNodeToResource(resource);
@@ -1200,7 +1337,7 @@ public class ChromeBotMapParser
                 //  COLUMN 3
             else if(x > 450)
             {
-                System.out.println(" 3\n");
+                System.out.println(" 3");
 
                 mapSolver.getNode(36).linkNodeToResource(resource);
                 mapSolver.getNode(31).linkNodeToResource(resource);
@@ -1210,7 +1347,7 @@ public class ChromeBotMapParser
                 //  COLUMN 2
             else if(x > 380)
             {
-                System.out.println(" 2\n");
+                System.out.println(" 2");
 
                 mapSolver.getNode(35).linkNodeToResource(resource);
                 mapSolver.getNode(30).linkNodeToResource(resource);
@@ -1220,7 +1357,7 @@ public class ChromeBotMapParser
                 //  COLUMN 1
             else if(x > 305)
             {
-                System.out.println(" 1\n");
+                System.out.println(" 1");
 
                 mapSolver.getNode(34).linkNodeToResource(resource);
                 mapSolver.getNode(29).linkNodeToResource(resource);
@@ -1230,7 +1367,7 @@ public class ChromeBotMapParser
                 //  COLUMN 0
             else
             {
-                System.out.println(" 0\n");
+                System.out.println(" 0");
 
                 mapSolver.getNode(33).linkNodeToResource(resource);
                 mapSolver.getNode(28).linkNodeToResource(resource);
@@ -1247,7 +1384,7 @@ public class ChromeBotMapParser
             //  COLUMN 4
             if(x > 515)
             {
-                System.out.println(" 4\n");
+                System.out.println(" 4");
 
                 mapSolver.getNode(26).linkNodeToResource(resource);
                 mapSolver.getNode(21).linkNodeToResource(resource);
@@ -1257,7 +1394,7 @@ public class ChromeBotMapParser
                 //  COLUMN 3
             else if(x > 445)
             {
-                System.out.println(" 3\n");
+                System.out.println(" 3");
 
                 mapSolver.getNode(25).linkNodeToResource(resource);
                 mapSolver.getNode(20).linkNodeToResource(resource);
@@ -1267,7 +1404,7 @@ public class ChromeBotMapParser
                 //  COLUMN 2
             else if(x > 375)
             {
-                System.out.println(" 2\n");
+                System.out.println(" 2");
 
                 mapSolver.getNode(24).linkNodeToResource(resource);
                 mapSolver.getNode(19).linkNodeToResource(resource);
@@ -1277,7 +1414,7 @@ public class ChromeBotMapParser
                 //  COLUMN 1
             else if(x > 310)
             {
-                System.out.println(" 1\n");
+                System.out.println(" 1");
 
                 mapSolver.getNode(23).linkNodeToResource(resource);
                 mapSolver.getNode(18).linkNodeToResource(resource);
@@ -1287,7 +1424,7 @@ public class ChromeBotMapParser
                 //  COLUMN 0
             else
             {
-                System.out.println(" 0\n");
+                System.out.println(" 0");
 
                 mapSolver.getNode(22).linkNodeToResource(resource);
                 mapSolver.getNode(17).linkNodeToResource(resource);
@@ -1303,7 +1440,7 @@ public class ChromeBotMapParser
             //  COLUMN 4
             if(x > 500)
             {
-                System.out.println(" 4\n");
+                System.out.println(" 4");
 
                 mapSolver.getNode(15).linkNodeToResource(resource);
                 mapSolver.getNode(10).linkNodeToResource(resource);
@@ -1313,7 +1450,7 @@ public class ChromeBotMapParser
                 //  COLUMN 3
             else if(x > 435)
             {
-                System.out.println(" 3\n");
+                System.out.println(" 3");
 
                 mapSolver.getNode(14).linkNodeToResource(resource);
                 mapSolver.getNode(9).linkNodeToResource(resource);
@@ -1323,7 +1460,7 @@ public class ChromeBotMapParser
                 //  COLUMN 2
             else if(x > 375)
             {
-                System.out.println(" 2\n");
+                System.out.println(" 2");
 
                 mapSolver.getNode(13).linkNodeToResource(resource);
                 mapSolver.getNode(8).linkNodeToResource(resource);
@@ -1333,7 +1470,7 @@ public class ChromeBotMapParser
                 //  COLUMN 1
             else if(x > 310)
             {
-                System.out.println(" 1\n");
+                System.out.println(" 1");
 
                 mapSolver.getNode(12).linkNodeToResource(resource);
                 mapSolver.getNode(7).linkNodeToResource(resource);
@@ -1343,7 +1480,7 @@ public class ChromeBotMapParser
                 //  COLUMN 0
             else
             {
-                System.out.println(" 0\n");
+                System.out.println(" 0");
 
                 mapSolver.getNode(11).linkNodeToResource(resource);
                 mapSolver.getNode(6).linkNodeToResource(resource);
@@ -1386,7 +1523,7 @@ public class ChromeBotMapParser
 
         if(!new Color(mapImage.getRGB(280, 231)).equals(new Color(93, 94, 92)))
             mapSolver.getNode(22).setInaccessible(true);
-        if(!new Color(mapImage.getRGB(310, 231)).equals(new Color(94, 95, 94)))
+        if(!new Color(mapImage.getRGB(306, 231)).equals(new Color(92, 95, 93)))
             mapSolver.getNode(23).setInaccessible(true);
         if(!new Color(mapImage.getRGB(380, 231)).equals(new Color(93, 94, 92)))
             mapSolver.getNode(24).setInaccessible(true);
@@ -1483,8 +1620,10 @@ public class ChromeBotMapParser
             mapSolver.getNode(74).setInaccessible(true);
         if(!new Color(mapImage.getRGB(570, 522)).equals(new Color(92, 95, 92)))
             mapSolver.getNode(75).setInaccessible(true);
+
     }
 
+    //  NOTE: Check for monochromatic rectangle pattern.
     private static boolean checkRectanglePattern(Color anchor, BufferedImage mapImage, int x, int y, int maxOffsetX, int maxOffsetY)
     {
         for(int xOffset = 0; xOffset < maxOffsetX; xOffset++)
@@ -1498,4 +1637,5 @@ public class ChromeBotMapParser
 
         return true;
     }
+
 }

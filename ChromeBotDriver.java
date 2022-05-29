@@ -1,5 +1,5 @@
 
-//  CHROME BOT MAIN
+//  CHROME-BOT (Driver Class)
 //  04/03/2022
 
 import net.dv8tion.jda.api.JDA;
