@@ -5,18 +5,15 @@ public class DateResult
 {
     private static int resultCountingNum = 0;
 
-    //  private int fuel, hunger, thirst, happiness, time;
     private int resultNum;
     private int affectionPoints;
-
-    //  private String status;
 
     private String path;
 
     private ResultType resultType;
 
     /*
-    //  CONSTRUCTOR: ISSUES include OutofMemory, must found alternative
+    //  CONSTRUCTOR: ISSUES include OutofMemory, must find alternative
     public DateResult(int fuel, int hunger, int thirst, int happiness, int time,
                       String status, String path)
     {

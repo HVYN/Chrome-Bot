@@ -66,6 +66,9 @@ public class ChromeBotMapParser
         //  NOTE: Airport is NOT a CRITICAL resource.
         //  checkIfAirplane(mapImage, mapSolver);
 
+        //  NOTE: Ring is NOT a CRITICAL resource.
+        checkIfRing(mapImage, mapSolver);
+
         //  NOTE: MARK Inaccessible nodes
         checkInaccessibleNodes(mapImage, mapSolver);
 
@@ -165,7 +168,7 @@ public class ChromeBotMapParser
                     continue;
                 if(redArt.getGreen() < 70 || redArt.getGreen() > 110)
                     continue;
-                if(redArt.getBlue() < 90 || redArt.getBlue() > 140)
+                if(redArt.getBlue() < 75 || redArt.getBlue() > 140)
                     continue;
 
                 if(!checkRectanglePattern(redArt, mapImage, x + 10, y + 12, 4, 0))
@@ -199,7 +202,7 @@ public class ChromeBotMapParser
                     continue;
                 if(redArt.getGreen() < 70 || redArt.getGreen() > 110)
                     continue;
-                if(redArt.getBlue() < 90 || redArt.getBlue() > 140)
+                if(redArt.getBlue() < 75 || redArt.getBlue() > 140)
                     continue;
 
                 if(!checkRectanglePattern(redArt, mapImage, x - 14, y + 12, 4, 0))
