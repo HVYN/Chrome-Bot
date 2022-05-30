@@ -16,6 +16,7 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.net.URL;
+import java.util.LinkedList;
 import java.util.Random;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -73,12 +74,14 @@ public class ChromeBotListener extends ListenerAdapter
             Matcher userMatcher = userRegex.matcher(message.getContentRaw());
             userMatcher.find();
 
-            messageGuild.retrieveMemberById(userMatcher.group(0)).queue(member -> {
+            messageGuild.retrieveMemberById(userMatcher.group(1)).queue(member -> {
                 message.reply(member.getUser().getAsTag()).queue();
             });
         }
 
          */
+
+
 
         //  NOTE: Check to see if the message received (in the channel)
         //      is from Karuta bot.
@@ -212,9 +215,7 @@ public class ChromeBotListener extends ListenerAdapter
 
             ChromeBotMapSolver mapSolver = new ChromeBotMapSolver();
 
-            EmbedBuilder dateSolveMessageBuilder = new EmbedBuilder()
-                    .setTitle("Date Solution")
-                    .setColor(new Color(0x5D5C5B));
+            //  EmbedBuilder dateSolveMessageBuilder = new EmbedBuilder().setTitle("Date Solution").setColor(new Color(0x5D5C5B));
 
             if(!ChromeBotMapParser.hasDateBegun(mapImage))
             {
@@ -222,64 +223,99 @@ public class ChromeBotListener extends ListenerAdapter
                 {
                     //  NOTE: Store error message from parsing process.
                     String errorMessage = ChromeBotMapParser.parseMapImage(mapImage, mapSolver);
+                    String description = "";
 
                     if (errorMessage.equals(""))
                     {
-                        //  NOTE: Once the player direction is determined, and the critical resources
-                        //      have been identified, proceed to solving the date.
-                        mapSolver.solveDate();
-
-                        //  DEBUG: Print highest result to console for debugging purposes.
-                        mapSolver.displayHighestResult();
-
-                        String description;
-
-                        //  NOTE: If there isn't even a single result marked as 'SUCCESS', then the
-                        //      date board is un-winnable.
-                        if(mapSolver.getHighestResult() != null)
+                        message.getGuild().retrieveMemberById(userMatcher.group(1)).queue(member ->
                         {
-                            //  NOTE: Create description for embed message.
-                            description = mapSolver.getPathAsEmotes(mapSolver.getHighestResult().getPath()) +
-                                    "\n**AP: " + (mapSolver.getHighestResult().getAffectionPoints() - 1) + "-" + (mapSolver.getHighestResult().getAffectionPoints() + 1)
-                                    + "**";
+                            EmbedBuilder dateSolveMessageBuilder = new EmbedBuilder().setTitle("Date Solution").setColor(new Color(0x5D5C5B));
 
-                            if (mapSolver.getHighestResult().getPath().contains("MALL"))
+                            //  NOTE: Once the player direction is determined, and the critical resources
+                            //      have been identified, proceed to solving the date.
+                            mapSolver.solveDate();
+
+                            //  DEBUG: Print highest result to console for debugging purposes.
+                            mapSolver.displayHighestResult();
+
+                            //  NOTE: If there isn't even a single result marked as 'SUCCESS', then the
+                            //      date board is un-winnable.
+                            if(mapSolver.getHighestResult() != null)
+                            {
+                                /*
+                                //  NOTE: Create description for embed message.
+                                description = mapSolver.getPathAsEmotes(mapSolver.getHighestResult().getPath()) +
+                                        "\n**AP: " + (mapSolver.getHighestResult().getAffectionPoints() - 1) + "-" + (mapSolver.getHighestResult().getAffectionPoints() + 1)
+                                        + "**";
+
+                                 */
+                                dateSolveMessageBuilder.setDescription(mapSolver.getPathAsEmotes(mapSolver.getHighestResult().getPath()) +
+                                        "\n**AP: " + (mapSolver.getHighestResult().getAffectionPoints() - 1) + "-" + (mapSolver.getHighestResult().getAffectionPoints() + 1)
+                                        + "**");
+
+                                if (mapSolver.getHighestResult().getPath().contains("MALL"))
+                                {
+                                    dateSolveMessageBuilder.setDescription(" `" + (mapSolver.getHighestResult().getAffectionPoints() - 1 - 30) + "-" + (mapSolver.getHighestResult().getAffectionPoints() + 1)
+                                            + " + :shopping_bags");
+                                }
+                                 /*
                                 description += " `" + (mapSolver.getHighestResult().getAffectionPoints() - 1 - 30) + "-" + (mapSolver.getHighestResult().getAffectionPoints() + 1)
                                         + " + :shopping_bags";
 
-                            dateSolveMessageBuilder.setColor(new Color(0xBABABA));
-                        }
-                        else
-                            description = "Date could not be solved!\n**AP: 0**";
+                                  */
 
-                        //  NOTE: Create footer for embed message.
-                        String footer = "For " + message.getGuild().getMemberById(userMatcher.group(1)).getUser().getAsTag();
+                                dateSolveMessageBuilder.setColor(new Color(0xBABABA));
+                            }
+                            else
+                                dateSolveMessageBuilder.setDescription("Date could not be solved!\n**AP: 0**");
 
-                        dateSolveMessageBuilder.setDescription(description);
-                        dateSolveMessageBuilder.setFooter(footer);
+                            //  description = "Date could not be solved!\n**AP: 0**";
 
-                        //  NOTE: In other words, there was no ring to get to begin with.
-                        if(mapSolver.getHighestResultWithRing() == null)
-                        {
-                            message.replyEmbeds(dateSolveMessageBuilder.build()).setActionRow(
-                                    Button.secondary("ring", Emoji.fromMarkdown("\uD83D\uDC8D")).asDisabled()
-                            ).queue();
-                        }
-                        else
-                        {
-                            message.replyEmbeds(dateSolveMessageBuilder.build()).setActionRow(
-                                    Button.secondary("ring", Emoji.fromMarkdown("\uD83D\uDC8D")).asDisabled()
-                            ).queue();
-                        }
+                            //  Member member = message.getGuild().retrieveMemberById(userMatcher.group(1)).complete();
 
-                        return;
+                            //  dateSolveMessageBuilder.setDescription(description);
+
+                            //  NOTE: Create footer for embed message.
+                            //  message.getGuild().retrieveMemberById(userMatcher.group(1)).queue();
+
+                            //  message.getGuild().retrieveMemberById(userMatcher.group(1)).queue(member -> {
+                            //          });
+
+                            //  String footer = "For " + message.getGuild().getMemberById(userMatcher.group(1)).getUser().getAsTag();
+
+                            dateSolveMessageBuilder.setFooter("For " + member.getUser().getAsTag());
+
+                            //  NOTE: In other words, there was no ring to get to begin with.
+                            if(mapSolver.getHighestResultWithRing() == null)
+                            {
+                                message.replyEmbeds(dateSolveMessageBuilder.build()).setActionRow(
+                                        Button.secondary("ring", Emoji.fromMarkdown("\uD83D\uDC8D")).asDisabled()
+                                ).queue();
+                            }
+                            else
+                            {
+                                message.replyEmbeds(dateSolveMessageBuilder.build()).setActionRow(
+                                        Button.secondary("ring", Emoji.fromMarkdown("\uD83D\uDC8D")).asDisabled()
+                                ).queue();
+                            }
+
+
+                        });
+
+
+                    }
+                    else
+                    {
+                        EmbedBuilder dateSolveMessageBuilder = new EmbedBuilder().setTitle("Date Solution").setColor(new Color(0x5D5C5B));
+
+                        dateSolveMessageBuilder.setDescription("I'm sorry, something went wrong while trying to find the best path!");
+                        dateSolveMessageBuilder.setFooter("ERROR: " + errorMessage);
+
+                        //  NOTE: Reply to Karuta date-board
+                        message.replyEmbeds(dateSolveMessageBuilder.build()).queue();
                     }
 
-                    dateSolveMessageBuilder.setDescription("I'm sorry, something went wrong while trying to find the best path!");
-                    dateSolveMessageBuilder.setFooter("ERROR: " + errorMessage);
 
-                    //  NOTE: Reply to Karuta date-board
-                    message.replyEmbeds(dateSolveMessageBuilder.build()).queue();
                 }
             }
         }
