@@ -465,8 +465,7 @@ public class ChromeBotMapSolver
             }
 
             //  HOME PATH
-            //  NOTE: WHEN DEBUGGING, WE WANT EVERY RESULT, BUT FOR NOW,
-            //      LOGGING A HOME PATH WITH THE DESIRED AFFECTION POINTS IS ENOUGH
+            //  NOTE: CONSIDER HOME ENDING AS WELL, IN CASE IT GIVES THE HIGHEST POSSIBLE AP.
             if (currentNode.isNextToHome())
             {
                 DateResult homeResult = new DateResult(ResultType.RETURNED_HOME, calculateAffectionPoints(hunger, thirst, happiness, time, mallVisited), path + " HOME");

@@ -29,29 +29,38 @@ import java.util.regex.Pattern;
 
 public class ChromeBotListener extends ListenerAdapter
 {
-    private final String KARUTA_ID = "646937666251915264";
     private final String DEVELOPER_ID = "209879011818471435";
-    private final String EVENT_ROLE_ID = "959261568430911539";
 
-    //  private final String EGG_REGEX = "(stEgg\\d{1,2}[ab])";
-    //  private final String EGG_NAME_REGEX = "(Springtide Egg #\\d{1,})";
     private final String USER_REGEX = "<@(\\d{1,})>";
     //  private final String USER_REPLACE_REGEX = "/[<@!>]/g";
 
-    //  private Pattern numberRegex = Pattern.compile("(\\d{1,2})");
-    //  private Pattern eggRegex = Pattern.compile(EGG_REGEX);
-    //  private Pattern eggNameRegex = Pattern.compile(EGG_NAME_REGEX);
-    private Pattern userRegex = Pattern.compile(USER_REGEX);
+    //  private Pattern userRegex = Pattern.compile(USER_REGEX);
 
-    //  private LinkedList<Long> whitelistedMessageIds = new LinkedList<>();
-    //  private LinkedList<String> userMentions = new LinkedList<>();
-
-    //  private HashMap<String, LinkedList<Integer>> userEggsMissing = new HashMap<>();
-
-    //  OVERRIDE: 'Listen' for button interactions (clicks).
     @Override
     public void onButtonInteraction(ButtonInteractionEvent buttonInteractionEvent)
     {
+        /*
+        if(buttonInteractionEvent.getComponentId().equals("testOne"))
+        {
+            buttonInteractionEvent.deferEdit().queue();
+
+            System.out.println("TEST ONE BUTTON PRESSED.");
+
+            buttonInteractionEvent.getMessage().getEmbeds().get(0).
+            buttonInteractionEvent.getMessage().suppressEmbeds(false).queue();
+            //  buttonInteractionEvent.editMessageEmbeds(buttonInteractionEvent.getMessage().getEmbeds().get(0)).queue();
+        }
+        else if(buttonInteractionEvent.getComponentId().equals("testTwo"))
+        {
+            buttonInteractionEvent.deferEdit().queue();
+
+            System.out.println("TEST TWO BUTTON PRESSED.");
+
+            buttonInteractionEvent.getMessage().suppressEmbeds(false).queue();
+            //  buttonInteractionEvent.editMessageEmbeds(buttonInteractionEvent.getMessage().getEmbeds().get(1)).queue();
+        }
+
+         */
 
     }
 
@@ -71,73 +80,57 @@ public class ChromeBotListener extends ListenerAdapter
         /*
         if(fromDeveloper(messageSenderId))
         {
-            Matcher userMatcher = userRegex.matcher(message.getContentRaw());
-            userMatcher.find();
+            message.reply("Hello!").queue(helloMessage -> {
+                EmbedBuilder testEmbedOneBuilder = new EmbedBuilder();
+                EmbedBuilder testEmbedTwoBuilder = new EmbedBuilder();
 
-            messageGuild.retrieveMemberById(userMatcher.group(1)).queue(member -> {
-                message.reply(member.getUser().getAsTag()).queue();
+                testEmbedOneBuilder.setDescription("TEST ONE!");
+                testEmbedTwoBuilder.setDescription("TEST TWO!");
+
+                LinkedList<MessageEmbed> embedMessages = new LinkedList<>();
+                    embedMessages.add(testEmbedOneBuilder.build());
+                    embedMessages.add(testEmbedTwoBuilder.build());
+
+                helloMessage.suppressEmbeds(true).queue();
+
+                helloMessage.editMessageEmbeds(embedMessages)
+                        .setActionRow(Button.primary("testOne", "TEST ONE"), Button.primary("testTwo", "TEST TWO"))
+                        .queue();
+
             });
         }
 
          */
 
-
-
-        //  NOTE: Check to see if the message received (in the channel)
-        //      is from Karuta bot.
-        if(fromKaruta(messageSenderId))
+        //  NOTE: Check messages from other users/authors.
+        if(rawMessageContent.length() >= 1)
         {
-            //  ASSUMPTION: KARUTA MESSAGES WITH 0 LENGTH TYPICALLY ARE
-            //      EMBED MESSAGES.
-            if (rawMessageContent.length() == 0)
+            //  if(messageSenderId.equals(DEVELOPER_ID))
+            //      System.out.println(messageReceivedEvent.getMember().getId().replace(USER_REPLACE_REGEX, ""));
+
+            if(rawMessageContent.substring(0, 1).equals("t") && !messageSender.isBot())
             {
-                if(!message.getEmbeds().isEmpty())
-                {
-                    //  IF THERE ARE EMBED ELEMENTS, BEGIN PARSING THEM HERE.
-                    MessageEmbed embedMessage = message.getEmbeds().get(0);
-
-                    if(embedMessage.getTitle().equals("Date Minigame"))
-                        processDateMiniGame(message, embedMessage);
-                }
-
-            }
-            //  CHECK IF WISHLIST IS DROPPING.
-            else if (wishListIsDropping(messageReceivedEvent))
-                messageChannel.sendMessage("**SOMEONE'S WISHLIST IS DROPPING!** :scream: "
-                        + messageGuild.getRoleById(EVENT_ROLE_ID).getAsMention())
-                        .queue();
-
-        }
-        else
-        {
-            //  NOTE: Check messages from other users/authors.
-            if(rawMessageContent.length() >= 1)
-            {
-                //  if(messageSenderId.equals(DEVELOPER_ID))
-                //      System.out.println(messageReceivedEvent.getMember().getId().replace(USER_REPLACE_REGEX, ""));
-
-                if(rawMessageContent.substring(0, 1).equals("t") && !messageSender.isBot())
-                {
-                    if (rawMessageContent.length() > 8 &&
+                if (rawMessageContent.length() > 8 &&
                             rawMessageContent.substring(1, 9).toUpperCase().equals("COINFLIP"))
+                {
+                    switch (new Random().nextInt(2))
                     {
-                        switch (new Random().nextInt(2))
-                        {
-                            case 0:
-                                messageChannel.sendMessage(":sparkles:  **HEADS!**  :sparkles:")
-                                        .queue();
-                                break;
-                            case 1:
-                                messageChannel.sendMessage(":boom:   **TAILS!**  :boom: ")
-                                        .queue();
-                                break;
-                            default:
-                                break;
-                        }
+                        case 0:
+                            messageChannel.sendMessage(":sparkles:  **HEADS!**  :sparkles:")
+                                    .queue();
+                            break;
+                        case 1:
+                            messageChannel.sendMessage(":boom:   **TAILS!**  :boom: ")
+                                    .queue();
+                            break;
+
+                        default:
+                            break;
                     }
                 }
             }
         }
+
     }
 
     //  OVERRIDE: Main way for bot to respond to messages being updated.
@@ -152,24 +145,6 @@ public class ChromeBotListener extends ListenerAdapter
         String rawMessageContent = message.getContentRaw();
         String messageSenderId = messageSender.getId();
 
-        //  NOTE: Check from Karuta; when users click the date option,
-        //      Karuta Bot will edit its own message.
-        if(fromKaruta(messageSenderId))
-        {
-            //  NOTE: Check for date mini-game embed from Karuta, which
-            //      always has no 'raw' content, only embed content.
-            if(rawMessageContent.length() == 0)
-            {
-                if(!message.getEmbeds().isEmpty())
-                {
-                    //  IF THERE ARE EMBED ELEMENTS, BEGIN PARSING THEM HERE.
-                    MessageEmbed embedMessage = message.getEmbeds().get(0);
-
-                    if(embedMessage.getTitle().equals("Date Minigame"))
-                        processDateMiniGame(message, embedMessage);
-                }
-            }
-        }
     }
 
     @Override
@@ -182,148 +157,7 @@ public class ChromeBotListener extends ListenerAdapter
 
     }
 
-    //  SCAN MESSAGE FOR WISHLIST DROP
-    private boolean wishListIsDropping(MessageReceivedEvent messageReceivedEvent)
-    {
-        return (fromKaruta(messageReceivedEvent.getAuthor().getId()) &&
-                messageReceivedEvent.getMessage().getContentRaw().contains("A card from your wishlist is dropping!"));
-    }
-
-    //  CHECK IF ID IS KARUTA BOT'S
-    private boolean fromKaruta(String id)   {   return id.equals(KARUTA_ID);    }
-
     //  CHECK IF ID IS MINE
     private boolean fromDeveloper(String id)    {   return id.equals(DEVELOPER_ID); }
-
-    //  HELPER: Since this series of actions is called when a message is edited and/or sent,
-    //      I moved it to a separate function to make readability better, and stop
-    //      spam.
-    private void processDateMiniGame(Message message, MessageEmbed embedMessage)
-    {
-        //  NOTE: Use Matcher class, with pre-defined 'USER_REGEX' Pattern object to
-        //      find user ID; we then put the user's name/tag into the footer of the
-        //      embed message we return (unless the parser fails, in which case we
-        //      return an error message in the footer).
-        Matcher userMatcher = userRegex.matcher(embedMessage.getDescription());
-        userMatcher.find();
-
-        try
-        {
-            URL mapImageURL = new URL(embedMessage.getImage().getProxyUrl());
-
-            BufferedImage mapImage = ImageIO.read(mapImageURL);
-
-            ChromeBotMapSolver mapSolver = new ChromeBotMapSolver();
-
-            //  EmbedBuilder dateSolveMessageBuilder = new EmbedBuilder().setTitle("Date Solution").setColor(new Color(0x5D5C5B));
-
-            if(!ChromeBotMapParser.hasDateBegun(mapImage))
-            {
-                if (ChromeBotMapParser.checkStartDirection(mapImage, mapSolver))
-                {
-                    //  NOTE: Store error message from parsing process.
-                    String errorMessage = ChromeBotMapParser.parseMapImage(mapImage, mapSolver);
-                    String description = "";
-
-                    if (errorMessage.equals(""))
-                    {
-                        message.getGuild().retrieveMemberById(userMatcher.group(1)).queue(member ->
-                        {
-                            EmbedBuilder dateSolveMessageBuilder = new EmbedBuilder().setTitle("Date Solution").setColor(new Color(0x5D5C5B));
-
-                            //  NOTE: Once the player direction is determined, and the critical resources
-                            //      have been identified, proceed to solving the date.
-                            mapSolver.solveDate();
-
-                            //  DEBUG: Print highest result to console for debugging purposes.
-                            mapSolver.displayHighestResult();
-
-                            //  NOTE: If there isn't even a single result marked as 'SUCCESS', then the
-                            //      date board is un-winnable.
-                            if(mapSolver.getHighestResult() != null)
-                            {
-                                /*
-                                //  NOTE: Create description for embed message.
-                                description = mapSolver.getPathAsEmotes(mapSolver.getHighestResult().getPath()) +
-                                        "\n**AP: " + (mapSolver.getHighestResult().getAffectionPoints() - 1) + "-" + (mapSolver.getHighestResult().getAffectionPoints() + 1)
-                                        + "**";
-
-                                 */
-                                dateSolveMessageBuilder.setDescription(mapSolver.getPathAsEmotes(mapSolver.getHighestResult().getPath()) +
-                                        "\n**AP: " + (mapSolver.getHighestResult().getAffectionPoints() - 1) + "-" + (mapSolver.getHighestResult().getAffectionPoints() + 1)
-                                        + "**");
-
-                                if (mapSolver.getHighestResult().getPath().contains("MALL"))
-                                {
-                                    dateSolveMessageBuilder.setDescription(" `" + (mapSolver.getHighestResult().getAffectionPoints() - 1 - 30) + "-" + (mapSolver.getHighestResult().getAffectionPoints() + 1)
-                                            + " + :shopping_bags");
-                                }
-                                 /*
-                                description += " `" + (mapSolver.getHighestResult().getAffectionPoints() - 1 - 30) + "-" + (mapSolver.getHighestResult().getAffectionPoints() + 1)
-                                        + " + :shopping_bags";
-
-                                  */
-
-                                dateSolveMessageBuilder.setColor(new Color(0xBABABA));
-                            }
-                            else
-                                dateSolveMessageBuilder.setDescription("Date could not be solved!\n**AP: 0**");
-
-                            //  description = "Date could not be solved!\n**AP: 0**";
-
-                            //  Member member = message.getGuild().retrieveMemberById(userMatcher.group(1)).complete();
-
-                            //  dateSolveMessageBuilder.setDescription(description);
-
-                            //  NOTE: Create footer for embed message.
-                            //  message.getGuild().retrieveMemberById(userMatcher.group(1)).queue();
-
-                            //  message.getGuild().retrieveMemberById(userMatcher.group(1)).queue(member -> {
-                            //          });
-
-                            //  String footer = "For " + message.getGuild().getMemberById(userMatcher.group(1)).getUser().getAsTag();
-
-                            dateSolveMessageBuilder.setFooter("For " + member.getUser().getAsTag());
-
-                            //  NOTE: In other words, there was no ring to get to begin with.
-                            if(mapSolver.getHighestResultWithRing() == null)
-                            {
-                                message.replyEmbeds(dateSolveMessageBuilder.build()).setActionRow(
-                                        Button.secondary("ring", Emoji.fromMarkdown("\uD83D\uDC8D")).asDisabled()
-                                ).queue();
-                            }
-                            else
-                            {
-                                message.replyEmbeds(dateSolveMessageBuilder.build()).setActionRow(
-                                        Button.secondary("ring", Emoji.fromMarkdown("\uD83D\uDC8D")).asDisabled()
-                                ).queue();
-                            }
-
-
-                        });
-
-
-                    }
-                    else
-                    {
-                        EmbedBuilder dateSolveMessageBuilder = new EmbedBuilder().setTitle("Date Solution").setColor(new Color(0x5D5C5B));
-
-                        dateSolveMessageBuilder.setDescription("I'm sorry, something went wrong while trying to find the best path!");
-                        dateSolveMessageBuilder.setFooter("ERROR: " + errorMessage);
-
-                        //  NOTE: Reply to Karuta date-board
-                        message.replyEmbeds(dateSolveMessageBuilder.build()).queue();
-                    }
-
-
-                }
-            }
-        }
-        catch (IOException ioe)
-        {
-            System.out.println("ERROR: Image can't load for some reason.");
-            ioe.printStackTrace();
-        }
-    }
 
 }

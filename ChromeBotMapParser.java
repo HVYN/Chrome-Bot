@@ -149,11 +149,7 @@ public class ChromeBotMapParser
             for(int y = 150; y < 572; y++)
             {
                 Color straw = new Color(mapImage.getRGB(x, y));
-                if(straw.getRed() < 190 || straw.getRed() > 220)
-                    continue;
-                if(straw.getGreen() < 205 || straw.getGreen() > 225)
-                    continue;
-                if(straw.getBlue() < 205 || straw.getBlue() > 240)
+                if(!isStrawColorCorrect(straw))
                     continue;
 
                 if(!straw.equals(new Color(mapImage.getRGB(x + 1, y - 1))))
@@ -164,11 +160,7 @@ public class ChromeBotMapParser
                     continue;
 
                 Color redArt = new Color(mapImage.getRGB(x + 10, y + 12));
-                if(redArt.getRed() < 215)
-                    continue;
-                if(redArt.getGreen() < 70 || redArt.getGreen() > 110)
-                    continue;
-                if(redArt.getBlue() < 75 || redArt.getBlue() > 140)
+                if(!isRedArtColorCorrect(redArt))
                     continue;
 
                 if(!checkRectanglePattern(redArt, mapImage, x + 10, y + 12, 4, 0))
@@ -183,11 +175,7 @@ public class ChromeBotMapParser
             for(int y = 150; y < 572; y++)
             {
                 Color straw = new Color(mapImage.getRGB(x, y));
-                if(straw.getRed() < 190 || straw.getRed() > 220)
-                    continue;
-                if(straw.getGreen() < 200 || straw.getGreen() > 225)
-                    continue;
-                if(straw.getBlue() < 205 || straw.getBlue() > 240)
+                if(!isStrawColorCorrect(straw))
                     continue;
 
                 if(!straw.equals(new Color(mapImage.getRGB(x - 1, y - 1))))
@@ -198,11 +186,7 @@ public class ChromeBotMapParser
                     continue;
 
                 Color redArt = new Color(mapImage.getRGB(x - 14, y + 12));
-                if(redArt.getRed() < 215)
-                    continue;
-                if(redArt.getGreen() < 70 || redArt.getGreen() > 110)
-                    continue;
-                if(redArt.getBlue() < 75 || redArt.getBlue() > 140)
+                if(!isRedArtColorCorrect(redArt))
                     continue;
 
                 if(!checkRectanglePattern(redArt, mapImage, x - 14, y + 12, 4, 0))
@@ -225,11 +209,7 @@ public class ChromeBotMapParser
             for(int y = 150; y < 572; y++)
             {
                 Color cheese = new Color(mapImage.getRGB(x, y));
-                if(cheese.getRed() < 235)
-                    continue;
-                if(cheese.getGreen() < 210)
-                    continue;
-                if(cheese.getBlue() < 170 || cheese.getBlue() > 210)
+                if(!isCheeseColorCorrect(cheese))
                     continue;
 
                 if(!checkRectanglePattern(cheese, mapImage, x, y, 3, 0))
@@ -238,22 +218,14 @@ public class ChromeBotMapParser
                     continue;
 
                 Color sauce = new Color(mapImage.getRGB(x + 2, y - 9));
-                if(sauce.getRed() < 225)
-                    continue;
-                if(sauce.getGreen() < 70 || sauce.getGreen() > 100)
-                    continue;
-                if(sauce.getBlue() < 80 || sauce.getBlue() > 150)
+                if(!isSauceColorCorrect(sauce))
                     continue;
 
                 if(!checkRectanglePattern(sauce, mapImage, x + 2, y - 9, 4, 0))
                     continue;
 
                 Color fork = new Color(mapImage.getRGB(x + 14, y - 13));
-                if(fork.getRed() < 130 || fork.getRed() > 170)
-                    continue;
-                if(fork.getGreen() < 150 || fork.getGreen() > 195)
-                    continue;
-                if(fork.getBlue() < 150 || fork.getBlue() > 200)
+                if(!isForkColorCorrect(fork))
                     continue;
 
                 if(!checkRectanglePattern(fork, mapImage, x + 13, y - 14, 2, 0))
@@ -270,11 +242,7 @@ public class ChromeBotMapParser
             for(int y = 150; y < 572; y++)
             {
                 Color cheese = new Color(mapImage.getRGB(x, y));
-                if(cheese.getRed() < 235)
-                    continue;
-                if(cheese.getGreen() < 210)
-                    continue;
-                if(cheese.getBlue() < 170 || cheese.getBlue() > 210)
+                if(!isCheeseColorCorrect(cheese))
                     continue;
 
                 if(!checkRectanglePattern(cheese, mapImage, x, y, 3, 0))
@@ -283,22 +251,14 @@ public class ChromeBotMapParser
                     continue;
 
                 Color sauce = new Color(mapImage.getRGB(x - 3, y - 9));
-                if(sauce.getRed() < 225)
-                    continue;
-                if(sauce.getGreen() < 70 || sauce.getGreen() > 100)
-                    continue;
-                if(sauce.getBlue() < 80 || sauce.getBlue() > 150)
+                if(!isSauceColorCorrect(sauce))
                     continue;
 
                 if(!checkRectanglePattern(sauce, mapImage, x - 3, y - 9, 4, 0))
                     continue;
 
                 Color fork = new Color(mapImage.getRGB(x - 14, y - 13));
-                if(fork.getRed() < 130 || fork.getRed() > 170)
-                    continue;
-                if(fork.getGreen() < 150 || fork.getGreen() > 195)
-                    continue;
-                if(fork.getBlue() < 150 || fork.getBlue() > 200)
+                if(!isForkColorCorrect(fork))
                     continue;
 
                 if(!checkRectanglePattern(fork, mapImage, x - 14, y - 14, 2, 0))
@@ -995,7 +955,7 @@ public class ChromeBotMapParser
                 if(!checkRectanglePattern(darkShade, mapImage, x + 6, y + 5, 3, 2))
                     continue;
 
-                Color topBand = new Color(mapImage.getRGB(x - 5, y + 9));
+                Color topBand = new Color(mapImage.getRGB(x + 1, y + 9));
                 if(topBand.getRed() < 130 || topBand.getRed() > 180)
                     continue;
                 if(topBand.getGreen() < 140 || topBand.getGreen() > 200)
@@ -1493,6 +1453,10 @@ public class ChromeBotMapParser
         }
     }
 
+    /*
+        NOTE: Pre-decided/Hard coded locations/color(s) on the map to determine whether or not a 'node'
+            is inaccessible or not.
+     */
     private static void checkInaccessibleNodes(BufferedImage mapImage, ChromeBotMapSolver mapSolver)
     {
         if(!new Color(mapImage.getRGB(306, 180)).equals(new Color(95, 96, 95)))
@@ -1637,6 +1601,72 @@ public class ChromeBotMapParser
                     return false;
             }
         }
+
+        return true;
+    }
+
+    //  HELPER: Check 'straw' color correctness, when finding Juice resource.
+    private static boolean isStrawColorCorrect(Color straw)
+    {
+        //  Color straw = new Color(mapImage.getRGB(x, y));
+        if(straw.getRed() < 190 || straw.getRed() > 220)
+            return false;
+        if(straw.getGreen() < 205 || straw.getGreen() > 225)
+            return false;
+        if(straw.getBlue() < 205 || straw.getBlue() > 240)
+            return false;
+
+        return true;
+    }
+
+    //  HELPER: Check 'redArt' color correctness, when finding Juice resource.
+    private static boolean isRedArtColorCorrect(Color redArt)
+    {
+        if(redArt.getRed() < 215)
+            return false;
+        if(redArt.getGreen() < 70 || redArt.getGreen() > 110)
+            return false;
+        if(redArt.getBlue() < 75 || redArt.getBlue() > 140)
+            return false;
+
+        return true;
+    }
+
+    //  HELPER: Check 'cheese' color correctness, when finding Spaghetti resource.
+    private static boolean isCheeseColorCorrect(Color cheese)
+    {
+        if(cheese.getRed() < 235)
+            return false;
+        if(cheese.getGreen() < 210)
+            return false;
+        if(cheese.getBlue() < 170 || cheese.getBlue() > 210)
+            return false;
+
+        return true;
+    }
+
+    //  HELPER: Check 'sauce' color correctness, when finding Spaghetti resource.
+    private static boolean isSauceColorCorrect(Color sauce)
+    {
+        if (sauce.getRed() < 225)
+            return false;
+        if (sauce.getGreen() < 70 || sauce.getGreen() > 100)
+            return false;
+        if (sauce.getBlue() < 80 || sauce.getBlue() > 150)
+            return false;
+
+        return true;
+    }
+
+    //  HELPER: Check 'fork' color correctness, when finding Spaghetti resource.
+    private static boolean isForkColorCorrect(Color fork)
+    {
+        if(fork.getRed() < 130 || fork.getRed() > 170)
+            return false;
+        if(fork.getGreen() < 150 || fork.getGreen() > 195)
+            return false;
+        if(fork.getBlue() < 150 || fork.getBlue() > 200)
+            return false;
 
         return true;
     }
