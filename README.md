@@ -51,3 +51,5 @@ GOAL REACHED -> EMBED MESSAGING, WEDDING RING PARSING, GENEROUS PIXEL PARSING (0
 ## Let two discord users challenge each other to a game of rock, paper, scissors!
 
 SHOULD USE BUTTONS!
+
+GOAL REACHED -> ROCK, PAPER, SCISSORS GAME IMPLEMENTED (06/03/2022)
