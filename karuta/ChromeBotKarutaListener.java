@@ -12,6 +12,7 @@ import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.events.message.MessageUpdateEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
+import net.dv8tion.jda.api.interactions.components.buttons.Button;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -84,7 +85,7 @@ public class ChromeBotKarutaListener extends ListenerAdapter
         }
     }
 
-    //  OVERRIDE: Main way for bot to respond to messages being updated.
+    //  OVERRIDE: Main Listener for bot to respond to messages being updated.
     @Override
     public void onMessageUpdate(MessageUpdateEvent messageUpdateEvent)
     {
@@ -179,49 +180,45 @@ public class ChromeBotKarutaListener extends ListenerAdapter
                                 //      have been identified, proceed to solving the date.
                                 mapSolver.solveDate();
 
+                                /*
+                                    FROM THIS POINT ONWARD, THE MAP-SOLVER SHOULD HAVE ITS ANSWER
+                                        FOR THE HIGHEST RESULT(S).
+                                 */
+
+                                DateResult highestResult = mapSolver.getHighestResult();
+                                DateResult highestResultRing = mapSolver.getHighestResultWithRing();
+
                                 //  DEBUG: Print highest result(s) to console for debugging purposes.
                                 mapSolver.displayHighestResult();
                                 mapSolver.displayHighestResultWithRing();
 
                                 //  NOTE: If there isn't even a single result marked as 'SUCCESS', then the
                                 //      date board is un-winnable.
-                                if(mapSolver.getHighestResult() != null)
+                                if(highestResult != null)
                                 {
-                                    String dateSolution = mapSolver.getPathAsEmotes(mapSolver.getHighestResult().getPath()) +
-                                            "\n**AP: " + (mapSolver.getHighestResult().getAffectionPoints() - 1) + "-" + (mapSolver.getHighestResult().getAffectionPoints() + 1)
-                                            + "**";
-                                    /*
-                                    //  NOTE: Create description for embed message.
-                                    dateSolveMessageBuilder.setDescription(mapSolver.getPathAsEmotes(mapSolver.getHighestResult().getPath()) +
-                                            "\n**AP: " + (mapSolver.getHighestResult().getAffectionPoints() - 1) + "-" + (mapSolver.getHighestResult().getAffectionPoints() + 1)
-                                            + "**");
+                                    String dateSolution = ChromeBotKarutaUtil.emojifyPath(highestResult.getPath()) +
+                                            "\n**AP: " + Math.round(highestResult.getAffectionPoints()) + "**";
 
-                                     */
-
-                                    if (mapSolver.getHighestResult().getPath().contains("MALL"))
-                                        dateSolution += " (" + (mapSolver.getHighestResult().getAffectionPoints() - 1 - 30) + "-" + (mapSolver.getHighestResult().getAffectionPoints() + 1 - 30)
-                                                + " + :shopping_bags:)";
+                                    if (highestResult.getPath().contains("MALL"))
+                                        dateSolution += " (" + Math.round(highestResult.getAffectionPoints()) + " + :shopping_bags:)";
                                         //  dateSolveMessageBuilder.setDescription("\n`" + (mapSolver.getHighestResult().getAffectionPoints() - 1 - 30) + "-" + (mapSolver.getHighestResult().getAffectionPoints() + 1)
                                         //          + " + :shopping_bags");
 
+                                    dateSolveMessageBuilder.setDescription(dateSolution)
+                                            .setColor(new Color(0xBABABA));
+
                                     //  NOTE: If there is a result that ends with a ring, build other embed message as well.
-                                    if(mapSolver.getHighestResultWithRing() != null)
+                                    if(highestResultRing != null)
                                     {
-                                        String dateSolutionRing = mapSolver.getPathAsEmotes(mapSolver.getHighestResultWithRing().getPath()) +
-                                                "\n**AP: " + (mapSolver.getHighestResultWithRing().getAffectionPoints() - 1) + "-" + (mapSolver.getHighestResultWithRing().getAffectionPoints() + 1)
-                                                + "**";
+                                        String dateSolutionRing = ChromeBotKarutaUtil.emojifyPath(highestResultRing.getPath()) +
+                                                "\n**AP: " + Math.round(highestResultRing.getAffectionPoints()) + "**";
 
-                                        if (mapSolver.getHighestResultWithRing().getPath().contains("MALL"))
-                                            dateSolutionRing += " (" + (mapSolver.getHighestResultWithRing().getAffectionPoints() - 1 - 30) + "-" + (mapSolver.getHighestResultWithRing().getAffectionPoints() + 1 - 30)
-                                                    + " + :shopping_bags:)";
-
+                                        if (highestResultRing.getPath().contains("MALL"))
+                                            dateSolutionRing += " (" + Math.round(highestResultRing.getAffectionPoints()) + " + :shopping_bags:)";
 
                                         dateSolveRingMessageBuilder.setDescription(dateSolutionRing)
                                                 .setColor(new Color(0x7eaede));
                                     }
-
-                                    dateSolveMessageBuilder.setDescription(dateSolution)
-                                        .setColor(new Color(0xBABABA));
                                 }
                                 else
                                     dateSolveMessageBuilder.setDescription("Date could not be solved!\n**AP: 0**");
@@ -244,7 +241,7 @@ public class ChromeBotKarutaListener extends ListenerAdapter
                                         embedMessages.add(highestResultRingEmbed);
 
                                     tempMessage.editMessageEmbeds(embedMessages)
-                                                .queue();
+                                            .queue();
                                 }
                             });
                         }

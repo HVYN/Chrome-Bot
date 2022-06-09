@@ -502,28 +502,26 @@ public class ChromeBotMapSolver
             //  NOTE: TO CONSERVE MEMORY IN THE HEAP, I HAVE TO STOP STORING RESULTS
             //      THAT END IN FAILURE.
         }
-
     }
 
     //  HELPER: CALCULATE AFFECTION POINTS USING A FORMULA
-    private int calculateAffectionPoints(int hunger, int thirst, int happiness, boolean mallVisited)
+    private double calculateAffectionPoints(int hunger, int thirst, int happiness, boolean mallVisited)
     {
         double resourceAverage = (hunger + thirst + happiness) / 6.0;
-        int affectionPoints = (int)(resourceAverage);
 
         if(mallVisited)
-            affectionPoints += 30;
+            resourceAverage += 30;
 
-        return affectionPoints;
+        return resourceAverage;
     }
 
     //  HELPER: CALCULATE AFFEECTION POINTS W/ TIME
-    private int calculateAffectionPoints(int hunger, int thirst, int happiness, int time, boolean mallVisited)
+    private double calculateAffectionPoints(int hunger, int thirst, int happiness, int time, boolean mallVisited)
     {
         double resourceAverage = (hunger + thirst + happiness) / 6.0;
         double timeWeight = (100 - time - 4) / 100.0;
 
-        int affectionPoints = (int)(resourceAverage * timeWeight);
+        double affectionPoints = (resourceAverage * timeWeight);
 
         if(mallVisited)
             affectionPoints += 30;
@@ -617,85 +615,6 @@ public class ChromeBotMapSolver
                 nodeArray.get(index).setBottomWestNode(null);
             }
         }
-    }
-
-    //  HELPER: PRINT PATH USING EMOJIS (USER-FRIENDLY)
-    public String getPathAsEmotes(String path)
-    {
-        //  ASSUMPTION: 'path' will actually exist.
-
-        String newPath = "";
-
-        //  NOTE: Split path into separate Strings, and convert them accordingly
-        //      to respective emojis/emotes.
-        for(String spot : path.split(" "))
-        {
-            switch(spot)
-            {
-                case "UP":
-                    newPath += ":arrow_up: ";
-                    break;
-                case "RIGHT":
-                    newPath += ":arrow_right: ";
-                    break;
-                case "DOWN":
-                    newPath += ":arrow_down: ";
-                    break;
-                case "LEFT":
-                    newPath += ":arrow_left: ";
-                    break;
-                case "BAR":
-                    newPath += ":tropical_drink: ";
-                    break;
-                case "GARDEN":
-                    newPath += ":blossom: ";
-                    break;
-                case "ITALIAN":
-                    newPath += ":spaghetti: ";
-                    break;
-                case "TACO":
-                    newPath += ":taco: ";
-                    break;
-                case "SANDWICH":
-                    newPath += ":sandwich: ";
-                    break;
-                case "JUICE":
-                    newPath += ":beverage_box: ";
-                    break;
-                case "GAS1":
-                case "GAS2":
-                case "GAS3":
-                    newPath += ":fuelpump: ";
-                    break;
-                case "FAIR":
-                    newPath += ":ferris_wheel: ";
-                    break;
-                case "THEATER":
-                    newPath += ":performing_arts: ";
-                    break;
-                case "MALL":
-                    newPath += ":shopping_bags: ";
-                    break;
-                case "COFFEE":
-                    newPath += ":coffee: ";
-                    break;
-                case "HOME":
-                    newPath += ":house: ";
-                    break;
-                case "BALLROOM":
-                    newPath += ":dancer: ";
-                    break;
-                case "RING":
-                    newPath += ":ring: ";
-                    break;
-
-                default:
-                    //  newPath += ":grey_question: ";
-                    break;
-            }
-        }
-
-        return newPath;
     }
 
     //  HELPER: GET HIGHEST RESULT
