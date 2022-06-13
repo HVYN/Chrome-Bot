@@ -1,4 +1,5 @@
 package karuta;
+
 //  ORIGINAL: TestMapParser.java
 
 /*
@@ -67,7 +68,7 @@ public class ChromeBotMapParser
         //  checkIfAirplane(mapImage, mapSolver);
 
         //  NOTE: Ring is NOT a CRITICAL resource.
-        checkIfRing(mapImage, mapSolver);
+        mapSolver.setRing(checkIfRing(mapImage, mapSolver));
 
         //  NOTE: MARK Inaccessible nodes
         checkInaccessibleNodes(mapImage, mapSolver);
