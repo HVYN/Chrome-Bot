@@ -1,6 +1,7 @@
 package karuta;
+
 /*
-    karuta.DateNode
+    NOTE: Representation of where the player can be at.
  */
 
 public class DateNode

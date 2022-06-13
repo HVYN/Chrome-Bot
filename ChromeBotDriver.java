@@ -3,14 +3,13 @@
 //  04/03/2022
 
 import karuta.ChromeBotKarutaListener;
+
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.interactions.commands.Command;
-import net.dv8tion.jda.api.interactions.commands.OptionType;
 
 import javax.security.auth.login.LoginException;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.util.Scanner;
 
@@ -41,6 +40,10 @@ public class ChromeBotDriver
         //  WAIT FOR JDA OBJECT TO ACTUALLY BE READY BEFORE DOING ANYTHING.
         jda.awaitReady();
 
+        //  NOW SINCE JDA OBJECT IS READY, START THREAD WITH THAT OBJECT.
+        WedThurs WTPrinter = new WedThurs(jda);
+            WTPrinter.start();
+
         /*
         jda.upsertCommand("rockpaperscissors", "Challenge someone to Rock-Paper-Scissors!")
                 .addOption(OptionType.USER, "opponent", "Username of the opponent.", true)
@@ -49,7 +52,7 @@ public class ChromeBotDriver
                 .queue();
 
          */
-        
+
         //  DEBUG: Display all commands the bot has in the TEST SERVER.
         jda.getGuildById(TEST_SERVER_ID).retrieveCommands().queue(commands -> {
             for(Command command : commands)

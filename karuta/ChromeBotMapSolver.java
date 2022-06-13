@@ -25,6 +25,8 @@ public class ChromeBotMapSolver
 
     private int startingNodeNumber;
 
+    private boolean ring;
+
     //  private int currentHighestScore;
     public ChromeBotMapSolver()
     {
@@ -44,6 +46,8 @@ public class ChromeBotMapSolver
         //  STARTING NODE IS ALWAYS AT THE SAME LOCATION, SO WE CAN
         //      DEFINE IT EARLY
         startingNodeNumber = 79;
+
+        ring = false;
 
         constructNodes();
         linkNodes();
@@ -83,34 +87,30 @@ public class ChromeBotMapSolver
         if(happiness > 100)
             happiness = 100;
 
-        juiceRefresh--; coffeeRefresh--; sandwichRefresh--; fairRefresh--;
-        spaghettiRefresh--; barRefresh--; theaterRefresh--; tacoRefresh--;
-        ballroomRefresh--; gasOneRefresh--; gasTwoRefresh--; gasThreeRefresh--;
-
-        if(juiceRefresh < 0)
-            juiceRefresh = 0;
-        if(coffeeRefresh < 0)
-            coffeeRefresh = 0;
-        if(sandwichRefresh < 0)
-            sandwichRefresh = 0;
-        if(fairRefresh < 0)
-            fairRefresh = 0;
-        if(spaghettiRefresh < 0)
-            spaghettiRefresh = 0;
-        if(barRefresh < 0)
-            barRefresh = 0;
-        if(theaterRefresh < 0)
-            theaterRefresh = 0;
-        if(tacoRefresh < 0)
-            tacoRefresh = 0;
-        if(ballroomRefresh < 0)
-            ballroomRefresh = 0;
-        if(gasOneRefresh < 0)
-            gasOneRefresh = 0;
-        if(gasTwoRefresh < 0)
-            gasTwoRefresh = 0;
-        if(gasThreeRefresh < 0)
-            gasThreeRefresh = 0;
+        if(juiceRefresh > 0)
+            juiceRefresh--;
+        if(coffeeRefresh > 0)
+            coffeeRefresh--;
+        if(sandwichRefresh > 0)
+            sandwichRefresh--;
+        if(fairRefresh > 0)
+            fairRefresh--;
+        if(spaghettiRefresh > 0)
+            spaghettiRefresh--;
+        if(barRefresh > 0)
+            barRefresh--;
+        if(theaterRefresh > 0)
+            theaterRefresh--;
+        if(tacoRefresh > 0)
+            tacoRefresh--;
+        if(ballroomRefresh > 0)
+            ballroomRefresh--;
+        if(gasOneRefresh > 0)
+            gasOneRefresh--;
+        if(gasTwoRefresh > 0)
+            gasTwoRefresh--;
+        if(gasThreeRefresh > 0)
+            gasThreeRefresh--;
 
         //  NOTE: This checks if the bot can still go on.
         //      a. Resources have not been depleted
@@ -157,7 +157,6 @@ public class ChromeBotMapSolver
             }
             else if(currentDirection.equals("LEFT"))
             {
-
                 if(!(currentNode.getLeftNorthNode() == null) &&
                         !currentNode.getLeftNorthNode().isInaccessible())
                     solveDate(currentNode.getLeftNorthNode(), "UP", turnNumber + 1,
@@ -264,7 +263,7 @@ public class ChromeBotMapSolver
             }
 
             //  OBSERVE RESOURCES SURROUNDING CURRENT NODE
-            //  AND ACT UPON THEM (Recursion?)
+            //  AND ACT UPON THEM
             if(!currentNode.hasNoResources())
             {
                 //  JUICE RESOURCE
@@ -653,5 +652,8 @@ public class ChromeBotMapSolver
 
     //  GETTER: Access individual nodes, from their ID/number
     public DateNode getNode(int nodeNumber)     {   return nodeArray.get(nodeNumber);   }
+
+    public boolean hasRing()            {   return ring;         }
+    public void setRing(boolean ring)   {   this.ring = ring;    }
 
 }
