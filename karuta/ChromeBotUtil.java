@@ -75,6 +75,9 @@ public class ChromeBotUtil
                 case "RING":
                     newPath += ":ring: ";
                     break;
+                case "AIRPORT":
+                    newPath += ":airplane: ";
+                    break;
                 case "GAS1":
                 case "GAS2":
                 case "GAS3":

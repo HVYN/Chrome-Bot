@@ -183,6 +183,7 @@ public class DateNode
     public boolean isNextToHome()       {   return nextToHome;      }
     public boolean isNextToMall()       {   return nextToMall;      }
     public boolean isNextToRing()       {   return nextToRing;      }
+    public boolean isNextToAirport()    {   return nextToAirport;   }
 
     //  NOTE: Check function, to certain portions of solving work if node is not
     //      neighboring any resources.

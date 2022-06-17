@@ -6,5 +6,5 @@ package karuta;
 
 public enum ResultType
 {
-    RETURNED_HOME, SUCCESS, OUT_OF_RESOURCE
+    RETURNED_HOME, SUCCESS, REACHED_AIRPORT
 }

@@ -65,7 +65,7 @@ public class ChromeBotMapParser
         checkIfMall(mapImage, mapSolver);
 
         //  NOTE: Airport is NOT a CRITICAL resource.
-        //  checkIfAirplane(mapImage, mapSolver);
+        checkIfAirplane(mapImage, mapSolver);
 
         //  NOTE: Ring is NOT a CRITICAL resource.
         mapSolver.setRing(checkIfRing(mapImage, mapSolver));
@@ -167,7 +167,14 @@ public class ChromeBotMapParser
                 if(!checkRectanglePattern(redArt, mapImage, x + 10, y + 12, 4, 0))
                     continue;
 
-                System.out.println("JUICE DETECTED.\n");
+                Color juiceBoxDark = new Color(mapImage.getRGB(x + 1, y + 6));
+                if(!isJuiceBoxDarkColorCorrect(juiceBoxDark))
+                    continue;
+
+                if(!checkRectanglePattern(juiceBoxDark, mapImage, x + 1, y + 6, 1, 15))
+                    continue;
+
+                System.out.println("JUICE DETECTED.");
                 determineSquareNumber(x, y, mapSolver, "JUICE");
                 return true;
             }
@@ -193,7 +200,14 @@ public class ChromeBotMapParser
                 if(!checkRectanglePattern(redArt, mapImage, x - 14, y + 12, 4, 0))
                     continue;
 
-                System.out.println("JUICE DETECTED. (MIRROR)\n");
+                Color juiceBoxDark = new Color(mapImage.getRGB(x - 2, y + 6));
+                if(!isJuiceBoxDarkColorCorrect(juiceBoxDark))
+                    continue;
+
+                if(!checkRectanglePattern(juiceBoxDark, mapImage, x - 2, y + 6, 1, 15))
+                    continue;
+
+                System.out.println("JUICE DETECTED. (MIRROR)");
                 determineSquareNumber(x, y, mapSolver, "JUICE");
                 return true;
             }
@@ -234,7 +248,7 @@ public class ChromeBotMapParser
                 if(!checkRectanglePattern(fork, mapImage, x + 13, y - 15, 2, 0))
                     continue;
 
-                System.out.println("SPAGHETTI DETECTED.\n");
+                System.out.println("SPAGHETTI DETECTED.");
                 determineSquareNumber(x, y, mapSolver, "SPAGHETTI");
                 return true;
             }
@@ -267,7 +281,7 @@ public class ChromeBotMapParser
                 if(!checkRectanglePattern(fork, mapImage, x - 14, y - 15, 2, 0))
                     continue;
 
-                System.out.println("SPAGHETTI DETECTED. (MIRROR)\n");
+                System.out.println("SPAGHETTI DETECTED. (MIRROR)");
                 determineSquareNumber(x, y, mapSolver, "SPAGHETTI");
                 return true;
             }
@@ -311,7 +325,7 @@ public class ChromeBotMapParser
                 if(!diagonal.equals(new Color(mapImage.getRGB(x + 23, y + 2))))
                     continue;
 
-                System.out.println("FAIR DETECTED.\n");
+                System.out.println("FAIR DETECTED.");
                 determineSquareNumber(x, y, mapSolver, "FAIR");
                 return true;
             }
@@ -338,7 +352,7 @@ public class ChromeBotMapParser
                 if(!checkRectanglePattern(bread, mapImage, x, y, 10, 8))
                     continue;
 
-                System.out.println("SANDWICH DETECTED.\n");
+                System.out.println("SANDWICH DETECTED.");
                 determineSquareNumber(x, y, mapSolver, "SANDWICH");
                 return true;
             }
@@ -380,7 +394,7 @@ public class ChromeBotMapParser
                 if(!checkRectanglePattern(liquid, mapImage, x + 3, y + 10, 2, 0))
                     continue;
 
-                System.out.println("BAR DETECTED.\n");
+                System.out.println("BAR DETECTED.");
                 determineSquareNumber(x, y, mapSolver, "BAR");
                 return true;
             }
@@ -414,7 +428,7 @@ public class ChromeBotMapParser
                 if(!checkRectanglePattern(liquid, mapImage, x + 3, y + 10, 2, 0))
                     continue;
 
-                System.out.println("BAR DETECTED. (MIRROR)\n");
+                System.out.println("BAR DETECTED. (MIRROR)");
                 determineSquareNumber(x, y, mapSolver, "BAR");
                 return true;
             }
@@ -451,7 +465,7 @@ public class ChromeBotMapParser
                 if(!eyeMouth.equals(new Color(mapImage.getRGB(x + 4, y + 7))))
                     continue;
 
-                System.out.println("THEATER DETECTED.\n");
+                System.out.println("THEATER DETECTED.");
                 determineSquareNumber(x, y, mapSolver, "THEATER");
                 return true;
             }
@@ -480,7 +494,7 @@ public class ChromeBotMapParser
                 if(!eyeMouth.equals(new Color(mapImage.getRGB(x - 4, y + 7))))
                     continue;
 
-                System.out.println("THEATER DETECTED. (MIRROR)\n");
+                System.out.println("THEATER DETECTED. (MIRROR)");
                 determineSquareNumber(x, y, mapSolver, "THEATER");
                 return true;
             }
@@ -513,7 +527,7 @@ public class ChromeBotMapParser
                 if(!shellDark.equals(new Color(mapImage.getRGB(x, y + 9))))
                     continue;
 
-                System.out.println("TACO DETECTED.\n");
+                System.out.println("TACO DETECTED.");
                 determineSquareNumber(x, y, mapSolver, "TACO");
                 return true;
             }
@@ -538,7 +552,7 @@ public class ChromeBotMapParser
                 if(!shellDark.equals(new Color(mapImage.getRGB(x, y + 9))))
                     continue;
 
-                System.out.println("TACO DETECTED. (MIRROR)\n");
+                System.out.println("TACO DETECTED. (MIRROR)");
                 determineSquareNumber(x, y, mapSolver, "TACO");
                 return true;
             }
@@ -580,7 +594,7 @@ public class ChromeBotMapParser
                 if(!checkRectanglePattern(stem, mapImage, x - 4, y + 17, 9, 1))
                     continue;
 
-                System.out.println("GARDEN DETECTED.\n");
+                System.out.println("GARDEN DETECTED.");
                 determineSquareNumber(x, y, mapSolver, "GARDEN");
                 return true;
             }
@@ -620,7 +634,7 @@ public class ChromeBotMapParser
                 if(!checkRectanglePattern(body, mapImage, x, y + 8, 13, 7))
                     continue;
 
-                System.out.println("GAS PUMP DETECTED.\n");
+                System.out.println("GAS PUMP DETECTED.");
 
                 if(numberOfGasPumps == 0)
                     determineSquareNumber(x, y, mapSolver, "GAS1");
@@ -661,7 +675,7 @@ public class ChromeBotMapParser
 
                 if(outwardLeg.equals(standLeg) && outwardLeg.equals(forehead))
                 {
-                    System.out.println("BALLROOM DETECTED.\n");
+                    System.out.println("BALLROOM DETECTED.");
                     determineSquareNumber(x, y, mapSolver, "BALLROOM");
                     return true;
                 }
@@ -683,7 +697,7 @@ public class ChromeBotMapParser
 
                 if(outwardLeg.equals(standLeg) && outwardLeg.equals(forehead))
                 {
-                    System.out.println("BALLROOM DETECTED. (MIRROR)\n");
+                    System.out.println("BALLROOM DETECTED. (MIRROR)");
                     determineSquareNumber(x, y, mapSolver, "BALLROOM");
                     return true;
                 }
@@ -720,7 +734,7 @@ public class ChromeBotMapParser
                 if(!trail.equals(new Color(mapImage.getRGB(x + 2, y + 6))))
                     continue;
 
-                System.out.println("COFFEE PATTERN DETECTED.\n");
+                System.out.println("COFFEE PATTERN DETECTED.");
                 determineSquareNumber(x, y, mapSolver, "COFFEE");
                 return true;
             }
@@ -747,7 +761,7 @@ public class ChromeBotMapParser
                 if(!trail.equals(new Color(mapImage.getRGB(x - 2, y + 6))))
                     continue;
 
-                System.out.println("COFFEE PATTERN DETECTED. (MIRROR)\n");
+                System.out.println("COFFEE PATTERN DETECTED. (MIRROR)");
                 determineSquareNumber(x, y, mapSolver, "COFFEE");
                 return true;
             }
@@ -791,7 +805,7 @@ public class ChromeBotMapParser
                 if(!checkRectanglePattern(bag, mapImage, x, y + 5, 12, 16))
                     continue;
 
-                System.out.println("MALL DETECTED.\n");
+                System.out.println("MALL DETECTED.");
                 determineSquareNumber(x, y, mapSolver, "MALL");
                 return;
             }
@@ -827,7 +841,7 @@ public class ChromeBotMapParser
                 if(!checkRectanglePattern(bag, mapImage, x, y + 5, 12, 1))
                     continue;
 
-                System.out.println("MALL DETECTED. (MIRROR)\n");
+                System.out.println("MALL DETECTED. (MIRROR)");
                 determineSquareNumber(x, y, mapSolver, "MALL");
                 return;
             }
@@ -861,7 +875,7 @@ public class ChromeBotMapParser
 
                 if(topLeftWindow.equals(topRightWindow) && topLeftWindow.equals(bottomWindowOne))
                 {
-                    System.out.println("HOME DETECTED.\n");
+                    System.out.println("HOME DETECTED.");
                     determineSquareNumber(x, y, mapSolver, "HOME");
 
                     return true;
@@ -892,7 +906,7 @@ public class ChromeBotMapParser
 
                 if(topRightWindow.equals(topLeftWindow) && topRightWindow.equals(bottomRightWindow))
                 {
-                    System.out.println("HOME PATTERN DETECTED. (MIRROR)\n");
+                    System.out.println("HOME PATTERN DETECTED. (MIRROR)");
                     determineSquareNumber(x, y, mapSolver, "HOME");
 
                     return true;
@@ -934,7 +948,7 @@ public class ChromeBotMapParser
                 if(!checkRectanglePattern(topBand, mapImage, x - 5, y + 9, 9, 3))
                     continue;
 
-                System.out.println("RING DETECTED.\n");
+                System.out.println("RING DETECTED.");
                 determineSquareNumber(x, y, mapSolver, "RING");
 
                 return true;
@@ -967,7 +981,7 @@ public class ChromeBotMapParser
                 if(!checkRectanglePattern(topBand, mapImage, x + 1, y + 9, 9, 3))
                     continue;
 
-                System.out.println("RING DETECTED. (MIRROR)\n");
+                System.out.println("RING DETECTED. (MIRROR)");
                 determineSquareNumber(x, y, mapSolver, "RING");
 
                 return true;
@@ -1003,7 +1017,7 @@ public class ChromeBotMapParser
                 if(!checkRectanglePattern(tailfin, mapImage, x + 7, y + 6, 1, 2))
                     continue;
 
-                System.out.println("AIRPLANE DETECTED.\n");
+                System.out.println("AIRPLANE DETECTED.");
                 determineSquareNumber(x, y, mapSolver, "AIRPLANE");
                 return true;
             }
@@ -1029,7 +1043,7 @@ public class ChromeBotMapParser
                 if(!checkRectanglePattern(tailfin, mapImage, x - 6, y + 8, 1, 0))
                     continue;
 
-                System.out.println("AIRPLANE DETECTED. (MIRROR)\n");
+                System.out.println("AIRPLANE DETECTED. (MIRROR)");
                 determineSquareNumber(x, y, mapSolver, "AIRPLANE");
                 return true;
             }
@@ -1628,6 +1642,19 @@ public class ChromeBotMapParser
         if(redArt.getGreen() < 70 || redArt.getGreen() > 110)
             return false;
         if(redArt.getBlue() < 75 || redArt.getBlue() > 140)
+            return false;
+
+        return true;
+    }
+
+    //  HELPER: Check 'juiceBoxDark' color correctness, when finding Juice resource.
+    private static boolean isJuiceBoxDarkColorCorrect(Color juiceBoxDark)
+    {
+        if(juiceBoxDark.getRed() < 185)
+            return false;
+        if(juiceBoxDark.getGreen() < 150 || juiceBoxDark.getGreen() > 195)
+            return false;
+        if(juiceBoxDark.getBlue() > 50)
             return false;
 
         return true;
