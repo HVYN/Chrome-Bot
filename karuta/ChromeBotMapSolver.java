@@ -20,6 +20,7 @@ public class ChromeBotMapSolver
 
     private DateResult highestResult;
     private DateResult highestResultWithRing;
+    private DateResult highestResultWithAirport;
 
     private String playerDirection;
 
@@ -41,7 +42,7 @@ public class ChromeBotMapSolver
         //  results = new LinkedList<>();
         //  pathsTaken = new LinkedList<>();
 
-        highestResultWithRing = highestResult = null;
+        highestResultWithRing = highestResult = highestResultWithAirport = null;
 
         //  STARTING NODE IS ALWAYS AT THE SAME LOCATION, SO WE CAN
         //      DEFINE IT EARLY
@@ -478,6 +479,17 @@ public class ChromeBotMapSolver
                     highestResult = homeResult;
 
             }
+
+            //  AIRPORT PATH
+            //  NOTE: CONSIDER AIRPORT ENDING, IN CASE THE BOARD DOES NOT HAVE A RING/THE USER
+            //      WISHES TO RE-ROLL THE BOARD.
+            if(currentNode.isNextToAirport())
+            {
+                DateResult airportResult = new DateResult(ResultType.REACHED_AIRPORT, calculateAffectionPoints(hunger, thirst, happiness, time, mallVisited), path + " AIRPORT");
+
+                if(highestResultWithAirport == null || airportResult.getAffectionPoints() > highestResultWithAirport.getAffectionPoints())
+                    highestResultWithAirport = airportResult;
+            }
         }
         else if(time <= 0)
         {
@@ -622,6 +634,9 @@ public class ChromeBotMapSolver
     //  HELPER: GET HIGHEST RESULT W/ RING
     public DateResult getHighestResultWithRing()    {   return highestResultWithRing;   }
 
+    //  HELPER: GET HIGHEST RESULT W/ AIRPORT
+    public DateResult getHighestResultWithAirport() {   return highestResultWithAirport;    }
+
     //  HELPER: DISPLAY HIGHEST RESULT
     public void displayHighestResult()
     {
@@ -641,7 +656,18 @@ public class ChromeBotMapSolver
         if(highestResultWithRing == null)
             System.out.println("NO RESULTS (WITH RING) FOUND!");
         else
-            System.out.println(highestResult);
+            System.out.println(highestResultWithRing);
+    }
+
+    //  HELPER: DISPLAY HIGHEST RESULT W/ AIRPORT
+    public void displayHighestResultWithAirport()
+    {
+        System.out.println("HIGHEST RESULT (WITH AIRPORT):");
+
+        if(highestResultWithAirport == null)
+            System.out.println("NO RESULTS (WITH AIRPORT) FOUND!");
+        else
+            System.out.println(highestResultWithAirport);
     }
 
     //  SETTER: Set (STARTING) Player Direction

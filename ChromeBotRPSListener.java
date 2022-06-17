@@ -82,10 +82,10 @@ public class ChromeBotRPSListener extends ListenerAdapter
     public void onButtonInteraction(ButtonInteractionEvent buttonInteractionEvent)
     {
         if(buttonInteractionEvent.getTimeCreated().isBefore(buttonInteractionEvent.getMessage().getTimeCreated().plusMinutes(3)))
-            System.out.println("MESSAGE IS STILL RECENT (<5 Minutes).");
+            System.out.println("MESSAGE IS STILL RECENT (<3 Minutes).");
         else
         {
-            System.out.println("MESSAGE IS OUTDATED (>5 Minutes).");
+            System.out.println("MESSAGE IS OUTDATED (>3 Minutes).");
             return;
         }
 
