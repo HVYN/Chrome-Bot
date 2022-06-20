@@ -999,22 +999,22 @@ public class ChromeBotMapParser
         {
             for(int y = 150; y < 572; y++)
             {
-                Color tailfin = new Color(mapImage.getRGB(x, y));
-                if(tailfin.getRed() < 60 || tailfin.getRed() > 105)
+                Color tailFin = new Color(mapImage.getRGB(x, y));
+                if(tailFin.getRed() < 60 || tailFin.getRed() > 105)
                     continue;
-                if(tailfin.getGreen() < 155 || tailfin.getGreen() > 190)
+                if(tailFin.getGreen() < 155 || tailFin.getGreen() > 190)
                     continue;
-                if(tailfin.getBlue() < 230)
-                    continue;
-
-                if(!checkRectanglePattern(tailfin, mapImage, x, y, 2, 1))
-                    continue;
-                if(!checkRectanglePattern(tailfin, mapImage, x + 1, y + 2, 1, 0))
+                if(tailFin.getBlue() < 210)
                     continue;
 
-                if(!checkRectanglePattern(tailfin, mapImage, x + 6, y + 6, 0, 1))
+                if(!checkRectanglePattern(tailFin, mapImage, x, y, 2, 1))
                     continue;
-                if(!checkRectanglePattern(tailfin, mapImage, x + 7, y + 6, 1, 2))
+                if(!checkRectanglePattern(tailFin, mapImage, x + 1, y + 2, 1, 0))
+                    continue;
+
+                if(!checkRectanglePattern(tailFin, mapImage, x + 6, y + 6, 0, 1))
+                    continue;
+                if(!checkRectanglePattern(tailFin, mapImage, x + 7, y + 6, 1, 2))
                     continue;
 
                 System.out.println("AIRPLANE DETECTED.");
@@ -1025,22 +1025,22 @@ public class ChromeBotMapParser
             //  CHECK FOR MIRROR FORM
             for(int y = 150; y < 572; y++)
             {
-                Color tailfin = new Color(mapImage.getRGB(x, y));
-                if(tailfin.getRed() < 60 || tailfin.getRed() > 105)
+                Color tailFin = new Color(mapImage.getRGB(x, y));
+                if(tailFin.getRed() < 60 || tailFin.getRed() > 105)
                     continue;
-                if(tailfin.getGreen() < 155 || tailfin.getGreen() > 190)
+                if(tailFin.getGreen() < 155 || tailFin.getGreen() > 190)
                     continue;
-                if(tailfin.getBlue() < 230)
-                    continue;
-
-                if(!checkRectanglePattern(tailfin, mapImage, x, y, 2, 1))
-                    continue;
-                if(!checkRectanglePattern(tailfin, mapImage, x, y + 2, 1, 0))
+                if(tailFin.getBlue() < 210)
                     continue;
 
-                if(!checkRectanglePattern(tailfin, mapImage, x - 6, y + 6, 2, 1))
+                if(!checkRectanglePattern(tailFin, mapImage, x, y, 2, 1))
                     continue;
-                if(!checkRectanglePattern(tailfin, mapImage, x - 6, y + 8, 1, 0))
+                if(!checkRectanglePattern(tailFin, mapImage, x, y + 2, 1, 0))
+                    continue;
+
+                if(!checkRectanglePattern(tailFin, mapImage, x - 6, y + 6, 2, 1))
+                    continue;
+                if(!checkRectanglePattern(tailFin, mapImage, x - 6, y + 8, 1, 0))
                     continue;
 
                 System.out.println("AIRPLANE DETECTED. (MIRROR)");

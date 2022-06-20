@@ -1,10 +1,12 @@
 package karuta;
 
 /*
-    NOTE: After the first listener class 'ChromeBotListener' started getting
+    NOTE: After the first listener class 'general.ChromeBotListener' started getting
         more cluttered when working on Karuta Bot functions, I moved all Karuta
         related things to another listener instead.
  */
+
+import general.ChromeBotUtil;
 
 import io.lettuce.core.api.StatefulRedisConnection;
 import io.lettuce.core.api.sync.RedisCommands;
@@ -15,7 +17,6 @@ import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.events.message.MessageUpdateEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
-import net.dv8tion.jda.api.interactions.components.ItemComponent;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 
 import javax.imageio.ImageIO;
@@ -33,10 +34,12 @@ public class ChromeBotKarutaListener extends ListenerAdapter
 
     private final String USER_REGEX = "<@(\\d{1,})>";
     private final String VALUE_REGEX = "(.{1,}):(.{1,})";
-    private final String BUTTON_KEY_REGEX = "\\w{1,}:(\\d{1,})";
+    private final String AIRPORT_REGEX = "([\\s?\\w{1,}]{1,}):\\n(\\w{1,} . \\d{1,})\\n(\\w{1,} . \\d{1,})\\n(\\w{1,} . \\d{1,})\\n(\\w{1,} . \\d{1,})\\n(\\w{1,} . \\d{1,})";
+    private final String BUTTON_KEY_REGEX = "(\\w{1,}):(\\d{1,})";
 
     private final Pattern USER_REGEX_PATTERN = Pattern.compile(USER_REGEX);
     private final Pattern VALUE_REGEX_PATTERN = Pattern.compile(VALUE_REGEX);
+    private final Pattern AIRPORT_REGEX_PATTERN = Pattern.compile(AIRPORT_REGEX);
     private final Pattern BUTTON_KEY_REGEX_PATTERN = Pattern.compile(BUTTON_KEY_REGEX);
 
     private RedisCommands<String, String> redisSyncCommands;
@@ -44,6 +47,7 @@ public class ChromeBotKarutaListener extends ListenerAdapter
     //  CONSTRUCTOR TAKES REDIS CONNECTION TO WORK WITH THE DATABASE.
     public ChromeBotKarutaListener(StatefulRedisConnection<String, String> redisConnection)
     {
+        //  NOTE: This variable allows us to work with Redis commands thru the Lettuce library.
         redisSyncCommands = redisConnection.sync();
     }
 
@@ -52,8 +56,6 @@ public class ChromeBotKarutaListener extends ListenerAdapter
     @Override
     public void onMessageReceived(MessageReceivedEvent messageReceivedEvent)
     {
-        Guild messageGuild = messageReceivedEvent.getGuild();
-        MessageChannel messageChannel = messageReceivedEvent.getChannel();
         User messageSender = messageReceivedEvent.getAuthor();
         Message message = messageReceivedEvent.getMessage();
 
@@ -132,6 +134,8 @@ public class ChromeBotKarutaListener extends ListenerAdapter
                         processDateMiniGame(message, embedMessage);
                     else if(embedMessage.getTitle().equals("Visit Character"))
                     {
+                        //  NOTE: Once the date is finished, the bot will wipe any solution messages
+                        //      related to the user from the DB.
                         Matcher userMatcher = USER_REGEX_PATTERN.matcher(embedMessage.getDescription());
                             userMatcher.find();
 
@@ -143,6 +147,7 @@ public class ChromeBotKarutaListener extends ListenerAdapter
                     }
                 }
             }
+
         }
     }
 
@@ -150,155 +155,123 @@ public class ChromeBotKarutaListener extends ListenerAdapter
     @Override
     public void onButtonInteraction(ButtonInteractionEvent buttonInteractionEvent)
     {
-        System.out.println("\nBUTTON " + buttonInteractionEvent.getComponentId() + " WAS PRESSED!");
+        //  DEBUG: Log to console which button was pressed.
+        System.out.println("\nBUTTON " + buttonInteractionEvent.getComponentId() + " WAS PRESSED BY " + buttonInteractionEvent.getUser().getId());
 
-        if(!buttonInteractionEvent.getTimeCreated().isBefore(buttonInteractionEvent.getMessage().getTimeCreated().plusMinutes(3)))
-        {
-            System.out.println("MESSAGE IS OUTDATED (>3 Minutes).");
+        if(!ChromeBotUtil.isInteractionRecent(buttonInteractionEvent, buttonInteractionEvent.getMessage()))
             return;
-        }
-
-        System.out.println("MESSAGE IS STILL RECENT (<3 Minutes).");
-
-        Matcher buttonKeyMatcher = BUTTON_KEY_REGEX_PATTERN.matcher(buttonInteractionEvent.getComponentId());
-            buttonKeyMatcher.find();
 
         if(!buttonInteractionEvent.isAcknowledged())
             buttonInteractionEvent.deferEdit().queue();
 
+        Matcher buttonKeyMatcher = BUTTON_KEY_REGEX_PATTERN.matcher(buttonInteractionEvent.getComponentId());
+
+        if(!buttonKeyMatcher.find())
+            return;
+
+        String buttonType = buttonKeyMatcher.group(1);
+        String userId = buttonKeyMatcher.group(2);
+
         //  NOTE: Check if user that is clicking the button is the right user (i.e. do not let random
         //      people interfere with the message).
         buttonInteractionEvent.getGuild()
-                .retrieveMemberById(buttonKeyMatcher.group(1))
-                .queue(member -> {
-
-                    if(buttonInteractionEvent.getUser().getId().equals(buttonKeyMatcher.group(1)))
+                .retrieveMemberById(userId)
+                .queue(member ->
+                {
+                    //  NOTE: Check to make sure that whoever is clicking the button is the correct user.
+                    if(buttonInteractionEvent.getUser().getId().equals(userId))
                     {
-                        //  GOAL: When user clicks on the button, it should toggle between a solution
-                        //      WITH the Ring included, and one without.
+                        Matcher valueMatcher = VALUE_REGEX_PATTERN.matcher(redisSyncCommands.get(buttonInteractionEvent.getComponentId()));
+                            valueMatcher.find();
 
-                        //  NOTE: Check if user clicks on 'Ring' button on the date solution
-                        //      embed message.
-                        if(buttonInteractionEvent.getComponentId().startsWith("ring"))
+                        String footerText = buttonInteractionEvent.getMessage()
+                                .getEmbeds().get(0)
+                                .getFooter().getText();
+
+                        //  NOTE: Check if button even exists in the DB, which it should.
+                        //      Still good to check just in case.
+                        if(!redisSyncCommands.get(buttonInteractionEvent.getComponentId()).isBlank())
                         {
-                            if(!redisSyncCommands.get(buttonInteractionEvent.getComponentId()).isBlank())
+                            EmbedBuilder newEmbedMessage = new EmbedBuilder()
+                                    .setFooter(footerText);
+
+                            Button newButton = null;
+
+                            //  GOAL: When user clicks on the button, it should toggle between a solution
+                            //      with the Ring included, a path to the Airport, or the default one.
+                            switch(buttonType)
                             {
-                                Matcher valueMatcher = VALUE_REGEX_PATTERN.matcher(redisSyncCommands.get(buttonInteractionEvent.getComponentId()));
-                                valueMatcher.find();
+                                case "default":
+                                case "ring":
+                                    //  NOTE: At first, parsing 'default' and 'ring' paths/AP is mostly the same.
+                                    String affectionPoints = valueMatcher.group(1);
+                                    String path = valueMatcher.group(2);
 
-                                String footerText = buttonInteractionEvent.getMessage()
-                                        .getEmbeds().get(0)
-                                        .getFooter().getText();
+                                    newEmbedMessage.setDescription(ChromeBotUtil.emojifyPath(path) + "\n**AP: " + affectionPoints + "**");
 
-                                String ringAffectionPoints = valueMatcher.group(1);
-                                String ringPath = valueMatcher.group(2);
+                                    if(path.contains("MALL"))
+                                        newEmbedMessage.appendDescription(" (" + affectionPoints + " + :shopping_bags:)");
 
-                                EmbedBuilder ringEmbedMessage = new EmbedBuilder()
-                                        .setTitle("Ring Solution")
-                                        .setColor(new Color(0x7eaede))
-                                        .setDescription(ChromeBotUtil.emojifyPath(ringPath) + "\n**AP: " + ringAffectionPoints + "**")
-                                        .setFooter(footerText);
+                                    //  NOTE: Branch off depending on what type of solution the button is for.
+                                    switch(buttonType)
+                                    {
+                                        case "default":
 
-                                if(ringPath.contains("MALL"))
-                                    ringEmbedMessage.appendDescription(" (" + valueMatcher.group(1) + " :shopping_bags:)");
+                                            newEmbedMessage.setTitle("Date Solution")
+                                                    .setColor(0xBABABA);
 
-                                buttonInteractionEvent.getHook()
-                                        .editOriginalEmbeds(ringEmbedMessage.build())
-                                        .queue();
-                                buttonInteractionEvent.getHook()
-                                        .editOriginalComponents()
-                                        .setActionRow(
-                                                Button.danger("default:" + buttonKeyMatcher.group(1), Emoji.fromMarkdown("\uD83D\uDC8D"))
-                                        )
-                                        .queue();
+                                            if(buttonInteractionEvent.getMessage().getButtons().get(0).getEmoji().equals(Emoji.fromMarkdown("\uD83D\uDC8D")))
+                                                newButton = Button.secondary("ring:" + userId, Emoji.fromMarkdown("\uD83D\uDC8D"));
+                                            else if(buttonInteractionEvent.getMessage().getButtons().get(0).getEmoji().equals(Emoji.fromMarkdown("✈️")))
+                                                newButton = Button.secondary("airplane:" + userId, Emoji.fromMarkdown("✈️"));
+
+                                            break;
+                                        case "ring":
+
+                                            newEmbedMessage.setTitle("Ring Solution")
+                                                    .setColor(0x7eaede);
+
+                                            newButton = Button.danger("default:" + userId, Emoji.fromMarkdown("\uD83D\uDC8D"));
+
+                                            break;
+                                    }
+
+                                    break;
+                                case "airplane":
+                                    Matcher airplaneMatcher = AIRPORT_REGEX_PATTERN.matcher(redisSyncCommands.get(buttonInteractionEvent.getComponentId()));
+                                        airplaneMatcher.find();
+
+                                    String airplanePath = airplaneMatcher.group(1);
+                                    String fuel = airplaneMatcher.group(2),
+                                            hunger = airplaneMatcher.group(3),
+                                            thirst = airplaneMatcher.group(4),
+                                            happiness = airplaneMatcher.group(5),
+                                            time = airplaneMatcher.group(6);
+
+                                    newEmbedMessage.setTitle("Airplane Path")
+                                            .setColor(0x5D5C5B)
+                                            .setDescription(ChromeBotUtil.emojifyPath(airplanePath) +
+                                                    "\n\n`" + fuel + "`\n`" + hunger + "`\n`" + thirst + "`\n`" + happiness + "`\n`" + time + "`");
+
+                                    newButton = Button.danger("default:" + userId, Emoji.fromMarkdown("✈️"));
+
+                                    break;
                             }
-                            else
-                                System.out.println("RING PATH IS MISSING FROM REDIS DB!");
+
+                            //  NOTE: After building the message, change the original embed for the user's request and
+                            //      the button.
+                            buttonInteractionEvent.getHook()
+                                    .editOriginalEmbeds(newEmbedMessage.build())
+                                    .queue();
+                            buttonInteractionEvent.getHook()
+                                    .editOriginalComponents()
+                                    .setActionRow(newButton)
+                                    .queue();
                         }
-                        else if(buttonInteractionEvent.getComponentId().startsWith("airplane"))
-                        {
-                            if(!redisSyncCommands.get(buttonInteractionEvent.getComponentId()).isBlank())
-                            {
-                                Matcher valueMatcher = VALUE_REGEX_PATTERN.matcher(redisSyncCommands.get(buttonInteractionEvent.getComponentId()));
-                                valueMatcher.find();
-
-                                String footerText = buttonInteractionEvent.getMessage()
-                                        .getEmbeds().get(0)
-                                        .getFooter().getText();
-
-                                String airplanePath = valueMatcher.group(2);
-
-                                EmbedBuilder airplaneEmbedMessage = new EmbedBuilder()
-                                        .setTitle("Airplane Path")
-                                        .setColor(new Color(0x5D5C5B))
-                                        .setDescription(ChromeBotUtil.emojifyPath(airplanePath))
-                                        .setFooter(footerText);
-
-                                buttonInteractionEvent.getHook()
-                                        .editOriginalEmbeds(airplaneEmbedMessage.build())
-                                        .queue();
-                                buttonInteractionEvent.getHook()
-                                        .editOriginalComponents()
-                                        .setActionRow(
-                                                Button.danger("default:" + buttonKeyMatcher.group(1), Emoji.fromMarkdown("✈️"))
-                                        )
-                                        .queue();
-                            }
-                            else
-                                System.out.println("AIRPLANE PATH IS MISSING FROM REDIS DB!");
-                        }
-                        else if(buttonInteractionEvent.getComponentId().startsWith("default"))
-                        {
-                            if(!redisSyncCommands.get(buttonInteractionEvent.getComponentId()).isBlank())
-                            {
-                                Matcher valueMatcher = VALUE_REGEX_PATTERN.matcher(redisSyncCommands.get(buttonInteractionEvent.getComponentId()));
-                                valueMatcher.find();
-
-                                String footerText = buttonInteractionEvent.getMessage()
-                                        .getEmbeds().get(0)
-                                        .getFooter().getText();
-
-                                String defaultAffectionPoints = valueMatcher.group(1);
-                                String defaultPath = valueMatcher.group(2);
-
-                                EmbedBuilder defaultEmbedMessage = new EmbedBuilder()
-                                        .setTitle("Date Solution")
-                                        .setColor(new Color(0xBABABA))
-                                        .setDescription(ChromeBotUtil.emojifyPath(defaultPath) + "\n**AP: " + defaultAffectionPoints + "**")
-                                        .setFooter(footerText);
-
-                                if(defaultPath.contains("MALL"))
-                                    defaultEmbedMessage.appendDescription(" (" + valueMatcher.group(1) + " :shopping_bags:)");
-
-                                buttonInteractionEvent.getHook()
-                                        .editOriginalEmbeds(defaultEmbedMessage.build())
-                                        .queue();
-
-                                if(buttonInteractionEvent.getMessage().getButtons().get(0).getEmoji().equals(Emoji.fromMarkdown("\uD83D\uDC8D")))
-                                {
-                                    buttonInteractionEvent.getHook()
-                                            .editOriginalComponents()
-                                            .setActionRow(
-                                                    Button.secondary("ring:" + buttonKeyMatcher.group(1), Emoji.fromMarkdown("\uD83D\uDC8D"))
-                                            )
-                                            .queue();
-                                }
-                                else if(buttonInteractionEvent.getMessage().getButtons().get(0).getEmoji().equals(Emoji.fromMarkdown("✈️")))
-                                {
-                                    buttonInteractionEvent.getHook()
-                                            .editOriginalComponents()
-                                            .setActionRow(
-                                                    Button.secondary("airplane:" + buttonKeyMatcher.group(1), Emoji.fromMarkdown("✈️"))
-                                            )
-                                            .queue();
-
-                                }
-                            }
-                            else
-                                System.out.println("DEFAULT PATH IS MISSING FROM REDIS DB!");
-
-                        }
+                        else
+                            System.out.println("ERROR: Button leads to missing Key-Value.");
                     }
+
                 });
 
     }
@@ -337,8 +310,8 @@ public class ChromeBotKarutaListener extends ListenerAdapter
                             .build();
 
                     //  NOTE: Once a result/outcome is reached/identified, edit the temporary embed message to display the highest result/error message.
-                    message.replyEmbeds(tempSolvingMessage).queue(tempMessage -> {
-
+                    message.replyEmbeds(tempSolvingMessage).queue(tempMessage ->
+                    {
                         if (errorMessage.equals(""))
                         {
                             message.getGuild().retrieveMemberById(userMatcher.group(1)).queue(member ->
@@ -373,10 +346,7 @@ public class ChromeBotKarutaListener extends ListenerAdapter
                                 //      date board is un-winnable.
                                 if(highestResult != null)
                                 {
-                                    System.out.println("\nSET User ID TO highestResult Path.");
-                                    redisSyncCommands.set("default:" + member.getId(),
-                                            Math.ceil(highestResult.getAffectionPoints()) + ":" + highestResult.getPath());
-                                    System.out.println("SET default:" + member.getId() + " TO " +
+                                    uploadToRedis("default:" + member.getId(),
                                             Math.ceil(highestResult.getAffectionPoints()) + ":" + highestResult.getPath());
 
                                     //  NOTE: USE VALUE MATCHER TO PARSE AP AND PATH
@@ -401,77 +371,35 @@ public class ChromeBotKarutaListener extends ListenerAdapter
                                 {
                                     DateResult highestResultRing = mapSolver.getHighestResultWithRing();
 
-                                    //  NOTE: Set Footer of the embed message, using the (local) variable 'member' (lambda).
-                                    EmbedBuilder dateSolveRingMessageBuilder = new EmbedBuilder().setTitle("Date Solution (w/ Ring)")
-                                            .setDescription("Date could not get :ring: and end safely!")
-                                            .setFooter("For " + member.getUser().getAsTag())
-                                            .setColor(new Color(0x5D5C5B));
-
                                     mapSolver.displayHighestResultWithRing();
 
                                     //  NOTE: If there is a result that ends with a ring, build other embed message as well.
                                     if(highestResultRing != null)
                                     {
-                                        System.out.println("\nSET User ID TO highestResultRing Path.");
-                                        redisSyncCommands.set("ring:" + member.getId(),
-                                                Math.ceil(highestResultRing.getAffectionPoints()) + ":" + highestResultRing.getPath());
-                                        System.out.println("SET ring:" + member.getId() +
+                                        uploadToRedis("ring:" + member.getId(),
                                                 Math.ceil(highestResultRing.getAffectionPoints()) + ":" + highestResultRing.getPath());
 
                                         tempMessage.editMessageComponents().setActionRow(
                                                 Button.secondary("ring:" + member.getId(), Emoji.fromMarkdown("\uD83D\uDC8D"))
                                         ).queue();
 
-                                        //  NOTE: USE VALUE MATCHER TO PARSE AP AND PATH
-                                        //  Matcher valueMatcher = VALUE_REGEX_PATTERN.matcher(redisSyncCommands.get("ring:" + member.getId()));
-                                        //      valueMatcher.find();
-
-                                        //  String dateSolutionRing = ChromeBotUtil.emojifyPath(valueMatcher.group(2)) +
-                                        //          "\n**AP: " + valueMatcher.group(1) + "**";
-
-                                        //  if (highestResultRing.getPath().contains("MALL"))
-                                        //      dateSolutionRing += " (" + valueMatcher.group(1) + " + :shopping_bags:)";
-
-                                        //  dateSolveRingMessageBuilder.setDescription(dateSolutionRing)
-                                        //          .setColor(new Color(0x7eaede));
                                     }
 
-                                    //  embedMessages.add(dateSolveRingMessageBuilder.build());
                                 }
                                 //  NOTE: If it can reach the airport successfully, return the embed message with the path.
                                 else if(mapSolver.getHighestResultWithAirport() != null)
                                 {
                                     DateResult highestResultWithAirport = mapSolver.getHighestResultWithAirport();
 
-                                    //  NOTE: Set Footer of the embed message, using the (local) variable 'member' (lambda).
-                                    //  EmbedBuilder dateSolveAirportMessageBuilder = new EmbedBuilder().setTitle("Date Solution (w/ Airport)")
-                                    //          .setDescription("Date could not get :airplane: and end safely!")
-                                    //          .setFooter("For " + member.getUser().getAsTag())
-                                    //          .setColor(new Color(0x5D5C5B));
+                                    mapSolver.displayHighestResultWithAirport();
 
-                                    System.out.println("\nSET User ID TO highestResultWithAirport Path.");
-                                    redisSyncCommands.set("airplane:" + member.getId(),
-                                            Math.ceil(highestResultWithAirport.getAffectionPoints()) + ":" + highestResultWithAirport.getPath());
-                                    System.out.println("SET airplane:" + member.getId() + " TO " +
-                                            Math.ceil(highestResultWithAirport.getAffectionPoints()) + ":" + highestResultWithAirport.getPath());
+                                    uploadToRedis("airplane:" + member.getId(),
+                                            highestResultWithAirport.getPath() + ":" + highestResultWithAirport.getResources());
 
                                     tempMessage.editMessageComponents().setActionRow(
                                             Button.secondary("airplane:" + member.getId(), Emoji.fromMarkdown("✈️")
                                             )).queue();
 
-                                    //  NOTE: USE VALUE MATCHER TO PARSE AP AND PATH
-                                    //  Matcher valueMatcher = VALUE_REGEX_PATTERN.matcher(redisSyncCommands.get("airplane:" + member.getId()));
-                                    //      valueMatcher.find();
-
-                                    //  String dateSolutionAirport = ChromeBotUtil.emojifyPath(valueMatcher.group(2));
-
-                                    //  if (highestResultWithAirport.getPath().contains("MALL"))
-                                    //      dateSolutionAirport += " (" + valueMatcher.group(1) + " + :shopping_bags:)";
-
-                                    //  dateSolveAirportMessageBuilder.setDescription(dateSolutionAirport)
-                                    //          .setColor(new Color(0xd5dfed));
-
-                                    //  embedMessages.add(dateSolveAirportMessageBuilder.build());
                                 }
 
                                 //  NOTE: Final step, edit the message to include the solution(s).
@@ -500,6 +428,17 @@ public class ChromeBotKarutaListener extends ListenerAdapter
             System.out.println("ERROR: Image can't load for some reason.");
             ioe.printStackTrace();
         }
+    }
+
+    //  HELPER: Push data onto Redis DB.
+    //      We can just use the same method for all of them (regarding Karuta stuff), because they all are more or less
+    //      the same.
+    private void uploadToRedis(String solutionId, String solutionApPath)
+    {
+        //  NOTE: This Key-Value pair will automatically be wiped in 10 minutes, to conserve space.
+        redisSyncCommands.setex(solutionId, 600, solutionApPath);
+
+        System.out.println("SET " + solutionId + " TO " + solutionApPath);
     }
 
     //  SCAN MESSAGE FOR WISHLIST DROP
