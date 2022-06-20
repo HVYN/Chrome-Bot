@@ -7,7 +7,6 @@ package karuta;
 public class DateNode
 {
     private int nodeNumber;
-    //  private String adjacentAttributes;
 
     private DateNode leftNorthNode, rightNorthNode,
             topEastNode, bottomEastNode,
@@ -23,25 +22,6 @@ public class DateNode
             nextToHome, nextToGasTwo, nextToGasThree, nextToMall,
             nextToRing, inaccessible;
 
-    /*
-    public karuta.DateNode(int nodeNumber, String adjacentAttributes)
-    {
-        this.nodeNumber = nodeNumber;
-
-        this.adjacentAttributes = adjacentAttributes;
-
-        leftNorthNode = rightNorthNode = topEastNode = bottomEastNode =
-                leftSouthNode = rightSouthNode = topWestNode = bottomWestNode =
-                        centralNorthNode = centralEastNode = centralSouthNode = centralWestNode = null;
-
-        currentPlayerNode = false;  inaccessible = false;
-
-        processAdjacentAttributes(adjacentAttributes);
-    }
-
-     */
-
-    //
     public DateNode(int nodeNumber)
     {
         this.nodeNumber = nodeNumber;
@@ -185,14 +165,14 @@ public class DateNode
     public boolean isNextToRing()       {   return nextToRing;      }
     public boolean isNextToAirport()    {   return nextToAirport;   }
 
-    //  NOTE: Check function, to certain portions of solving work if node is not
+    //  NOTE: Check function, to certain portions of solving work if node is
     //      neighboring any resources.
-    public boolean hasNoResources()
+    public boolean hasResources()
     {
-        return !(isNextToGasOne() || isNextToTheater() || isNextToFair() || isNextToJuice() ||
+        return isNextToGasOne() || isNextToTheater() || isNextToFair() || isNextToJuice() ||
                 isNextToSandwich() || isNextToCoffee() || isNextToTaco() || isNextToGarden() ||
                 isNextToBar() || isNextToBallroom() || isNextToSpaghetti() || isNextToGasTwo() ||
-                isNextToGasThree() || isNextToMall() || isNextToRing());
+                isNextToGasThree() || isNextToMall() || isNextToRing();
     }
 
     //  NOTE: (HARD-CODED) Returns whether the node is bordering the left-most edge of the map board.

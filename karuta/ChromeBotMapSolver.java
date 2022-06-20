@@ -1,4 +1,5 @@
 package karuta;
+
 //  ORIGINAL: DateMap.java
 
 //  THIS CLASS IS THE MAIN SEQUENCE OF ACTIONS AIMED
@@ -28,7 +29,6 @@ public class ChromeBotMapSolver
 
     private boolean ring;
 
-    //  private int currentHighestScore;
     public ChromeBotMapSolver()
     {
         //  mapEncodingArray = mapEncoding.split("\\s+");
@@ -71,6 +71,32 @@ public class ChromeBotMapSolver
     //  NOTE: This version of 'solveDate' is the actual workhorse of the
     //      program, being called recursively to brute-force its way to the
     //      answer.
+
+    /*
+        NOTE: This overridden version of 'solveDate()' is the real Backtracking method that
+            calls itself to find the best path.
+
+            (Best paths are saved in their respective 'DateResult' variables)
+
+            Parameters:
+                'currentNode' (DateNode)
+                    Representation of the current node the algorithm is at, complete with information
+                    about the node's surroundings.
+                'currentDirection' (String)
+                    Identifier as to what direction the algorithm is currently facing; helps with
+                    determining what paths/resources it can access at the moment.
+                'turnNumber' (int)
+                    Keep track of turn number (A dating game cannot go past 25 turns).
+                'fuel', 'hunger', 'thirst', 'happiness', 'time' (int)
+                    Counters for critical resources and time remaining in the game.
+                REFRESH TIMERS (int)
+                    Counters that serve as timers for resource cooldowns.
+                'gardenVisited', 'mallVisited', 'ringVisited' (boolean)
+                    Markers that indicate if the algorithm accessed these resources in its
+                    pathfinding attempt(s).
+                'path' (String)
+                    Representation of the path the algorithm has taken.
+     */
     public void solveDate(DateNode currentNode, String currentDirection, int turnNumber,
                           int fuel, int hunger, int thirst, int happiness, int time,
                           int juiceRefresh, int coffeeRefresh, int sandwichRefresh, int fairRefresh,
@@ -80,7 +106,7 @@ public class ChromeBotMapSolver
                           String path)
     {
         //  MAX RESOURCE CAP IS 100; ADJUST IF THEY ARE OVER THE LIMIT TO
-        //      AVOID ANY MISCALCULATIONS GOING FORWARD
+        //      AVOID ANY MISCALCULATIONS GOING FORWARD.
         if(hunger > 100)
             hunger = 100;
         if(thirst > 100)
@@ -88,6 +114,7 @@ public class ChromeBotMapSolver
         if(happiness > 100)
             happiness = 100;
 
+        //  IF RESOURCE IS ON COOLDOWN, DECREMENT BY ONE EVERY TURN.
         if(juiceRefresh > 0)
             juiceRefresh--;
         if(coffeeRefresh > 0)
@@ -121,151 +148,152 @@ public class ChromeBotMapSolver
         {
             //  NOTE: IF bot is currently facing RIGHT/EAST
             //      The bot, in this state, can move UP/NORTH, RIGHT/EAST, or DOWN/SOUTH
-            if(currentDirection.equals("RIGHT"))
+            switch(currentDirection)
             {
-                if(!(currentNode.getRightNorthNode() == null) &&
-                        !currentNode.getRightNorthNode().isInaccessible())
-                    solveDate(currentNode.getRightNorthNode(), "UP", turnNumber + 1,
-                            fuel - 10, hunger - 4, thirst - 6, happiness - 8, time - 4,
-                            juiceRefresh, coffeeRefresh, sandwichRefresh, fairRefresh,
-                            spaghettiRefresh, barRefresh, theaterRefresh, tacoRefresh,
-                            ballroomRefresh, gasOneRefresh, gasTwoRefresh, gasThreeRefresh,
-                            gardenVisited, mallVisited, ringVisited,
-                            //  path + " UP [" + currentNode.getRightNorthNode().getNodeNumber() + "] ");
-                            path + " UP");
+                case "RIGHT":
+                    if(!(currentNode.getRightNorthNode() == null) &&
+                            !currentNode.getRightNorthNode().isInaccessible())
+                        solveDate(currentNode.getRightNorthNode(), "UP", turnNumber + 1,
+                                fuel - 10, hunger - 4, thirst - 6, happiness - 8, time - 4,
+                                juiceRefresh, coffeeRefresh, sandwichRefresh, fairRefresh,
+                                spaghettiRefresh, barRefresh, theaterRefresh, tacoRefresh,
+                                ballroomRefresh, gasOneRefresh, gasTwoRefresh, gasThreeRefresh,
+                                gardenVisited, mallVisited, ringVisited,
+                                //  path + " UP [" + currentNode.getRightNorthNode().getNodeNumber() + "] ");
+                                path + " UP");
 
-                if(!(currentNode.getCentralEastNode() == null) &&
-                        !currentNode.getCentralEastNode().isInaccessible())
-                    solveDate(currentNode.getCentralEastNode(), currentDirection, turnNumber + 1,
-                            fuel - 10, hunger - 4, thirst - 6, happiness - 8, time - 4,
-                            juiceRefresh, coffeeRefresh, sandwichRefresh, fairRefresh,
-                            spaghettiRefresh, barRefresh, theaterRefresh, tacoRefresh,
-                            ballroomRefresh, gasOneRefresh, gasTwoRefresh, gasThreeRefresh,
-                            gardenVisited, mallVisited, ringVisited,
-                            //  path + " RIGHT [" + currentNode.getCentralEastNode().getNodeNumber() + "] ");
-                            path + " RIGHT");
+                    if(!(currentNode.getCentralEastNode() == null) &&
+                            !currentNode.getCentralEastNode().isInaccessible())
+                        solveDate(currentNode.getCentralEastNode(), currentDirection, turnNumber + 1,
+                                fuel - 10, hunger - 4, thirst - 6, happiness - 8, time - 4,
+                                juiceRefresh, coffeeRefresh, sandwichRefresh, fairRefresh,
+                                spaghettiRefresh, barRefresh, theaterRefresh, tacoRefresh,
+                                ballroomRefresh, gasOneRefresh, gasTwoRefresh, gasThreeRefresh,
+                                gardenVisited, mallVisited, ringVisited,
+                                //  path + " RIGHT [" + currentNode.getCentralEastNode().getNodeNumber() + "] ");
+                                path + " RIGHT");
 
-                if(!(currentNode.getRightSouthNode() == null) &&
-                        !currentNode.getRightSouthNode().isInaccessible())
-                    solveDate(currentNode.getRightSouthNode(), "DOWN", turnNumber + 1,
-                            fuel - 10, hunger - 4, thirst - 6, happiness - 8, time - 4,
-                            juiceRefresh, coffeeRefresh, sandwichRefresh, fairRefresh,
-                            spaghettiRefresh, barRefresh, theaterRefresh, tacoRefresh,
-                            ballroomRefresh, gasOneRefresh, gasTwoRefresh, gasThreeRefresh,
-                            gardenVisited, mallVisited, ringVisited,
-                            //  path + " DOWN [" + currentNode.getRightSouthNode().getNodeNumber() + "] ");
-                            path + " DOWN");
-            }
-            else if(currentDirection.equals("LEFT"))
-            {
-                if(!(currentNode.getLeftNorthNode() == null) &&
-                        !currentNode.getLeftNorthNode().isInaccessible())
-                    solveDate(currentNode.getLeftNorthNode(), "UP", turnNumber + 1,
-                            fuel - 10, hunger - 4, thirst - 6, happiness - 8, time - 4,
-                            juiceRefresh, coffeeRefresh, sandwichRefresh, fairRefresh,
-                            spaghettiRefresh, barRefresh, theaterRefresh, tacoRefresh,
-                            ballroomRefresh, gasOneRefresh, gasTwoRefresh, gasThreeRefresh,
-                            gardenVisited, mallVisited, ringVisited,
-                            //  path + " UP [" + currentNode.getLeftNorthNode().getNodeNumber() + "] ");
-                            path + " UP");
+                    if(!(currentNode.getRightSouthNode() == null) &&
+                            !currentNode.getRightSouthNode().isInaccessible())
+                        solveDate(currentNode.getRightSouthNode(), "DOWN", turnNumber + 1,
+                                fuel - 10, hunger - 4, thirst - 6, happiness - 8, time - 4,
+                                juiceRefresh, coffeeRefresh, sandwichRefresh, fairRefresh,
+                                spaghettiRefresh, barRefresh, theaterRefresh, tacoRefresh,
+                                ballroomRefresh, gasOneRefresh, gasTwoRefresh, gasThreeRefresh,
+                                gardenVisited, mallVisited, ringVisited,
+                                //  path + " DOWN [" + currentNode.getRightSouthNode().getNodeNumber() + "] ");
+                                path + " DOWN");
 
-                if(!(currentNode.getCentralWestNode() == null) &&
-                        !currentNode.getCentralWestNode().isInaccessible())
-                    solveDate(currentNode.getCentralWestNode(), currentDirection, turnNumber + 1,
-                            fuel - 10, hunger - 4, thirst - 6, happiness - 8, time - 4,
-                            juiceRefresh, coffeeRefresh, sandwichRefresh, fairRefresh,
-                            spaghettiRefresh, barRefresh, theaterRefresh, tacoRefresh,
-                            ballroomRefresh, gasOneRefresh, gasTwoRefresh, gasThreeRefresh,
-                            gardenVisited, mallVisited, ringVisited,
-                            //   path + " LEFT [" + currentNode.getCentralWestNode().getNodeNumber() + "] ");
-                            path + " LEFT");
+                    break;
+                case "LEFT":
+                    if(!(currentNode.getLeftNorthNode() == null) &&
+                            !currentNode.getLeftNorthNode().isInaccessible())
+                        solveDate(currentNode.getLeftNorthNode(), "UP", turnNumber + 1,
+                                fuel - 10, hunger - 4, thirst - 6, happiness - 8, time - 4,
+                                juiceRefresh, coffeeRefresh, sandwichRefresh, fairRefresh,
+                                spaghettiRefresh, barRefresh, theaterRefresh, tacoRefresh,
+                                ballroomRefresh, gasOneRefresh, gasTwoRefresh, gasThreeRefresh,
+                                gardenVisited, mallVisited, ringVisited,
+                                //  path + " UP [" + currentNode.getLeftNorthNode().getNodeNumber() + "] ");
+                                path + " UP");
 
-                if(!(currentNode.getLeftSouthNode() == null) &&
-                        !currentNode.getLeftSouthNode().isInaccessible())
-                    solveDate(currentNode.getLeftSouthNode(), "DOWN", turnNumber + 1,
-                            fuel - 10, hunger - 4, thirst - 6, happiness - 8, time - 4,
-                            juiceRefresh, coffeeRefresh, sandwichRefresh, fairRefresh,
-                            spaghettiRefresh, barRefresh, theaterRefresh, tacoRefresh,
-                            ballroomRefresh, gasOneRefresh, gasTwoRefresh, gasThreeRefresh,
-                            gardenVisited, mallVisited, ringVisited,
-                            //  path + " DOWN [" + currentNode.getLeftSouthNode().getNodeNumber() + "] ");
-                            path + " DOWN");
-            }
-            else if(currentDirection.equals("UP"))
-            {
+                    if(!(currentNode.getCentralWestNode() == null) &&
+                            !currentNode.getCentralWestNode().isInaccessible())
+                        solveDate(currentNode.getCentralWestNode(), currentDirection, turnNumber + 1,
+                                fuel - 10, hunger - 4, thirst - 6, happiness - 8, time - 4,
+                                juiceRefresh, coffeeRefresh, sandwichRefresh, fairRefresh,
+                                spaghettiRefresh, barRefresh, theaterRefresh, tacoRefresh,
+                                ballroomRefresh, gasOneRefresh, gasTwoRefresh, gasThreeRefresh,
+                                gardenVisited, mallVisited, ringVisited,
+                                //   path + " LEFT [" + currentNode.getCentralWestNode().getNodeNumber() + "] ");
+                                path + " LEFT");
 
-                if(!(currentNode.getTopWestNode() == null) &&
-                        !currentNode.getTopWestNode().isInaccessible())
-                    solveDate(currentNode.getTopWestNode(), "LEFT", turnNumber + 1,
-                            fuel - 10, hunger - 4, thirst - 6, happiness - 8, time - 4,
-                            juiceRefresh, coffeeRefresh, sandwichRefresh, fairRefresh,
-                            spaghettiRefresh, barRefresh, theaterRefresh, tacoRefresh,
-                            ballroomRefresh, gasOneRefresh, gasTwoRefresh, gasThreeRefresh,
-                            gardenVisited, mallVisited, ringVisited,
-                            //  path + " LEFT [" + currentNode.getTopWestNode().getNodeNumber() + "] ");
-                            path + " LEFT");
+                    if(!(currentNode.getLeftSouthNode() == null) &&
+                            !currentNode.getLeftSouthNode().isInaccessible())
+                        solveDate(currentNode.getLeftSouthNode(), "DOWN", turnNumber + 1,
+                                fuel - 10, hunger - 4, thirst - 6, happiness - 8, time - 4,
+                                juiceRefresh, coffeeRefresh, sandwichRefresh, fairRefresh,
+                                spaghettiRefresh, barRefresh, theaterRefresh, tacoRefresh,
+                                ballroomRefresh, gasOneRefresh, gasTwoRefresh, gasThreeRefresh,
+                                gardenVisited, mallVisited, ringVisited,
+                                //  path + " DOWN [" + currentNode.getLeftSouthNode().getNodeNumber() + "] ");
+                                path + " DOWN");
 
-                if(!(currentNode.getCentralNorthNode() == null) &&
-                        !currentNode.getCentralNorthNode().isInaccessible())
-                    solveDate(currentNode.getCentralNorthNode(), currentDirection, turnNumber + 1,
-                            fuel - 10, hunger - 4, thirst - 6, happiness - 8, time - 4,
-                            juiceRefresh, coffeeRefresh, sandwichRefresh, fairRefresh,
-                            spaghettiRefresh, barRefresh, theaterRefresh, tacoRefresh,
-                            ballroomRefresh, gasOneRefresh, gasTwoRefresh, gasThreeRefresh,
-                            gardenVisited, mallVisited, ringVisited,
-                            //  path + " UP [" + currentNode.getCentralNorthNode().getNodeNumber() + "] ");
-                            path + " UP");
+                    break;
+                case "UP":
+                    if(!(currentNode.getTopWestNode() == null) &&
+                            !currentNode.getTopWestNode().isInaccessible())
+                        solveDate(currentNode.getTopWestNode(), "LEFT", turnNumber + 1,
+                                fuel - 10, hunger - 4, thirst - 6, happiness - 8, time - 4,
+                                juiceRefresh, coffeeRefresh, sandwichRefresh, fairRefresh,
+                                spaghettiRefresh, barRefresh, theaterRefresh, tacoRefresh,
+                                ballroomRefresh, gasOneRefresh, gasTwoRefresh, gasThreeRefresh,
+                                gardenVisited, mallVisited, ringVisited,
+                                //  path + " LEFT [" + currentNode.getTopWestNode().getNodeNumber() + "] ");
+                                path + " LEFT");
 
-                if(!(currentNode.getTopEastNode() == null) &&
-                        !currentNode.getTopEastNode().isInaccessible())
-                    solveDate(currentNode.getTopEastNode(), "RIGHT", turnNumber + 1,
-                            fuel - 10, hunger - 4, thirst - 6, happiness - 8, time - 4,
-                            juiceRefresh, coffeeRefresh, sandwichRefresh, fairRefresh,
-                            spaghettiRefresh, barRefresh, theaterRefresh, tacoRefresh,
-                            ballroomRefresh, gasOneRefresh, gasTwoRefresh, gasThreeRefresh,
-                            gardenVisited, mallVisited, ringVisited,
-                            //  path + " RIGHT [" + currentNode.getTopEastNode().getNodeNumber() + "] ");
-                            path + " RIGHT");
-            }
-            else if(currentDirection.equals("DOWN"))
-            {
+                    if(!(currentNode.getCentralNorthNode() == null) &&
+                            !currentNode.getCentralNorthNode().isInaccessible())
+                        solveDate(currentNode.getCentralNorthNode(), currentDirection, turnNumber + 1,
+                                fuel - 10, hunger - 4, thirst - 6, happiness - 8, time - 4,
+                                juiceRefresh, coffeeRefresh, sandwichRefresh, fairRefresh,
+                                spaghettiRefresh, barRefresh, theaterRefresh, tacoRefresh,
+                                ballroomRefresh, gasOneRefresh, gasTwoRefresh, gasThreeRefresh,
+                                gardenVisited, mallVisited, ringVisited,
+                                //  path + " UP [" + currentNode.getCentralNorthNode().getNodeNumber() + "] ");
+                                path + " UP");
 
-                if(!(currentNode.getBottomWestNode() == null) &&
-                        !currentNode.getBottomWestNode().isInaccessible())
-                    solveDate(currentNode.getBottomWestNode(), "LEFT", turnNumber + 1,
-                            fuel - 10, hunger - 4, thirst - 6, happiness - 8, time - 4,
-                            juiceRefresh, coffeeRefresh, sandwichRefresh, fairRefresh,
-                            spaghettiRefresh, barRefresh, theaterRefresh, tacoRefresh,
-                            ballroomRefresh, gasOneRefresh, gasTwoRefresh, gasThreeRefresh,
-                            gardenVisited, mallVisited, ringVisited,
-                            //  path + " LEFT [" + currentNode.getBottomWestNode().getNodeNumber() + "] ");
-                            path + " LEFT");
+                    if(!(currentNode.getTopEastNode() == null) &&
+                            !currentNode.getTopEastNode().isInaccessible())
+                        solveDate(currentNode.getTopEastNode(), "RIGHT", turnNumber + 1,
+                                fuel - 10, hunger - 4, thirst - 6, happiness - 8, time - 4,
+                                juiceRefresh, coffeeRefresh, sandwichRefresh, fairRefresh,
+                                spaghettiRefresh, barRefresh, theaterRefresh, tacoRefresh,
+                                ballroomRefresh, gasOneRefresh, gasTwoRefresh, gasThreeRefresh,
+                                gardenVisited, mallVisited, ringVisited,
+                                //  path + " RIGHT [" + currentNode.getTopEastNode().getNodeNumber() + "] ");
+                                path + " RIGHT");
 
-                if(!(currentNode.getCentralSouthNode() == null) &&
-                        !currentNode.getCentralSouthNode().isInaccessible())
-                    solveDate(currentNode.getCentralSouthNode(), currentDirection, turnNumber + 1,
-                            fuel - 10, hunger - 4, thirst - 6, happiness - 8, time - 4,
-                            juiceRefresh, coffeeRefresh, sandwichRefresh, fairRefresh,
-                            spaghettiRefresh, barRefresh, theaterRefresh, tacoRefresh,
-                            ballroomRefresh, gasOneRefresh, gasTwoRefresh, gasThreeRefresh,
-                            gardenVisited, mallVisited, ringVisited,
-                            //  path + " DOWN [" + currentNode.getCentralSouthNode().getNodeNumber() + "] ");
-                            path + " DOWN");
-                if(!(currentNode.getBottomEastNode() == null) &&
-                        !currentNode.getBottomEastNode().isInaccessible())
-                    solveDate(currentNode.getBottomEastNode(), "RIGHT", turnNumber + 1,
-                            fuel - 10, hunger - 4, thirst - 6, happiness - 8, time - 4,
-                            juiceRefresh, coffeeRefresh, sandwichRefresh, fairRefresh,
-                            spaghettiRefresh, barRefresh, theaterRefresh, tacoRefresh,
-                            ballroomRefresh, gasOneRefresh, gasTwoRefresh, gasThreeRefresh,
-                            gardenVisited, mallVisited, ringVisited,
-                            //  path + " RIGHT [" + currentNode.getBottomEastNode().getNodeNumber() + "] ");
-                            path + " RIGHT");
+                    break;
+                case "DOWN":
+                    if(!(currentNode.getBottomWestNode() == null) &&
+                            !currentNode.getBottomWestNode().isInaccessible())
+                        solveDate(currentNode.getBottomWestNode(), "LEFT", turnNumber + 1,
+                                fuel - 10, hunger - 4, thirst - 6, happiness - 8, time - 4,
+                                juiceRefresh, coffeeRefresh, sandwichRefresh, fairRefresh,
+                                spaghettiRefresh, barRefresh, theaterRefresh, tacoRefresh,
+                                ballroomRefresh, gasOneRefresh, gasTwoRefresh, gasThreeRefresh,
+                                gardenVisited, mallVisited, ringVisited,
+                                //  path + " LEFT [" + currentNode.getBottomWestNode().getNodeNumber() + "] ");
+                                path + " LEFT");
+
+                    if(!(currentNode.getCentralSouthNode() == null) &&
+                            !currentNode.getCentralSouthNode().isInaccessible())
+                        solveDate(currentNode.getCentralSouthNode(), currentDirection, turnNumber + 1,
+                                fuel - 10, hunger - 4, thirst - 6, happiness - 8, time - 4,
+                                juiceRefresh, coffeeRefresh, sandwichRefresh, fairRefresh,
+                                spaghettiRefresh, barRefresh, theaterRefresh, tacoRefresh,
+                                ballroomRefresh, gasOneRefresh, gasTwoRefresh, gasThreeRefresh,
+                                gardenVisited, mallVisited, ringVisited,
+                                //  path + " DOWN [" + currentNode.getCentralSouthNode().getNodeNumber() + "] ");
+                                path + " DOWN");
+                    if(!(currentNode.getBottomEastNode() == null) &&
+                            !currentNode.getBottomEastNode().isInaccessible())
+                        solveDate(currentNode.getBottomEastNode(), "RIGHT", turnNumber + 1,
+                                fuel - 10, hunger - 4, thirst - 6, happiness - 8, time - 4,
+                                juiceRefresh, coffeeRefresh, sandwichRefresh, fairRefresh,
+                                spaghettiRefresh, barRefresh, theaterRefresh, tacoRefresh,
+                                ballroomRefresh, gasOneRefresh, gasTwoRefresh, gasThreeRefresh,
+                                gardenVisited, mallVisited, ringVisited,
+                                //  path + " RIGHT [" + currentNode.getBottomEastNode().getNodeNumber() + "] ");
+                                path + " RIGHT");
+
+                    break;
             }
 
             //  OBSERVE RESOURCES SURROUNDING CURRENT NODE
             //  AND ACT UPON THEM
-            if(!currentNode.hasNoResources())
+            if(currentNode.hasResources())
             {
                 //  JUICE RESOURCE
                 if (currentNode.isNextToJuice() &&
@@ -467,7 +495,7 @@ public class ChromeBotMapSolver
             //  NOTE: CONSIDER HOME ENDING AS WELL, IN CASE IT GIVES THE HIGHEST POSSIBLE AP.
             if (currentNode.isNextToHome())
             {
-                DateResult homeResult = new DateResult(ResultType.RETURNED_HOME, calculateAffectionPoints(hunger, thirst, happiness, time, mallVisited), path + " HOME");
+                DateResult homeResult = new DateResult(ResultType.RETURNED_HOME, fuel, hunger, thirst, happiness, time, mallVisited, path + " HOME");
 
                 if(ringVisited && (highestResultWithRing == null || homeResult.getAffectionPoints() > highestResultWithRing.getAffectionPoints()))
                 {
@@ -485,7 +513,8 @@ public class ChromeBotMapSolver
             //      WISHES TO RE-ROLL THE BOARD.
             if(currentNode.isNextToAirport())
             {
-                DateResult airportResult = new DateResult(ResultType.REACHED_AIRPORT, calculateAffectionPoints(hunger, thirst, happiness, time, mallVisited), path + " AIRPORT");
+                //  DateResult airportResult = new DateResult(ResultType.REACHED_AIRPORT, calculateAffectionPoints(hunger, thirst, happiness, time, mallVisited), path + " AIRPORT");
+                DateResult airportResult = new DateResult(ResultType.REACHED_AIRPORT, fuel, hunger - 4, thirst - 6, happiness - 8 - 10, time - 4, mallVisited, path + " AIRPORT");
 
                 if(highestResultWithAirport == null || airportResult.getAffectionPoints() > highestResultWithAirport.getAffectionPoints())
                     highestResultWithAirport = airportResult;
@@ -497,7 +526,7 @@ public class ChromeBotMapSolver
             //      out of any resource after doing so, it will be a failure as well.
             if(fuel > 0 && happiness > 0 && hunger > 0 && thirst > 0)
             {
-                DateResult successResult = new DateResult(ResultType.SUCCESS, calculateAffectionPoints(hunger, thirst, happiness, mallVisited), path);
+                DateResult successResult = new DateResult(ResultType.SUCCESS, fuel, hunger, thirst, happiness, time, mallVisited, path);
 
                 if(ringVisited && (highestResultWithRing == null || successResult.getAffectionPoints() > highestResultWithRing.getAffectionPoints()))
                 {
@@ -510,34 +539,7 @@ public class ChromeBotMapSolver
 
             }
 
-            //  NOTE: TO CONSERVE MEMORY IN THE HEAP, I HAVE TO STOP STORING RESULTS
-            //      THAT END IN FAILURE.
         }
-    }
-
-    //  HELPER: CALCULATE AFFECTION POINTS USING A FORMULA
-    private double calculateAffectionPoints(int hunger, int thirst, int happiness, boolean mallVisited)
-    {
-        double resourceAverage = (hunger + thirst + happiness) / 6.0;
-
-        if(mallVisited)
-            resourceAverage += 30;
-
-        return resourceAverage;
-    }
-
-    //  HELPER: CALCULATE AFFEECTION POINTS W/ TIME
-    private double calculateAffectionPoints(int hunger, int thirst, int happiness, int time, boolean mallVisited)
-    {
-        double resourceAverage = (hunger + thirst + happiness) / 6.0;
-        double timeWeight = (100 - time - 4) / 100.0;
-
-        double affectionPoints = (resourceAverage * timeWeight);
-
-        if(mallVisited)
-            affectionPoints += 30;
-
-        return affectionPoints;
     }
 
     //  NOTE: Instantiate all 82 nodes -> place them in ArrayList
