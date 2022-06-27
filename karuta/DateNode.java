@@ -6,7 +6,7 @@ package karuta;
 
 public class DateNode
 {
-    private int nodeNumber;
+    private final int nodeNumber;
 
     private DateNode leftNorthNode, rightNorthNode,
             topEastNode, bottomEastNode,
@@ -15,12 +15,11 @@ public class DateNode
             centralNorthNode, centralSouthNode,
             centralWestNode, centralEastNode;
 
-    private boolean currentPlayerNode,
-            nextToGasOne, nextToTheater, nextToFair, nextToJuice,
+    private boolean nextToGasOne, nextToTheater, nextToFair, nextToJuice,
             nextToSandwich, nextToCoffee, nextToTaco, nextToGarden,
             nextToBar, nextToAirport, nextToBallroom, nextToSpaghetti,
             nextToHome, nextToGasTwo, nextToGasThree, nextToMall,
-            nextToRing, inaccessible;
+            nextToRing, accessible;
 
     public DateNode(int nodeNumber)
     {
@@ -30,68 +29,36 @@ public class DateNode
                 leftSouthNode = rightSouthNode = topWestNode = bottomWestNode =
                         centralNorthNode = centralEastNode = centralSouthNode = centralWestNode = null;
 
-        currentPlayerNode = false;  inaccessible = false;
+        accessible = true;
     }
 
+    //  NOTE: Link this node to given resource.
     public void linkNodeToResource(String resource)
     {
         switch(resource)
         {
-            case "JUICE":
-                setNextToJuice(true);
-                break;
-            case "MALL":
-                setNextToMall(true);
-                break;
-            case "SPAGHETTI":
-                setNextToSpaghetti(true);
-                break;
-            case "FAIR":
-                setNextToFair(true);
-                break;
-            case "SANDWICH":
-                setNextToSandwich(true);
-                break;
-            case "BAR":
-                setNextToBar(true);
-                break;
-            case "AIRPLANE":
-                setNextToAirport(true);
-                break;
-            case "THEATER":
-                setNextToTheater(true);
-                break;
-            case "TACO":
-                setNextToTaco(true);
-                break;
-            case "COFFEE":
-                setNextToCoffee(true);
-                break;
-            case "GARDEN":
-                setNextToGarden(true);
-                break;
-            case "BALLROOM":
-                setNextToBallroom(true);
-                break;
-            case "HOME":
-                setNextToHome(true);
-                break;
-            case "GAS1":
-                setNextToGasOne(true);
-                break;
-            case "GAS2":
-                setNextToGasTwo(true);
-                break;
-            case "GAS3":
-                setNextToGasThree(true);
-                break;
-            case "RING":
-                setNextToRing(true);
-                break;
+            case "JUICE" -> setNextToJuice(true);
+            case "MALL" -> setNextToMall(true);
+            case "SPAGHETTI" -> setNextToSpaghetti(true);
+            case "FAIR" -> setNextToFair(true);
+            case "SANDWICH" -> setNextToSandwich(true);
+            case "BAR" -> setNextToBar(true);
+            case "AIRPLANE" -> setNextToAirport(true);
+            case "THEATER" -> setNextToTheater(true);
+            case "TACO" -> setNextToTaco(true);
+            case "COFFEE" -> setNextToCoffee(true);
+            case "GARDEN" -> setNextToGarden(true);
+            case "BALLROOM" -> setNextToBallroom(true);
+            case "HOME" -> setNextToHome(true);
+            case "GAS1" -> setNextToGasOne(true);
+            case "GAS2" -> setNextToGasTwo(true);
+            case "GAS3" -> setNextToGasThree(true);
+            case "RING" -> setNextToRing(true);
         }
 
     }
 
+    //  NOTE: During parsing phase, use these methods to link together nodes.
     public void setCentralNorthNode(DateNode centralNorthNode)  {   this.centralNorthNode = centralNorthNode;   }
     public void setCentralEastNode(DateNode centralEastNode)    {   this.centralEastNode = centralEastNode;     }
     public void setCentralSouthNode(DateNode centralSouthNode)  {   this.centralSouthNode = centralSouthNode;   }
@@ -106,6 +73,7 @@ public class DateNode
     public void setTopWestNode(DateNode topWestNode)        {   this.topWestNode = topWestNode;         }
     public void setBottomWestNode(DateNode bottomWestNode)  {   this.bottomWestNode = bottomWestNode;   }
 
+    //  NOTE: Getter methods return respective, adjacent nodes.
     public DateNode getLeftNorthNode()  {   return leftNorthNode;   }
     public DateNode getRightNorthNode() {   return rightNorthNode;  }
     public DateNode getTopEastNode()    {   return topEastNode;     }
@@ -121,10 +89,10 @@ public class DateNode
     public DateNode getCentralWestNode()    {   return centralWestNode;     }
 
     //  SETTER: Used during parsing phase; set node's accessibility status.
-    public void setInaccessible(boolean inaccessible)   {   this.inaccessible = inaccessible;   }
+    public void setAccessible(boolean accessible)   {   this.accessible = accessible;   }
 
-    //  GETTER: Return accessibility status of node.
-    public boolean isInaccessible()     {   return inaccessible;    }
+    //  GETTER: Return accessibility of node.
+    public boolean isAccessible()     {   return accessible;    }
 
     //  SETTER: Used during the parsing phase; set node's adjacent resources.
     public void setNextToGasOne(boolean nextToGasOne)       {   this.nextToGasOne = nextToGasOne;       }
@@ -240,114 +208,5 @@ public class DateNode
 
     //  DEBUG: Return node number
     //  public int getNodeNumber()  {   return nodeNumber;  }
-
-    //  public void setCurrentPlayerNode(boolean currentPlayerNode) {   this.currentPlayerNode = currentPlayerNode; }
-    //  public boolean isCurrentPlayerNode()    {   return currentPlayerNode;   }
-
-    /*
-    public void displayAdjacentNodes()
-    {
-        System.out.println("\n\tLEFT NORTH NODE: " + getLeftNorthNode() + "\n" +
-                "\tCENTRAL NORTH NODE: " + getCentralNorthNode() + "\n" +
-                "\tRIGHT NORTH NODE: " + getRightNorthNode() + "\n" +
-                "\tTOP EAST NODE: " + getTopEastNode() + "\n" +
-                "\tCENTRAL EAST NODE: " + getCentralEastNode() + "\n" +
-                "\tBOTTOM EAST NODE: " + getBottomEastNode() + "\n" +
-                "\tLEFT SOUTH NODE: " + getLeftSouthNode() + "\n" +
-                "\tCENTRAL SOUTH NODE: " + getCentralSouthNode() + "\n" +
-                "\tRIGHT SOUTH NODE: " + getRightSouthNode() + "\n" +
-                "\tTOP WEST NODE: " + getTopWestNode() + "\n" +
-                "\tCENTRAL WEST NODE: " + getCentralWestNode() + "\n" +
-                "\tBOTTOM WEST NODE: " + getBottomWestNode() + "\n");
-    }
-
-     */
-
-    // public void addAdjacentNodeNumbers(int adjacentNodeNumber)
-    // {
-    //     adjacentNodeNumbers.add(adjacentNodeNumber);
-    // }
-
-    // public ArrayList<Integer> getAdjacentNodes()
-    // {
-    //     return adjacentNodeNumbers;
-    // }
-
-    /*
-    public void processAdjacentAttributes(String adjacentAttributes)
-    {
-        for(int index = 0; index < adjacentAttributes.length(); index++)
-        {
-            switch(adjacentAttributes.charAt(index))
-            {
-                case('G'):
-                    if(adjacentAttributes.charAt(index + 1) == '1')
-                    {
-                        setNextToGasOne(true);
-                        break;
-                    }
-
-                    if(adjacentAttributes.charAt(index + 1) == '2')
-                    {
-                        setNextToGasTwo(true);
-                        break;
-                    }
-
-                    if(adjacentAttributes.charAt(index + 1) == '3')
-                    {
-                        setNextToGasThree(true);
-                        break;
-                    }
-
-                    break;
-                case('X'):
-                    setInaccessible(true);
-                    break;
-                case('F'):
-                    setNextToFair(true);
-                    break;
-                case('M'):
-                    setNextToTheater(true);
-                    break;
-                case('C'):
-                    setNextToCoffee(true);
-                    break;
-                case('J'):
-                    setNextToJuice(true);
-                    break;
-                case('S'):
-                    setNextToSandwich(true);
-                    break;
-                case('A'):
-                    setNextToAirport(true);
-                    break;
-                case('Q'):
-                    setNextToGarden(true);
-                    break;
-                case('B'):
-                    setNextToBar(true);
-                    break;
-                case('D'):
-                    setNextToBallroom(true);
-                    break;
-                case('P'):
-                    setNextToTaco(true);
-                    break;
-                case('I'):
-                    setNextToSpaghetti(true);
-                    break;
-                case('H'):
-                    setNextToHome(true);
-                    break;
-                case('U'):
-                    setNextToMall(true);
-                    break;
-                default:
-                    break;
-            }
-        }
-    }
-
-     */
 
 }

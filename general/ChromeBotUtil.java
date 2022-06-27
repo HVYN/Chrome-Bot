@@ -83,14 +83,14 @@ public class ChromeBotUtil
     //  CURRENT THRESHOLD: 3 MINUTES
     public static boolean isInteractionRecent(ButtonInteractionEvent buttonInteractionEvent, Message message)
     {
-        if(!buttonInteractionEvent.getTimeCreated().isBefore(message.getTimeCreated().plusMinutes(3)))
+        if(buttonInteractionEvent.getTimeCreated().isBefore(message.getTimeCreated().plusMinutes(3)))
         {
-            System.out.println("MESSAGE IS OUTDATED! (>3 MINUTES OLD)");
-            return false;
+            System.out.println("MESSAGE IS STILL RECENT! (<3 MINUTES OLD)");
+            return true;
         }
 
-        System.out.println("MESSAGE IS STILL RECENT! (<3 MINUTES OLD)");
-        return true;
+        System.out.println("MESSAGE IS OUTDATED! (>3 MINUTES OLD)");
+        return false;
     }
 
     //  NOTE: Check if ID is Karuta Bot's

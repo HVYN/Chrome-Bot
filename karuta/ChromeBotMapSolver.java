@@ -13,7 +13,9 @@ import java.util.ArrayList;
 
 public class ChromeBotMapSolver
 {
-    private ArrayList<DateNode> nodeArray;
+    private final ArrayList<DateNode> nodeArray;
+
+    private final int startingNodeNumber;
 
     //  DEBUG: When I was first programming the solver, I had the program store
     //      every result (Success and Failure), to check if it was being thorough.
@@ -25,14 +27,10 @@ public class ChromeBotMapSolver
 
     private String playerDirection;
 
-    private int startingNodeNumber;
-
     private boolean ring;
 
     public ChromeBotMapSolver()
     {
-        //  mapEncodingArray = mapEncoding.split("\\s+");
-
         nodeArray = new ArrayList<>();
 
         //  NOTE: I used a Set to store paths because I thought it wouldn't
@@ -150,9 +148,10 @@ public class ChromeBotMapSolver
             //      The bot, in this state, can move UP/NORTH, RIGHT/EAST, or DOWN/SOUTH
             switch(currentDirection)
             {
-                case "RIGHT":
-                    if(!(currentNode.getRightNorthNode() == null) &&
-                            !currentNode.getRightNorthNode().isInaccessible())
+                case "RIGHT" ->
+                {
+                    if (!(currentNode.getRightNorthNode() == null) &&
+                            currentNode.getRightNorthNode().isAccessible())
                         solveDate(currentNode.getRightNorthNode(), "UP", turnNumber + 1,
                                 fuel - 10, hunger - 4, thirst - 6, happiness - 8, time - 4,
                                 juiceRefresh, coffeeRefresh, sandwichRefresh, fairRefresh,
@@ -162,8 +161,8 @@ public class ChromeBotMapSolver
                                 //  path + " UP [" + currentNode.getRightNorthNode().getNodeNumber() + "] ");
                                 path + " UP");
 
-                    if(!(currentNode.getCentralEastNode() == null) &&
-                            !currentNode.getCentralEastNode().isInaccessible())
+                    if (!(currentNode.getCentralEastNode() == null) &&
+                            currentNode.getCentralEastNode().isAccessible())
                         solveDate(currentNode.getCentralEastNode(), currentDirection, turnNumber + 1,
                                 fuel - 10, hunger - 4, thirst - 6, happiness - 8, time - 4,
                                 juiceRefresh, coffeeRefresh, sandwichRefresh, fairRefresh,
@@ -173,8 +172,8 @@ public class ChromeBotMapSolver
                                 //  path + " RIGHT [" + currentNode.getCentralEastNode().getNodeNumber() + "] ");
                                 path + " RIGHT");
 
-                    if(!(currentNode.getRightSouthNode() == null) &&
-                            !currentNode.getRightSouthNode().isInaccessible())
+                    if (!(currentNode.getRightSouthNode() == null) &&
+                            currentNode.getRightSouthNode().isAccessible())
                         solveDate(currentNode.getRightSouthNode(), "DOWN", turnNumber + 1,
                                 fuel - 10, hunger - 4, thirst - 6, happiness - 8, time - 4,
                                 juiceRefresh, coffeeRefresh, sandwichRefresh, fairRefresh,
@@ -183,11 +182,12 @@ public class ChromeBotMapSolver
                                 gardenVisited, mallVisited, ringVisited,
                                 //  path + " DOWN [" + currentNode.getRightSouthNode().getNodeNumber() + "] ");
                                 path + " DOWN");
+                }
 
-                    break;
-                case "LEFT":
-                    if(!(currentNode.getLeftNorthNode() == null) &&
-                            !currentNode.getLeftNorthNode().isInaccessible())
+                case "LEFT" ->
+                {
+                    if (!(currentNode.getLeftNorthNode() == null) &&
+                            currentNode.getLeftNorthNode().isAccessible())
                         solveDate(currentNode.getLeftNorthNode(), "UP", turnNumber + 1,
                                 fuel - 10, hunger - 4, thirst - 6, happiness - 8, time - 4,
                                 juiceRefresh, coffeeRefresh, sandwichRefresh, fairRefresh,
@@ -197,8 +197,8 @@ public class ChromeBotMapSolver
                                 //  path + " UP [" + currentNode.getLeftNorthNode().getNodeNumber() + "] ");
                                 path + " UP");
 
-                    if(!(currentNode.getCentralWestNode() == null) &&
-                            !currentNode.getCentralWestNode().isInaccessible())
+                    if (!(currentNode.getCentralWestNode() == null) &&
+                            currentNode.getCentralWestNode().isAccessible())
                         solveDate(currentNode.getCentralWestNode(), currentDirection, turnNumber + 1,
                                 fuel - 10, hunger - 4, thirst - 6, happiness - 8, time - 4,
                                 juiceRefresh, coffeeRefresh, sandwichRefresh, fairRefresh,
@@ -208,8 +208,8 @@ public class ChromeBotMapSolver
                                 //   path + " LEFT [" + currentNode.getCentralWestNode().getNodeNumber() + "] ");
                                 path + " LEFT");
 
-                    if(!(currentNode.getLeftSouthNode() == null) &&
-                            !currentNode.getLeftSouthNode().isInaccessible())
+                    if (!(currentNode.getLeftSouthNode() == null) &&
+                            currentNode.getLeftSouthNode().isAccessible())
                         solveDate(currentNode.getLeftSouthNode(), "DOWN", turnNumber + 1,
                                 fuel - 10, hunger - 4, thirst - 6, happiness - 8, time - 4,
                                 juiceRefresh, coffeeRefresh, sandwichRefresh, fairRefresh,
@@ -219,10 +219,12 @@ public class ChromeBotMapSolver
                                 //  path + " DOWN [" + currentNode.getLeftSouthNode().getNodeNumber() + "] ");
                                 path + " DOWN");
 
-                    break;
-                case "UP":
-                    if(!(currentNode.getTopWestNode() == null) &&
-                            !currentNode.getTopWestNode().isInaccessible())
+                }
+
+                case "UP" ->
+                {
+                    if (!(currentNode.getTopWestNode() == null) &&
+                            currentNode.getTopWestNode().isAccessible())
                         solveDate(currentNode.getTopWestNode(), "LEFT", turnNumber + 1,
                                 fuel - 10, hunger - 4, thirst - 6, happiness - 8, time - 4,
                                 juiceRefresh, coffeeRefresh, sandwichRefresh, fairRefresh,
@@ -232,8 +234,8 @@ public class ChromeBotMapSolver
                                 //  path + " LEFT [" + currentNode.getTopWestNode().getNodeNumber() + "] ");
                                 path + " LEFT");
 
-                    if(!(currentNode.getCentralNorthNode() == null) &&
-                            !currentNode.getCentralNorthNode().isInaccessible())
+                    if (!(currentNode.getCentralNorthNode() == null) &&
+                            currentNode.getCentralNorthNode().isAccessible())
                         solveDate(currentNode.getCentralNorthNode(), currentDirection, turnNumber + 1,
                                 fuel - 10, hunger - 4, thirst - 6, happiness - 8, time - 4,
                                 juiceRefresh, coffeeRefresh, sandwichRefresh, fairRefresh,
@@ -243,8 +245,8 @@ public class ChromeBotMapSolver
                                 //  path + " UP [" + currentNode.getCentralNorthNode().getNodeNumber() + "] ");
                                 path + " UP");
 
-                    if(!(currentNode.getTopEastNode() == null) &&
-                            !currentNode.getTopEastNode().isInaccessible())
+                    if (!(currentNode.getTopEastNode() == null) &&
+                            currentNode.getTopEastNode().isAccessible())
                         solveDate(currentNode.getTopEastNode(), "RIGHT", turnNumber + 1,
                                 fuel - 10, hunger - 4, thirst - 6, happiness - 8, time - 4,
                                 juiceRefresh, coffeeRefresh, sandwichRefresh, fairRefresh,
@@ -254,10 +256,12 @@ public class ChromeBotMapSolver
                                 //  path + " RIGHT [" + currentNode.getTopEastNode().getNodeNumber() + "] ");
                                 path + " RIGHT");
 
-                    break;
-                case "DOWN":
-                    if(!(currentNode.getBottomWestNode() == null) &&
-                            !currentNode.getBottomWestNode().isInaccessible())
+                }
+
+                case "DOWN" ->
+                {
+                    if (!(currentNode.getBottomWestNode() == null) &&
+                            currentNode.getBottomWestNode().isAccessible())
                         solveDate(currentNode.getBottomWestNode(), "LEFT", turnNumber + 1,
                                 fuel - 10, hunger - 4, thirst - 6, happiness - 8, time - 4,
                                 juiceRefresh, coffeeRefresh, sandwichRefresh, fairRefresh,
@@ -267,8 +271,8 @@ public class ChromeBotMapSolver
                                 //  path + " LEFT [" + currentNode.getBottomWestNode().getNodeNumber() + "] ");
                                 path + " LEFT");
 
-                    if(!(currentNode.getCentralSouthNode() == null) &&
-                            !currentNode.getCentralSouthNode().isInaccessible())
+                    if (!(currentNode.getCentralSouthNode() == null) &&
+                            currentNode.getCentralSouthNode().isAccessible())
                         solveDate(currentNode.getCentralSouthNode(), currentDirection, turnNumber + 1,
                                 fuel - 10, hunger - 4, thirst - 6, happiness - 8, time - 4,
                                 juiceRefresh, coffeeRefresh, sandwichRefresh, fairRefresh,
@@ -277,8 +281,8 @@ public class ChromeBotMapSolver
                                 gardenVisited, mallVisited, ringVisited,
                                 //  path + " DOWN [" + currentNode.getCentralSouthNode().getNodeNumber() + "] ");
                                 path + " DOWN");
-                    if(!(currentNode.getBottomEastNode() == null) &&
-                            !currentNode.getBottomEastNode().isInaccessible())
+                    if (!(currentNode.getBottomEastNode() == null) &&
+                            currentNode.getBottomEastNode().isAccessible())
                         solveDate(currentNode.getBottomEastNode(), "RIGHT", turnNumber + 1,
                                 fuel - 10, hunger - 4, thirst - 6, happiness - 8, time - 4,
                                 juiceRefresh, coffeeRefresh, sandwichRefresh, fairRefresh,
@@ -288,7 +292,7 @@ public class ChromeBotMapSolver
                                 //  path + " RIGHT [" + currentNode.getBottomEastNode().getNodeNumber() + "] ");
                                 path + " RIGHT");
 
-                    break;
+                }
             }
 
             //  OBSERVE RESOURCES SURROUNDING CURRENT NODE
@@ -516,8 +520,12 @@ public class ChromeBotMapSolver
                 //  DateResult airportResult = new DateResult(ResultType.REACHED_AIRPORT, calculateAffectionPoints(hunger, thirst, happiness, time, mallVisited), path + " AIRPORT");
                 DateResult airportResult = new DateResult(ResultType.REACHED_AIRPORT, fuel, hunger - 4, thirst - 6, happiness - 8 - 10, time - 4, mallVisited, path + " AIRPORT");
 
-                if(highestResultWithAirport == null || airportResult.getAffectionPoints() > highestResultWithAirport.getAffectionPoints())
-                    highestResultWithAirport = airportResult;
+                if((hunger - 4 > 12) && (thirst - 6 > 18) &&
+                        (happiness - 8 - 10 > 24) && (fuel > 30))
+                {
+                    if(highestResultWithAirport == null || airportResult.getTime() > highestResultWithAirport.getTime())
+                        highestResultWithAirport = airportResult;
+                }
             }
         }
         else if(time <= 0)
@@ -676,7 +684,7 @@ public class ChromeBotMapSolver
     public void setPlayerDirection(String playerDirection)    {   this.playerDirection = playerDirection;   }
 
     //  GETTER: Access node array
-    public ArrayList<DateNode> getNodeArray()   {   return nodeArray;   }
+    //  public ArrayList<DateNode> getNodeArray()   {   return nodeArray;   }
 
     //  GETTER: Access individual nodes, from their ID/number
     public DateNode getNode(int nodeNumber)     {   return nodeArray.get(nodeNumber);   }

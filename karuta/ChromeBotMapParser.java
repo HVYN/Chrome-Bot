@@ -36,42 +36,42 @@ public class ChromeBotMapParser
     {
 
         //  NOTE: IF ANY CRITICAL RESOURCE CANNOT BE FOUND, STOP SOLVING PROCESS.
-        if(!checkIfHome(mapImage, mapSolver))
+        if(!findHome(mapImage, mapSolver))
             return "HOME NOT FOUND";
-        if(!checkIfBallroom(mapImage, mapSolver))
+        if(!findBallroom(mapImage, mapSolver))
             return "BALLROOM NOT FOUND";
-        if(!checkIfGas(mapImage, mapSolver))
+        if(!findGas(mapImage, mapSolver))
             return "GAS NOT FOUND";
-        if(!checkIfGarden(mapImage, mapSolver))
+        if(!findGarden(mapImage, mapSolver))
             return "GARDEN NOT FOUND";
-        if(!checkIfCoffee(mapImage, mapSolver))
+        if(!findCoffee(mapImage, mapSolver))
             return "COFFEE NOT FOUND";
-        if(!checkIfTaco(mapImage, mapSolver))
+        if(!findTaco(mapImage, mapSolver))
             return "TACO NOT FOUND";
-        if(!checkIfTheater(mapImage, mapSolver))
+        if(!findTheater(mapImage, mapSolver))
             return "THEATER NOT FOUND";
-        if(!checkIfBar(mapImage, mapSolver))
+        if(!findBar(mapImage, mapSolver))
             return "BAR NOT FOUND";
-        if(!checkIfSandwich(mapImage, mapSolver))
+        if(!findSandwich(mapImage, mapSolver))
             return "SANDWICH NOT FOUND";
-        if(!checkIfFair(mapImage, mapSolver))
+        if(!findFair(mapImage, mapSolver))
             return "FAIR NOT FOUND";
-        if(!checkIfSpaghetti(mapImage, mapSolver))
+        if(!findSpaghetti(mapImage, mapSolver))
             return "SPAGHETTI NOT FOUND";
-        if(!checkIfJuice(mapImage, mapSolver))
+        if(!findJuice(mapImage, mapSolver))
             return "JUICE NOT FOUND";
 
         //  NOTE: Shopping Mall is NOT a CRITICAL resource.
-        checkIfMall(mapImage, mapSolver);
+        findMall(mapImage, mapSolver);
 
         //  NOTE: Airport is NOT a CRITICAL resource.
-        checkIfAirplane(mapImage, mapSolver);
+        findAirplane(mapImage, mapSolver);
 
         //  NOTE: Ring is NOT a CRITICAL resource.
-        mapSolver.setRing(checkIfRing(mapImage, mapSolver));
+        mapSolver.setRing(findRing(mapImage, mapSolver));
 
-        //  NOTE: MARK Inaccessible nodes
-        checkInaccessibleNodes(mapImage, mapSolver);
+        //  NOTE: MARK Accessible nodes
+        findAccessibleNodes(mapImage, mapSolver);
 
         return "";
     }
@@ -132,84 +132,71 @@ public class ChromeBotMapParser
     {
         Color timeBar = new Color(mapImage.getRGB(703, 123));
 
-        if(timeBar.equals(new Color(0, 0, 0)))
-            return true;
-
-        return false;
+        return timeBar.equals(new Color(0, 0, 0));
     }
 
     /*
-        NOTE: The below 'CheckIf' methods all basically check for certain patterns of pixels
+        NOTE: The below 'find' methods all basically search for certain patterns of pixels
             for respective resources.
      */
 
-    private static boolean checkIfJuice(BufferedImage mapImage, ChromeBotMapSolver mapSolver)
+    private static boolean findJuice(BufferedImage mapImage, ChromeBotMapSolver mapSolver)
     {
         for(int x = 122; x < 735; x++)
         {
             for(int y = 150; y < 572; y++)
             {
                 Color straw = new Color(mapImage.getRGB(x, y));
-                if(!isStrawColorCorrect(straw))
-                    continue;
 
-                if(!straw.equals(new Color(mapImage.getRGB(x + 1, y - 1))))
-                    continue;
-                if(!straw.equals(new Color(mapImage.getRGB(x + 3, y - 2))))
-                    continue;
-                if(!checkRectanglePattern(straw, mapImage, x + 6, y, 0, 3))
-                    continue;
+                //  NOTE: The common denominator/common pixel that both the normal and mirror forms of this pattern
+                //      is on the same pixel, for the straw color.
+                if(isStrawColorCorrect(straw))
+                {
+                    //  CHECK NORMAL FORM.
+                    if (straw.equals(new Color(mapImage.getRGB(x + 1, y - 1))) &&
+                            straw.equals(new Color(mapImage.getRGB(x + 3, y - 2))) &&
+                            checkRectanglePattern(straw, mapImage, x + 6, y, 0, 3))
+                    {
+                        Color redArt = new Color(mapImage.getRGB(x + 10, y + 12));
 
-                Color redArt = new Color(mapImage.getRGB(x + 10, y + 12));
-                if(!isRedArtColorCorrect(redArt))
-                    continue;
+                        if (isRedArtColorCorrect(redArt) &&
+                                checkRectanglePattern(redArt, mapImage, x + 10, y + 12, 4, 0))
+                        {
+                            Color juiceBoxDark = new Color(mapImage.getRGB(x + 1, y + 6));
 
-                if(!checkRectanglePattern(redArt, mapImage, x + 10, y + 12, 4, 0))
-                    continue;
+                            if (isJuiceBoxDarkColorCorrect(juiceBoxDark) &&
+                                    checkRectanglePattern(juiceBoxDark, mapImage, x + 1, y + 6, 1, 15))
+                            {
+                                System.out.println("JUICE DETECTED.");
+                                determineSquareNumber(x, y, mapSolver, "JUICE");
+                                return true;
+                            }
+                        }
 
-                Color juiceBoxDark = new Color(mapImage.getRGB(x + 1, y + 6));
-                if(!isJuiceBoxDarkColorCorrect(juiceBoxDark))
-                    continue;
+                    }
 
-                if(!checkRectanglePattern(juiceBoxDark, mapImage, x + 1, y + 6, 1, 15))
-                    continue;
+                    //  CHECK MIRROR FORM IF NORMAL FORM IS UNSUCCESSFUL.
+                    if(straw.equals(new Color(mapImage.getRGB(x - 1, y - 1))) &&
+                            straw.equals(new Color(mapImage.getRGB(x - 3, y - 2))) &&
+                            checkRectanglePattern(straw, mapImage, x - 6, y, 0, 3))
+                    {
+                        Color redArt = new Color(mapImage.getRGB(x - 14, y + 12));
 
-                System.out.println("JUICE DETECTED.");
-                determineSquareNumber(x, y, mapSolver, "JUICE");
-                return true;
-            }
+                        if(isRedArtColorCorrect(redArt) &&
+                                checkRectanglePattern(redArt, mapImage, x - 14, y + 12, 4, 0))
+                        {
+                            Color juiceBoxDark = new Color(mapImage.getRGB(x - 2, y + 6));
 
-            //  CHECK FOR MIRROR FORM
-            for(int y = 150; y < 572; y++)
-            {
-                Color straw = new Color(mapImage.getRGB(x, y));
-                if(!isStrawColorCorrect(straw))
-                    continue;
-
-                if(!straw.equals(new Color(mapImage.getRGB(x - 1, y - 1))))
-                    continue;
-                if(!straw.equals(new Color(mapImage.getRGB(x - 3, y - 2))))
-                    continue;
-                if(!checkRectanglePattern(straw, mapImage, x - 6, y, 0, 3))
-                    continue;
-
-                Color redArt = new Color(mapImage.getRGB(x - 14, y + 12));
-                if(!isRedArtColorCorrect(redArt))
-                    continue;
-
-                if(!checkRectanglePattern(redArt, mapImage, x - 14, y + 12, 4, 0))
-                    continue;
-
-                Color juiceBoxDark = new Color(mapImage.getRGB(x - 2, y + 6));
-                if(!isJuiceBoxDarkColorCorrect(juiceBoxDark))
-                    continue;
-
-                if(!checkRectanglePattern(juiceBoxDark, mapImage, x - 2, y + 6, 1, 15))
-                    continue;
-
-                System.out.println("JUICE DETECTED. (MIRROR)");
-                determineSquareNumber(x, y, mapSolver, "JUICE");
-                return true;
+                            if(isJuiceBoxDarkColorCorrect(juiceBoxDark) &&
+                                    checkRectanglePattern(juiceBoxDark, mapImage, x - 2, y + 6, 1, 15))
+                            {
+                                System.out.println("JUICE DETECTED. (MIRROR)");
+                                determineSquareNumber(x, y, mapSolver, "JUICE");
+                                return true;
+                            }
+                        }
+                    }
+                }
             }
         }
 
@@ -217,73 +204,61 @@ public class ChromeBotMapParser
         return false;
     }
 
-    private static boolean checkIfSpaghetti(BufferedImage mapImage, ChromeBotMapSolver mapSolver)
+    private static boolean findSpaghetti(BufferedImage mapImage, ChromeBotMapSolver mapSolver)
     {
         for(int x = 122; x < 735; x++)
         {
             for(int y = 150; y < 572; y++)
             {
                 Color cheese = new Color(mapImage.getRGB(x, y));
-                if(!isCheeseColorCorrect(cheese))
-                    continue;
 
-                if(!checkRectanglePattern(cheese, mapImage, x, y, 3, 0))
-                    continue;
-                if(!checkRectanglePattern(cheese, mapImage, x - 11, y - 7, 0, 1))
-                    continue;
+                if(isCheeseColorCorrect(cheese))
+                {
+                    //  CHECK NORMAL FORM.
+                    if(checkRectanglePattern(cheese, mapImage, x, y, 3, 0) &&
+                            checkRectanglePattern(cheese, mapImage, x - 11, y - 7, 0, 1))
+                    {
+                        Color sauce = new Color(mapImage.getRGB(x + 2, y - 9));
 
-                Color sauce = new Color(mapImage.getRGB(x + 2, y - 9));
-                if(!isSauceColorCorrect(sauce))
-                    continue;
+                        if(isSauceColorCorrect(sauce) &&
+                                checkRectanglePattern(sauce, mapImage, x + 2, y - 9, 4, 0))
+                        {
+                            Color fork = new Color(mapImage.getRGB(x + 14, y - 13));
 
-                if(!checkRectanglePattern(sauce, mapImage, x + 2, y - 9, 4, 0))
-                    continue;
+                            if(isForkColorCorrect(fork) &&
+                                    checkRectanglePattern(fork, mapImage, x + 13, y - 14, 2, 0) &&
+                                    checkRectanglePattern(fork, mapImage, x + 13, y - 15, 2, 0))
+                            {
+                                System.out.println("SPAGHETTI DETECTED.");
+                                determineSquareNumber(x, y, mapSolver, "SPAGHETTI");
+                                return true;
+                            }
+                        }
+                    }
 
-                Color fork = new Color(mapImage.getRGB(x + 14, y - 13));
-                if(!isForkColorCorrect(fork))
-                    continue;
+                    //  CHECK FOR MIRROR FORM.
+                    if(checkRectanglePattern(cheese, mapImage, x, y, 3, 0) &&
+                            checkRectanglePattern(cheese, mapImage, x + 14, y - 7, 0, 1))
+                    {
+                        Color sauce = new Color(mapImage.getRGB(x - 3, y - 9));
 
-                if(!checkRectanglePattern(fork, mapImage, x + 13, y - 14, 2, 0))
-                    continue;
-                if(!checkRectanglePattern(fork, mapImage, x + 13, y - 15, 2, 0))
-                    continue;
+                        if(isSauceColorCorrect(sauce) &&
+                                checkRectanglePattern(sauce, mapImage, x - 3, y - 9, 4, 0))
+                        {
+                            Color fork = new Color(mapImage.getRGB(x - 14, y - 13));
 
-                System.out.println("SPAGHETTI DETECTED.");
-                determineSquareNumber(x, y, mapSolver, "SPAGHETTI");
-                return true;
-            }
+                            if(isForkColorCorrect(fork) &&
+                                    checkRectanglePattern(fork, mapImage, x - 14, y - 14, 2, 0) &&
+                                    checkRectanglePattern(fork, mapImage, x - 14, y - 15, 2, 0))
+                            {
+                                System.out.println("SPAGHETTI DETECTED. (MIRROR)");
+                                determineSquareNumber(x, y, mapSolver, "SPAGHETTI");
+                                return true;
+                            }
 
-            //  CHECK FOR MIRROR FORM
-            for(int y = 150; y < 572; y++)
-            {
-                Color cheese = new Color(mapImage.getRGB(x, y));
-                if(!isCheeseColorCorrect(cheese))
-                    continue;
-
-                if(!checkRectanglePattern(cheese, mapImage, x, y, 3, 0))
-                    continue;
-                if(!checkRectanglePattern(cheese, mapImage, x + 14, y - 7, 0, 1))
-                    continue;
-
-                Color sauce = new Color(mapImage.getRGB(x - 3, y - 9));
-                if(!isSauceColorCorrect(sauce))
-                    continue;
-
-                if(!checkRectanglePattern(sauce, mapImage, x - 3, y - 9, 4, 0))
-                    continue;
-
-                Color fork = new Color(mapImage.getRGB(x - 14, y - 13));
-                if(!isForkColorCorrect(fork))
-                    continue;
-
-                if(!checkRectanglePattern(fork, mapImage, x - 14, y - 14, 2, 0))
-                    continue;
-                if(!checkRectanglePattern(fork, mapImage, x - 14, y - 15, 2, 0))
-                    continue;
-
-                System.out.println("SPAGHETTI DETECTED. (MIRROR)");
-                determineSquareNumber(x, y, mapSolver, "SPAGHETTI");
-                return true;
+                        }
+                    }
+                }
             }
         }
 
@@ -291,7 +266,7 @@ public class ChromeBotMapParser
         return false;
     }
 
-    private static boolean checkIfFair(BufferedImage mapImage, ChromeBotMapSolver mapSolver)
+    private static boolean findFair(BufferedImage mapImage, ChromeBotMapSolver mapSolver)
     {
         for(int x = 122; x < 735; x++)
         {
@@ -335,7 +310,7 @@ public class ChromeBotMapParser
         return false;
     }
 
-    private static boolean checkIfSandwich(BufferedImage mapImage, ChromeBotMapSolver mapSolver)
+    private static boolean findSandwich(BufferedImage mapImage, ChromeBotMapSolver mapSolver)
     {
         for(int x = 122; x < 735; x++)
         {
@@ -362,207 +337,138 @@ public class ChromeBotMapParser
         return false;
     }
 
-    private static boolean checkIfBar(BufferedImage mapImage, ChromeBotMapSolver mapSolver)
+    private static boolean findBar(BufferedImage mapImage, ChromeBotMapSolver mapSolver)
     {
         for(int x = 122; x < 735; x++)
         {
             for(int y = 150; y < 572; y++)
             {
                 Color umbrellaShaft = new Color(mapImage.getRGB(x, y));
-                if(umbrellaShaft.getRed() < 175 || umbrellaShaft.getRed() > 220)
-                    continue;
-                if(umbrellaShaft.getGreen() < 90 || umbrellaShaft.getGreen() > 120)
-                    continue;
-                if(umbrellaShaft.getBlue() < 60 || umbrellaShaft.getBlue() > 110)
-                    continue;
 
-                if(!umbrellaShaft.equals(new Color(mapImage.getRGB(x, y + 1))))
-                    continue;
+                if(isUmbrellaShaftColorCorrect(umbrellaShaft) &&
+                        umbrellaShaft.equals(new Color(mapImage.getRGB(x, y + 1))))
+                {
+                    //  CHECK NORMAL FORM.
+                    Color liquid = new Color(mapImage.getRGB(x - 2, y + 8));
 
-                Color liquid = new Color(mapImage.getRGB(x - 2, y + 8));
-                if(liquid.getRed() < 195)
-                    continue;
-                if(liquid.getGreen() < 120 || liquid.getGreen() > 165)
-                    continue;
-                if(liquid.getBlue() > 45)
-                    continue;
+                    if(isLiquidColorCorrect(liquid) &&
+                            checkRectanglePattern(liquid, mapImage, x - 2, y + 8, 12, 0) &&
+                            checkRectanglePattern(liquid, mapImage, x - 1, y + 9, 10, 0) &&
+                            checkRectanglePattern(liquid, mapImage, x + 3, y + 10, 2, 0))
+                    {
+                        System.out.println("BAR DETECTED.");
+                        determineSquareNumber(x, y, mapSolver, "BAR");
+                        return true;
+                    }
 
-                if(!checkRectanglePattern(liquid, mapImage, x - 2, y + 8, 12, 0))
-                    continue;
-                if(!checkRectanglePattern(liquid, mapImage, x - 1, y + 9, 10, 0))
-                    continue;
-                if(!checkRectanglePattern(liquid, mapImage, x + 3, y + 10, 2, 0))
-                    continue;
+                    //  CHECK MIRROR FORM.
+                    liquid = new Color(mapImage.getRGB(x + 2, y + 8));
 
-                System.out.println("BAR DETECTED.");
-                determineSquareNumber(x, y, mapSolver, "BAR");
-                return true;
+                    if(isLiquidColorCorrect(liquid) &&
+                            checkRectanglePattern(liquid, mapImage, x + 2, y + 8, 12, 0) &&
+                            checkRectanglePattern(liquid, mapImage, x + 1, y + 9, 10, 0) &&
+                            checkRectanglePattern(liquid, mapImage, x + 3, y + 10, 2, 0))
+                    {
+                        System.out.println("BAR DETECTED. (MIRROR)");
+                        determineSquareNumber(x, y, mapSolver, "BAR");
+                        return true;
+                    }
+                }
             }
 
-            //  CHECK FOR MIRROR FORM
-            for(int y = 150; y < 572; y++)
-            {
-                Color umbrellaShaft = new Color(mapImage.getRGB(x, y));
-                if(umbrellaShaft.getRed() < 175 || umbrellaShaft.getRed() > 220)
-                    continue;
-                if(umbrellaShaft.getGreen() < 90 || umbrellaShaft.getGreen() > 120)
-                    continue;
-                if(umbrellaShaft.getBlue() < 60 || umbrellaShaft.getBlue() > 110)
-                    continue;
-
-                if(!umbrellaShaft.equals(new Color(mapImage.getRGB(x, y + 1))))
-                    continue;
-
-                Color liquid = new Color(mapImage.getRGB(x + 2, y + 8));
-                if(liquid.getRed() < 195)
-                    continue;
-                if(liquid.getGreen() < 120 || liquid.getGreen() > 165)
-                    continue;
-                if(liquid.getBlue() > 45)
-                    continue;
-
-                if(!checkRectanglePattern(liquid, mapImage, x + 2, y + 8, 12, 0))
-                    continue;
-                if(!checkRectanglePattern(liquid, mapImage, x + 1, y + 9, 10, 0))
-                    continue;
-                if(!checkRectanglePattern(liquid, mapImage, x + 3, y + 10, 2, 0))
-                    continue;
-
-                System.out.println("BAR DETECTED. (MIRROR)");
-                determineSquareNumber(x, y, mapSolver, "BAR");
-                return true;
-            }
+            //  if(!umbrellaShaft.equals(new Color(mapImage.getRGB(x, y + 1))))
+            //      continue;
         }
 
         System.out.println("ERROR: BAR NOT FOUND");
         return false;
     }
 
-    private static boolean checkIfTheater(BufferedImage mapImage, ChromeBotMapSolver mapSolver)
+    private static boolean findTheater(BufferedImage mapImage, ChromeBotMapSolver mapSolver)
     {
         for(int x = 122; x < 735; x++)
         {
             for(int y = 150; y < 572; y++)
             {
                 Color eyeMouth = new Color(mapImage.getRGB(x, y));
-                if(eyeMouth.getRed() < 110 || eyeMouth.getRed() > 170)
-                    continue;
-                if(eyeMouth.getGreen() < 90 || eyeMouth.getGreen() > 120)
-                    continue;
-                if(eyeMouth.getBlue() < 185 || eyeMouth.getBlue() > 220)
-                    continue;
 
-                if(!eyeMouth.equals(new Color(mapImage.getRGB(x + 7, y))))
-                    continue;
-                if(!eyeMouth.equals(new Color(mapImage.getRGB(x + 1, y + 8))))
-                    continue;
-                if(!eyeMouth.equals(new Color(mapImage.getRGB(x + 2, y + 8))))
-                    continue;
-                if(!eyeMouth.equals(new Color(mapImage.getRGB(x + 2, y + 7))))
-                    continue;
-                if(!eyeMouth.equals(new Color(mapImage.getRGB(x + 3, y + 7))))
-                    continue;
-                if(!eyeMouth.equals(new Color(mapImage.getRGB(x + 4, y + 7))))
-                    continue;
+                if(isTheaterColorCorrect(eyeMouth))
+                {
+                    //  CHECK NORMAL FORM.
+                    if(eyeMouth.equals(new Color(mapImage.getRGB(x + 7, y))) &&
+                            eyeMouth.equals(new Color(mapImage.getRGB(x + 1, y + 8))) &&
+                            eyeMouth.equals(new Color(mapImage.getRGB(x + 2, y + 8))) &&
+                            eyeMouth.equals(new Color(mapImage.getRGB(x + 2, y + 7))) &&
+                            eyeMouth.equals(new Color(mapImage.getRGB(x + 3, y + 7))) &&
+                            eyeMouth.equals(new Color(mapImage.getRGB(x + 4, y + 7))))
+                    {
+                        System.out.println("THEATER DETECTED.");
+                        determineSquareNumber(x, y, mapSolver, "THEATER");
+                        return true;
+                    }
 
-                System.out.println("THEATER DETECTED.");
-                determineSquareNumber(x, y, mapSolver, "THEATER");
-                return true;
+                    //  CHECK THEATER FORM.
+                    if(eyeMouth.equals(new Color(mapImage.getRGB(x - 7, y))) &&
+                            eyeMouth.equals(new Color(mapImage.getRGB(x - 1, y + 8))) &&
+                            eyeMouth.equals(new Color(mapImage.getRGB(x - 2, y + 8))) &&
+                            eyeMouth.equals(new Color(mapImage.getRGB(x - 2, y + 7))) &&
+                            eyeMouth.equals(new Color(mapImage.getRGB(x - 3, y + 7))) &&
+                            eyeMouth.equals(new Color(mapImage.getRGB(x - 4, y + 7))))
+                    {
+                        System.out.println("THEATER DETECTED. (MIRROR)");
+                        determineSquareNumber(x, y, mapSolver, "THEATER");
+                        return true;
+                    }
+
+                }
             }
 
-            //  CHECK FOR MIRROR FORM
-            for(int y = 150; y < 572; y++)
-            {
-                Color eyeMouth = new Color(mapImage.getRGB(x, y));
-                if(eyeMouth.getRed() < 110 || eyeMouth.getRed() > 170)
-                    continue;
-                if(eyeMouth.getGreen() < 90 || eyeMouth.getGreen() > 120)
-                    continue;
-                if(eyeMouth.getBlue() < 185 || eyeMouth.getBlue() > 220)
-                    continue;
-
-                if(!eyeMouth.equals(new Color(mapImage.getRGB(x - 7, y))))
-                    continue;
-                if(!eyeMouth.equals(new Color(mapImage.getRGB(x - 1, y + 8))))
-                    continue;
-                if(!eyeMouth.equals(new Color(mapImage.getRGB(x - 2, y + 8))))
-                    continue;
-                if(!eyeMouth.equals(new Color(mapImage.getRGB(x - 2, y + 7))))
-                    continue;
-                if(!eyeMouth.equals(new Color(mapImage.getRGB(x - 3, y + 7))))
-                    continue;
-                if(!eyeMouth.equals(new Color(mapImage.getRGB(x - 4, y + 7))))
-                    continue;
-
-                System.out.println("THEATER DETECTED. (MIRROR)");
-                determineSquareNumber(x, y, mapSolver, "THEATER");
-                return true;
-            }
         }
 
         System.out.println("ERROR: THEATER NOT FOUND");
         return false;
     }
 
-    private static boolean checkIfTaco(BufferedImage mapImage, ChromeBotMapSolver mapSolver)
+    private static boolean findTaco(BufferedImage mapImage, ChromeBotMapSolver mapSolver)
     {
         for(int x = 122; x < 735; x++)
         {
             for(int y = 150; y < 572; y++)
             {
                 Color shellDark = new Color(mapImage.getRGB(x, y));
-                if(shellDark.getRed() < 200)
-                    continue;
-                if(shellDark.getGreen() < 115 || shellDark.getGreen() > 180)
-                    continue;
-                if(shellDark.getBlue() > 50)
-                    continue;
+                if(isShellDarkCorrect(shellDark))
+                {
+                    //  CHECK NORMAL FORM.
+                    if(shellDark.equals(new Color(mapImage.getRGB(x + 4, y - 3))) &&
+                            shellDark.equals(new Color(mapImage.getRGB(x - 1, y + 5))) &&
+                            shellDark.equals(new Color(mapImage.getRGB(x - 6, y + 5))) &&
+                            shellDark.equals(new Color(mapImage.getRGB(x, y + 9))))
+                    {
+                        System.out.println("TACO DETECTED.");
+                        determineSquareNumber(x, y, mapSolver, "TACO");
+                        return true;
+                    }
 
-                if(!shellDark.equals(new Color(mapImage.getRGB(x + 4, y - 3))))
-                    continue;
-                if(!shellDark.equals(new Color(mapImage.getRGB(x - 1, y + 5))))
-                    continue;
-                if(!shellDark.equals(new Color(mapImage.getRGB(x - 6, y + 5))))
-                    continue;
-                if(!shellDark.equals(new Color(mapImage.getRGB(x, y + 9))))
-                    continue;
-
-                System.out.println("TACO DETECTED.");
-                determineSquareNumber(x, y, mapSolver, "TACO");
-                return true;
+                    //  CHECK MIRROR FORM.
+                    if(shellDark.equals(new Color(mapImage.getRGB(x - 4, y - 3))) &&
+                            shellDark.equals(new Color(mapImage.getRGB(x + 1, y + 5))) &&
+                            shellDark.equals(new Color(mapImage.getRGB(x + 6, y + 5))) &&
+                            shellDark.equals(new Color(mapImage.getRGB(x, y + 9))))
+                    {
+                        System.out.println("TACO DETECTED. (MIRROR)");
+                        determineSquareNumber(x, y, mapSolver, "TACO");
+                        return true;
+                    }
+                }
             }
 
-            //  CHECK FOR MIRROR FORM
-            for(int y = 150; y < 572; y++)
-            {
-                Color shellDark = new Color(mapImage.getRGB(x, y));
-                if(shellDark.getRed() < 200)
-                    continue;
-                if(shellDark.getGreen() < 115 || shellDark.getGreen() > 180)
-                    continue;
-                if(shellDark.getBlue() > 50)
-                    continue;
-
-                if(!shellDark.equals(new Color(mapImage.getRGB(x - 4, y - 3))))
-                    continue;
-                if(!shellDark.equals(new Color(mapImage.getRGB(x + 1, y + 5))))
-                    continue;
-                if(!shellDark.equals(new Color(mapImage.getRGB(x + 6, y + 5))))
-                    continue;
-                if(!shellDark.equals(new Color(mapImage.getRGB(x, y + 9))))
-                    continue;
-
-                System.out.println("TACO DETECTED. (MIRROR)");
-                determineSquareNumber(x, y, mapSolver, "TACO");
-                return true;
-            }
         }
 
         System.out.println("ERROR: TACO NOT FOUND");
         return false;
     }
 
-    private static boolean checkIfGarden(BufferedImage mapImage, ChromeBotMapSolver mapSolver)
+    private static boolean findGarden(BufferedImage mapImage, ChromeBotMapSolver mapSolver)
     {
         for(int x = 122; x < 735; x++)
         {
@@ -604,7 +510,7 @@ public class ChromeBotMapParser
         return false;
     }
 
-    private static boolean checkIfGas(BufferedImage mapImage, ChromeBotMapSolver mapSolver)
+    private static boolean findGas(BufferedImage mapImage, ChromeBotMapSolver mapSolver)
     {
         int numberOfGasPumps = 0;
 
@@ -656,50 +562,38 @@ public class ChromeBotMapParser
         return true;
     }
 
-    private static boolean checkIfBallroom(BufferedImage mapImage, ChromeBotMapSolver mapSolver)
+    private static boolean findBallroom(BufferedImage mapImage, ChromeBotMapSolver mapSolver)
     {
         for(int x = 122; x < 735; x++)
         {
             for(int y = 150; y < 572; y++)
             {
                 Color outwardLeg = new Color(mapImage.getRGB(x, y));
-                Color standLeg = new Color(mapImage.getRGB(x + 12, y + 11));
-                Color forehead = new Color(mapImage.getRGB(x + 12, y - 10));
 
-                if(outwardLeg.getRed() < 220)
-                    continue;
-                if(outwardLeg.getGreen() < 205 || outwardLeg.getGreen() > 235)
-                    continue;
-                if(outwardLeg.getBlue() < 80 || outwardLeg.getBlue() > 110)
-                    continue;
-
-                if(outwardLeg.equals(standLeg) && outwardLeg.equals(forehead))
+                if(isOutwardLegColorCorrect(outwardLeg))
                 {
-                    System.out.println("BALLROOM DETECTED.");
-                    determineSquareNumber(x, y, mapSolver, "BALLROOM");
-                    return true;
-                }
-            }
+                    //  CHECK NORMAL FORM.
+                    Color standLeg = new Color(mapImage.getRGB(x + 12, y + 11));
+                    Color forehead = new Color(mapImage.getRGB(x + 12, y - 10));
 
-            //  CHECK FOR MIRROR FORM
-            for(int y = 150; y < 572; y++)
-            {
-                Color outwardLeg = new Color(mapImage.getRGB(x, y));
-                Color standLeg = new Color(mapImage.getRGB(x - 12, y + 11));
-                Color forehead = new Color(mapImage.getRGB(x - 12, y - 10));
+                    if(outwardLeg.equals(standLeg) &&
+                            outwardLeg.equals(forehead))
+                    {
+                        System.out.println("BALLROOM DETECTED.");
+                        determineSquareNumber(x, y, mapSolver, "BALLROOM");
+                        return true;
+                    }
 
-                if(outwardLeg.getRed() < 220)
-                    continue;
-                if(outwardLeg.getGreen() < 205 || outwardLeg.getGreen() > 235)
-                    continue;
-                if(outwardLeg.getBlue() < 80 || outwardLeg.getBlue() > 110)
-                    continue;
+                    //  CHECK MIRROR FORM.
+                    standLeg = new Color(mapImage.getRGB(x - 12, y + 11));
+                    forehead = new Color(mapImage.getRGB(x - 12, y - 10));
 
-                if(outwardLeg.equals(standLeg) && outwardLeg.equals(forehead))
-                {
-                    System.out.println("BALLROOM DETECTED. (MIRROR)");
-                    determineSquareNumber(x, y, mapSolver, "BALLROOM");
-                    return true;
+                    if(outwardLeg.equals(standLeg) && outwardLeg.equals(forehead))
+                    {
+                        System.out.println("BALLROOM DETECTED. (MIRROR)");
+                        determineSquareNumber(x, y, mapSolver, "BALLROOM");
+                        return true;
+                    }
                 }
             }
         }
@@ -708,62 +602,40 @@ public class ChromeBotMapParser
         return false;
     }
 
-    private static boolean checkIfCoffee(BufferedImage mapImage, ChromeBotMapSolver mapSolver)
+    private static boolean findCoffee(BufferedImage mapImage, ChromeBotMapSolver mapSolver)
     {
         for(int x = 122; x < 735; x++)
         {
             for(int y = 150; y < 572; y++)
             {
                 Color trail = new Color(mapImage.getRGB(x, y));
-                if(trail.getRed() < 190 || trail.getRed() > 230)
-                    continue;
-                if(trail.getGreen() < 145 || trail.getGreen() > 180)
-                    continue;
-                if(trail.getBlue() < 110 || trail.getBlue() > 150)
-                    continue;
 
-                //  CHECK TRAIL POINTS
-                if(!trail.equals(new Color(mapImage.getRGB(x, y + 1))))
-                    continue;
-                if(!trail.equals(new Color(mapImage.getRGB(x, y + 2))))
-                    continue;
-                if(!trail.equals(new Color(mapImage.getRGB(x + 1, y + 3))))
-                    continue;
-                if(!trail.equals(new Color(mapImage.getRGB(x + 2, y + 5))))
-                    continue;
-                if(!trail.equals(new Color(mapImage.getRGB(x + 2, y + 6))))
-                    continue;
+                if(isTrailColorCorrect(trail))
+                {
+                    //  CHECK NORMAL FORM.
+                    if(trail.equals(new Color(mapImage.getRGB(x, y + 1))) &&
+                            trail.equals(new Color(mapImage.getRGB(x, y + 2))) &&
+                            trail.equals(new Color(mapImage.getRGB(x + 1, y + 3))) &&
+                            trail.equals(new Color(mapImage.getRGB(x + 2, y + 5))) &&
+                            trail.equals(new Color(mapImage.getRGB(x + 2, y + 6))))
+                    {
+                        System.out.println("COFFEE PATTERN DETECTED.");
+                        determineSquareNumber(x, y, mapSolver, "COFFEE");
+                        return true;
+                    }
 
-                System.out.println("COFFEE PATTERN DETECTED.");
-                determineSquareNumber(x, y, mapSolver, "COFFEE");
-                return true;
-            }
-
-            //  CHECK FOR MIRROR FORM
-            for(int y = 150; y < 572; y++)
-            {
-                Color trail = new Color(mapImage.getRGB(x, y));
-                if(trail.getRed() < 190 || trail.getRed() > 230)
-                    continue;
-                if(trail.getGreen() < 145 || trail.getGreen() > 180)
-                    continue;
-                if(trail.getBlue() < 110 || trail.getBlue() > 150)
-                    continue;
-
-                if(!trail.equals(new Color(mapImage.getRGB(x, y + 1))))
-                    continue;
-                if(!trail.equals(new Color(mapImage.getRGB(x, y + 2))))
-                    continue;
-                if(!trail.equals(new Color(mapImage.getRGB(x - 1, y + 3))))
-                    continue;
-                if(!trail.equals(new Color(mapImage.getRGB(x - 2, y + 5))))
-                    continue;
-                if(!trail.equals(new Color(mapImage.getRGB(x - 2, y + 6))))
-                    continue;
-
-                System.out.println("COFFEE PATTERN DETECTED. (MIRROR)");
-                determineSquareNumber(x, y, mapSolver, "COFFEE");
-                return true;
+                    //  CHECK MIRROR FORM.
+                    if(trail.equals(new Color(mapImage.getRGB(x, y + 1))) &&
+                            trail.equals(new Color(mapImage.getRGB(x, y + 2))) &&
+                            trail.equals(new Color(mapImage.getRGB(x - 1, y + 3))) &&
+                            trail.equals(new Color(mapImage.getRGB(x - 2, y + 5))) &&
+                            trail.equals(new Color(mapImage.getRGB(x - 2, y + 6))))
+                    {
+                        System.out.println("COFFEE PATTERN DETECTED. (MIRROR)");
+                        determineSquareNumber(x, y, mapSolver, "COFFEE");
+                        return true;
+                    }
+                }
             }
         }
 
@@ -771,145 +643,88 @@ public class ChromeBotMapParser
         return false;
     }
 
-    private static void checkIfMall(BufferedImage mapImage, ChromeBotMapSolver mapSolver)
+    private static void findMall(BufferedImage mapImage, ChromeBotMapSolver mapSolver)
     {
         for(int x = 122; x < 735; x++)
         {
             for(int y = 150; y < 572; y++)
             {
                 Color brightHandle = new Color(mapImage.getRGB(x, y));
-                if(brightHandle.getRed() < 205)
-                    continue;
-                if(brightHandle.getGreen() < 185 || brightHandle.getGreen() > 230)
-                    continue;
-                if(brightHandle.getBlue() < 40 || brightHandle.getBlue() > 100)
-                    continue;
-
-                if(!checkRectanglePattern(brightHandle, mapImage, x, y, 0, 1))
-                    continue;
-                if(!checkRectanglePattern(brightHandle, mapImage, x + 1, y - 2, 0, 1))
-                    continue;
-                if(!checkRectanglePattern(brightHandle, mapImage, x + 3, y - 3, 1, 0))
-                    continue;
-                if(!checkRectanglePattern(brightHandle, mapImage, x + 11, y, 0, 2))
-                    continue;
-
                 Color bag = new Color(mapImage.getRGB(x, y + 5));
-                if(bag.getRed() < 80 || bag.getRed() > 115)
-                    continue;
-                if(bag.getGreen() < 70 || bag.getGreen() > 105)
-                    continue;
-                if(bag.getBlue() < 155 || bag.getBlue() > 190)
-                    continue;
 
-                if(!checkRectanglePattern(bag, mapImage, x, y + 5, 12, 16))
-                    continue;
-
-                System.out.println("MALL DETECTED.");
-                determineSquareNumber(x, y, mapSolver, "MALL");
-                return;
-            }
-
-            //  CHECK FOR MIRROR
-            for(int y = 150; y < 572; y++)
-            {
-                Color brightHandle = new Color(mapImage.getRGB(x, y));
-                if(brightHandle.getRed() < 205)
-                    continue;
-                if(brightHandle.getGreen() < 185 || brightHandle.getGreen() > 230)
-                    continue;
-                if(brightHandle.getBlue() < 40 || brightHandle.getBlue() > 100)
-                    continue;
-
-                if(!checkRectanglePattern(brightHandle, mapImage, x, y, 0, 2))
-                    continue;
-                if(!checkRectanglePattern(brightHandle, mapImage, x + 11, y, 0, 1))
-                    continue;
-                if(!checkRectanglePattern(brightHandle, mapImage, x + 9, y - 2, 1, 0))
-                    continue;
-                if(!checkRectanglePattern(brightHandle, mapImage, x + 7, y - 3, 1, 0))
-                    continue;
-
-                Color bag = new Color(mapImage.getRGB(x, y + 5));
-                if(bag.getRed() < 80 || bag.getRed() > 140)
-                    continue;
-                if(bag.getGreen() < 70 || bag.getGreen() > 105)
-                    continue;
-                if(bag.getBlue() < 155 || bag.getBlue() > 190)
-                    continue;
-
-                if(!checkRectanglePattern(bag, mapImage, x, y + 5, 12, 1))
-                    continue;
-
-                System.out.println("MALL DETECTED. (MIRROR)");
-                determineSquareNumber(x, y, mapSolver, "MALL");
-                return;
-            }
-        }
-    }
-
-    private static boolean checkIfHome(BufferedImage mapImage, ChromeBotMapSolver mapSolver)
-    {
-        for(int x = 122; x < 735; x++)
-        {
-            for(int y = 150; y < 572; y++)
-            {
-                Color topLeftWindow = new Color(mapImage.getRGB(x, y));
-                if(topLeftWindow.getRed() < 60 || topLeftWindow.getRed() > 115)
-                    continue;
-                if(topLeftWindow.getGreen() < 160 || topLeftWindow.getGreen() > 190)
-                    continue;
-                if(topLeftWindow.getBlue() < 210 || topLeftWindow.getBlue() > 255)
-                    continue;
-
-                if(!checkRectanglePattern(topLeftWindow, mapImage, x, y, 1, 1))
-                    continue;
-
-                Color topRightWindow = new Color(mapImage.getRGB(x + 10, y));
-                if(!checkRectanglePattern(topRightWindow, mapImage, x + 10, y, 2, 1))
-                    continue;
-
-                Color bottomWindowOne = new Color(mapImage.getRGB(x, y + 7));
-                if(!checkRectanglePattern(bottomWindowOne, mapImage, x, y + 7, 1, 2))
-                    continue;
-
-                if(topLeftWindow.equals(topRightWindow) && topLeftWindow.equals(bottomWindowOne))
+                if(isBrightHandleColorCorrect(brightHandle))
                 {
-                    System.out.println("HOME DETECTED.");
-                    determineSquareNumber(x, y, mapSolver, "HOME");
+                    //  CHECK NORMAL FORM.
+                    if(checkRectanglePattern(brightHandle, mapImage, x, y, 0, 1) &&
+                            checkRectanglePattern(brightHandle, mapImage, x + 1, y - 2, 0, 1) &&
+                            checkRectanglePattern(brightHandle, mapImage, x + 3, y - 3, 1, 0) &&
+                            checkRectanglePattern(brightHandle, mapImage, x + 11, y, 0, 2))
+                    {
+                        if(isBagColorCorrect(bag) &&
+                                checkRectanglePattern(bag, mapImage, x, y + 5, 12, 16))
+                        {
+                            System.out.println("MALL DETECTED.");
+                            determineSquareNumber(x, y, mapSolver, "MALL");
+                            return;
+                        }
+                    }
 
-                    return true;
+                    //  CHECK MIRROR FORM.
+                    if(checkRectanglePattern(brightHandle, mapImage, x, y, 0, 2) &&
+                            checkRectanglePattern(brightHandle, mapImage, x + 11, y, 0, 1) &&
+                            checkRectanglePattern(brightHandle, mapImage, x + 9, y - 2, 1, 0) &&
+                            checkRectanglePattern(brightHandle, mapImage, x + 7, y - 3, 1, 0))
+                    {
+                        if(isBagColorCorrect(bag) &&
+                                checkRectanglePattern(bag, mapImage, x, y + 5, 12, 1))
+                        {
+                            System.out.println("MALL DETECTED. (MIRROR)");
+                            determineSquareNumber(x, y, mapSolver, "MALL");
+                            return;
+                        }
+                    }
                 }
             }
 
-            //  CHECK MIRROR FORM
+        }
+    }
+
+    private static boolean findHome(BufferedImage mapImage, ChromeBotMapSolver mapSolver)
+    {
+        for(int x = 122; x < 735; x++)
+        {
             for(int y = 150; y < 572; y++)
             {
-                Color topRightWindow = new Color(mapImage.getRGB(x, y));
-                if(topRightWindow.getRed() < 60 || topRightWindow.getRed() > 115)
-                    continue;
-                if(topRightWindow.getGreen() < 160 || topRightWindow.getGreen() > 190)
-                    continue;
-                if(topRightWindow.getBlue() < 210 || topRightWindow.getBlue() > 255)
-                    continue;
-
-                if(!checkRectanglePattern(topRightWindow, mapImage, x, y, 1, 1))
-                    continue;
-
-                Color topLeftWindow = new Color(mapImage.getRGB(x - 11, y));
-                if(!checkRectanglePattern(topLeftWindow, mapImage, x - 11, y, 2, 1))
-                    continue;
-
-                Color bottomRightWindow = new Color(mapImage.getRGB(x, y + 7));
-                if(!checkRectanglePattern(bottomRightWindow, mapImage, x, y + 7, 1, 2))
-                    continue;
-
-                if(topRightWindow.equals(topLeftWindow) && topRightWindow.equals(bottomRightWindow))
+                Color topWindow = new Color(mapImage.getRGB(x, y));
+                if(isTopWindowColorCorrect(topWindow) &&
+                        checkRectanglePattern(topWindow, mapImage, x, y, 1, 1))
                 {
-                    System.out.println("HOME PATTERN DETECTED. (MIRROR)");
-                    determineSquareNumber(x, y, mapSolver, "HOME");
+                    //  CHECK NORMAL FORM.
+                    Color otherTopWindow = new Color(mapImage.getRGB(x + 10, y));
+                    Color bottomWindow = new Color(mapImage.getRGB(x, y + 7));
 
-                    return true;
+                    if(checkRectanglePattern(otherTopWindow, mapImage, x + 10, y, 2, 1) &&
+                            checkRectanglePattern(bottomWindow, mapImage, x, y + 7, 1, 2) &&
+                            (topWindow.equals(otherTopWindow) && topWindow.equals(bottomWindow)))
+                    {
+                        System.out.println("HOME DETECTED.");
+                        determineSquareNumber(x, y, mapSolver, "HOME");
+                        return true;
+                    }
+
+                    //  CHECK MIRROR FORM.
+                    otherTopWindow = new Color(mapImage.getRGB(x - 11, y));
+                    bottomWindow = new Color(mapImage.getRGB(x, y + 7));
+
+                    if(checkRectanglePattern(otherTopWindow, mapImage, x - 11, y, 2, 1) &&
+                            checkRectanglePattern(bottomWindow, mapImage, x, y + 7, 1, 2) &&
+                            (topWindow.equals(otherTopWindow) && topWindow.equals(bottomWindow)))
+                    {
+                        System.out.println("HOME PATTERN DETECTED. (MIRROR)");
+                        determineSquareNumber(x, y, mapSolver, "HOME");
+                        return true;
+                    }
+
                 }
             }
         }
@@ -918,73 +733,41 @@ public class ChromeBotMapParser
         return false;
     }
 
-    private static boolean checkIfRing(BufferedImage mapImage, ChromeBotMapSolver mapSolver)
+    private static boolean findRing(BufferedImage mapImage, ChromeBotMapSolver mapSolver)
     {
         for(int x = 122; x < 735; x++)
         {
             for(int y = 150; y < 572; y++)
             {
                 Color darkShade = new Color(mapImage.getRGB(x, y));
-                if(darkShade.getRed() < 60 || darkShade.getRed() > 120)
-                    continue;
-                if(darkShade.getGreen() < 150 || darkShade.getGreen() > 195)
-                    continue;
-                if(darkShade.getBlue() < 215)
-                    continue;
 
-                if(!checkRectanglePattern(darkShade, mapImage, x, y, 5, 3))
-                    continue;
-                if(!checkRectanglePattern(darkShade, mapImage, x - 4, y + 5, 3, 2))
-                    continue;
+                if(isDarkShadeColorCorrect(darkShade) &&
+                        checkRectanglePattern(darkShade, mapImage, x, y, 5, 3))
+                {
+                    //  CHECK NORMAL FORM.
+                    Color topBand = new Color(mapImage.getRGB(x - 5, y + 9));
 
-                Color topBand = new Color(mapImage.getRGB(x - 5, y + 9));
-                if(topBand.getRed() < 130 || topBand.getRed() > 180)
-                    continue;
-                if(topBand.getGreen() < 140 || topBand.getGreen() > 200)
-                    continue;
-                if(topBand.getBlue() < 150 || topBand.getBlue() > 210)
-                    continue;
+                    if(checkRectanglePattern(darkShade, mapImage, x - 4, y + 5, 3, 2) &&
+                        isTopBandColorCorrect(topBand) &&
+                            checkRectanglePattern(topBand, mapImage, x - 5, y + 9, 9, 3))
+                    {
+                        System.out.println("RING DETECTED.");
+                        determineSquareNumber(x, y, mapSolver, "RING");
+                        return true;
+                    }
 
-                if(!checkRectanglePattern(topBand, mapImage, x - 5, y + 9, 9, 3))
-                    continue;
+                    //  CHECK MIRROR FORM.
+                    topBand = new Color(mapImage.getRGB(x + 1, y + 9));
 
-                System.out.println("RING DETECTED.");
-                determineSquareNumber(x, y, mapSolver, "RING");
-
-                return true;
-            }
-
-            //  CHECK FOR MIRROR FORM
-            for(int y = 150; y < 572; y++)
-            {
-                Color darkShade = new Color(mapImage.getRGB(x, y));
-                if(darkShade.getRed() < 60 || darkShade.getRed() > 120)
-                    continue;
-                if(darkShade.getGreen() < 150 || darkShade.getGreen() > 195)
-                    continue;
-                if(darkShade.getBlue() < 215)
-                    continue;
-
-                if(!checkRectanglePattern(darkShade, mapImage, x, y, 5, 3))
-                    continue;
-                if(!checkRectanglePattern(darkShade, mapImage, x + 6, y + 5, 3, 2))
-                    continue;
-
-                Color topBand = new Color(mapImage.getRGB(x + 1, y + 9));
-                if(topBand.getRed() < 130 || topBand.getRed() > 180)
-                    continue;
-                if(topBand.getGreen() < 140 || topBand.getGreen() > 200)
-                    continue;
-                if(topBand.getBlue() < 150 || topBand.getBlue() > 210)
-                    continue;
-
-                if(!checkRectanglePattern(topBand, mapImage, x + 1, y + 9, 9, 3))
-                    continue;
-
-                System.out.println("RING DETECTED. (MIRROR)");
-                determineSquareNumber(x, y, mapSolver, "RING");
-
-                return true;
+                    if(checkRectanglePattern(darkShade, mapImage, x + 6, y + 5, 3, 2) &&
+                        isTopBandColorCorrect(topBand) &&
+                            checkRectanglePattern(topBand, mapImage, x + 1, y + 9, 9, 3))
+                    {
+                        System.out.println("RING DETECTED. (MIRROR)");
+                        determineSquareNumber(x, y, mapSolver, "RING");
+                        return true;
+                    }
+                }
             }
         }
 
@@ -993,59 +776,38 @@ public class ChromeBotMapParser
 
     //  NOTE: This method is most likely never going to actually see any use, but is still
     //      good to have just in case.
-    private static boolean checkIfAirplane(BufferedImage mapImage, ChromeBotMapSolver mapSolver)
+    private static boolean findAirplane(BufferedImage mapImage, ChromeBotMapSolver mapSolver)
     {
         for(int x = 122; x < 735; x++)
         {
             for(int y = 150; y < 572; y++)
             {
                 Color tailFin = new Color(mapImage.getRGB(x, y));
-                if(tailFin.getRed() < 60 || tailFin.getRed() > 105)
-                    continue;
-                if(tailFin.getGreen() < 155 || tailFin.getGreen() > 190)
-                    continue;
-                if(tailFin.getBlue() < 210)
-                    continue;
 
-                if(!checkRectanglePattern(tailFin, mapImage, x, y, 2, 1))
-                    continue;
-                if(!checkRectanglePattern(tailFin, mapImage, x + 1, y + 2, 1, 0))
-                    continue;
+                if(isTailFinColorCorrect(tailFin) &&
+                        checkRectanglePattern(tailFin, mapImage, x, y, 2, 1))
+                {
+                    //  CHECK NORMAL FORM.
+                    if(checkRectanglePattern(tailFin, mapImage, x + 1, y + 2, 1, 0) &&
+                            checkRectanglePattern(tailFin, mapImage, x + 6, y + 6, 0, 1) &&
+                            checkRectanglePattern(tailFin, mapImage, x + 7, y + 6, 1, 2))
+                    {
+                        System.out.println("AIRPLANE DETECTED.");
+                        determineSquareNumber(x, y, mapSolver, "AIRPLANE");
+                        return true;
+                    }
 
-                if(!checkRectanglePattern(tailFin, mapImage, x + 6, y + 6, 0, 1))
-                    continue;
-                if(!checkRectanglePattern(tailFin, mapImage, x + 7, y + 6, 1, 2))
-                    continue;
+                    //  CHECK MIRROR FORM.
+                    if(checkRectanglePattern(tailFin, mapImage, x, y + 2, 1, 0) &&
+                            checkRectanglePattern(tailFin, mapImage, x - 6, y + 6, 2, 1) &&
+                            checkRectanglePattern(tailFin, mapImage, x - 6, y + 8, 1, 0))
 
-                System.out.println("AIRPLANE DETECTED.");
-                determineSquareNumber(x, y, mapSolver, "AIRPLANE");
-                return true;
-            }
-
-            //  CHECK FOR MIRROR FORM
-            for(int y = 150; y < 572; y++)
-            {
-                Color tailFin = new Color(mapImage.getRGB(x, y));
-                if(tailFin.getRed() < 60 || tailFin.getRed() > 105)
-                    continue;
-                if(tailFin.getGreen() < 155 || tailFin.getGreen() > 190)
-                    continue;
-                if(tailFin.getBlue() < 210)
-                    continue;
-
-                if(!checkRectanglePattern(tailFin, mapImage, x, y, 2, 1))
-                    continue;
-                if(!checkRectanglePattern(tailFin, mapImage, x, y + 2, 1, 0))
-                    continue;
-
-                if(!checkRectanglePattern(tailFin, mapImage, x - 6, y + 6, 2, 1))
-                    continue;
-                if(!checkRectanglePattern(tailFin, mapImage, x - 6, y + 8, 1, 0))
-                    continue;
-
-                System.out.println("AIRPLANE DETECTED. (MIRROR)");
-                determineSquareNumber(x, y, mapSolver, "AIRPLANE");
-                return true;
+                    {
+                        System.out.println("AIRPLANE DETECTED. (MIRROR)");
+                        determineSquareNumber(x, y, mapSolver, "AIRPLANE");
+                        return true;
+                    }
+                }
             }
         }
 
@@ -1067,7 +829,6 @@ public class ChromeBotMapParser
                     mini-game.
             'resource' (String)
                 Name of the resource that the pixel belongs to.
-
      */
     private static void determineSquareNumber(int x, int y, ChromeBotMapSolver mapSolver, String resource)
     {
@@ -1088,7 +849,7 @@ public class ChromeBotMapParser
                 mapSolver.getNode(75).linkNodeToResource(resource);
                 mapSolver.getNode(70).linkNodeToResource(resource);
             }
-                //  COLUMN 3
+            //  COLUMN 3
             else if(x > 485)
             {
                 System.out.println(" 3");
@@ -1098,7 +859,7 @@ public class ChromeBotMapParser
                 mapSolver.getNode(74).linkNodeToResource(resource);
                 mapSolver.getNode(69).linkNodeToResource(resource);
             }
-                //  COLUMN 2
+            //  COLUMN 2
             else if(x > 365)
             {
                 System.out.println(" 2");
@@ -1108,7 +869,7 @@ public class ChromeBotMapParser
                 mapSolver.getNode(73).linkNodeToResource(resource);
                 mapSolver.getNode(68).linkNodeToResource(resource);
             }
-                //  COLUMN 1
+            //  COLUMN 1
             else if(x > 245)
             {
                 System.out.println(" 1");
@@ -1118,7 +879,7 @@ public class ChromeBotMapParser
                 mapSolver.getNode(72).linkNodeToResource(resource);
                 mapSolver.getNode(67).linkNodeToResource(resource);
             }
-                //  COLUMN 0
+            //  COLUMN 0
             else
             {
                 System.out.println(" 0");
@@ -1144,7 +905,7 @@ public class ChromeBotMapParser
                 mapSolver.getNode(64).linkNodeToResource(resource);
                 mapSolver.getNode(59).linkNodeToResource(resource);
             }
-                //  COLUMN 3
+            //  COLUMN 3
             else if(x > 475)
             {
                 System.out.println(" 3");
@@ -1154,7 +915,7 @@ public class ChromeBotMapParser
                 mapSolver.getNode(63).linkNodeToResource(resource);
                 mapSolver.getNode(58).linkNodeToResource(resource);
             }
-                //  COLUMN 2
+            //  COLUMN 2
             else if(x > 360)
             {
                 System.out.println(" 2");
@@ -1164,7 +925,7 @@ public class ChromeBotMapParser
                 mapSolver.getNode(62).linkNodeToResource(resource);
                 mapSolver.getNode(57).linkNodeToResource(resource);
             }
-                //  COLUMN 1
+            //  COLUMN 1
             else if(x > 265)
             {
                 System.out.println(" 1");
@@ -1174,7 +935,7 @@ public class ChromeBotMapParser
                 mapSolver.getNode(61).linkNodeToResource(resource);
                 mapSolver.getNode(56).linkNodeToResource(resource);
             }
-                //  COLUMN 0
+            //  COLUMN 0
             else
             {
                 System.out.println(" 0");
@@ -1200,7 +961,7 @@ public class ChromeBotMapParser
                 mapSolver.getNode(53).linkNodeToResource(resource);
                 mapSolver.getNode(48).linkNodeToResource(resource);
             }
-                //  COLUMN 3
+            //  COLUMN 3
             else if(x > 465)
             {
                 System.out.println(" 3");
@@ -1210,7 +971,7 @@ public class ChromeBotMapParser
                 mapSolver.getNode(52).linkNodeToResource(resource);
                 mapSolver.getNode(47).linkNodeToResource(resource);
             }
-                //  COLUMN 2
+            //  COLUMN 2
             else if(x > 370)
             {
                 System.out.println(" 2");
@@ -1220,7 +981,7 @@ public class ChromeBotMapParser
                 mapSolver.getNode(51).linkNodeToResource(resource);
                 mapSolver.getNode(46).linkNodeToResource(resource);
             }
-                //  COLUMN 1
+            //  COLUMN 1
             else if(x > 280)
             {
                 System.out.println(" 1");
@@ -1230,7 +991,7 @@ public class ChromeBotMapParser
                 mapSolver.getNode(50).linkNodeToResource(resource);
                 mapSolver.getNode(45).linkNodeToResource(resource);
             }
-                //  COLUMN 0
+            //  COLUMN 0
             else
             {
                 System.out.println(" 0");
@@ -1256,7 +1017,7 @@ public class ChromeBotMapParser
                 mapSolver.getNode(42).linkNodeToResource(resource);
                 mapSolver.getNode(37).linkNodeToResource(resource);
             }
-                //  COLUMN 3
+            //  COLUMN 3
             else if(x > 455)
             {
                 System.out.println(" 3");
@@ -1266,7 +1027,7 @@ public class ChromeBotMapParser
                 mapSolver.getNode(41).linkNodeToResource(resource);
                 mapSolver.getNode(36).linkNodeToResource(resource);
             }
-                //  COLUMN 2
+            //  COLUMN 2
             else if(x > 375)
             {
                 System.out.println(" 2");
@@ -1276,7 +1037,7 @@ public class ChromeBotMapParser
                 mapSolver.getNode(40).linkNodeToResource(resource);
                 mapSolver.getNode(35).linkNodeToResource(resource);
             }
-                //  COLUMN 1
+            //  COLUMN 1
             else if(x > 295)
             {
                 System.out.println(" 1");
@@ -1286,7 +1047,7 @@ public class ChromeBotMapParser
                 mapSolver.getNode(39).linkNodeToResource(resource);
                 mapSolver.getNode(34).linkNodeToResource(resource);
             }
-                //  COLUMN 0
+            //  COLUMN 0
             else
             {
                 System.out.println(" 0");
@@ -1312,7 +1073,7 @@ public class ChromeBotMapParser
                 mapSolver.getNode(31).linkNodeToResource(resource);
                 mapSolver.getNode(26).linkNodeToResource(resource);
             }
-                //  COLUMN 3
+            //  COLUMN 3
             else if(x > 450)
             {
                 System.out.println(" 3");
@@ -1322,7 +1083,7 @@ public class ChromeBotMapParser
                 mapSolver.getNode(30).linkNodeToResource(resource);
                 mapSolver.getNode(25).linkNodeToResource(resource);
             }
-                //  COLUMN 2
+            //  COLUMN 2
             else if(x > 380)
             {
                 System.out.println(" 2");
@@ -1332,7 +1093,7 @@ public class ChromeBotMapParser
                 mapSolver.getNode(29).linkNodeToResource(resource);
                 mapSolver.getNode(24).linkNodeToResource(resource);
             }
-                //  COLUMN 1
+            //  COLUMN 1
             else if(x > 305)
             {
                 System.out.println(" 1");
@@ -1342,7 +1103,7 @@ public class ChromeBotMapParser
                 mapSolver.getNode(28).linkNodeToResource(resource);
                 mapSolver.getNode(23).linkNodeToResource(resource);
             }
-                //  COLUMN 0
+            //  COLUMN 0
             else
             {
                 System.out.println(" 0");
@@ -1369,7 +1130,7 @@ public class ChromeBotMapParser
                 mapSolver.getNode(20).linkNodeToResource(resource);
                 mapSolver.getNode(15).linkNodeToResource(resource);
             }
-                //  COLUMN 3
+            //  COLUMN 3
             else if(x > 445)
             {
                 System.out.println(" 3");
@@ -1379,7 +1140,7 @@ public class ChromeBotMapParser
                 mapSolver.getNode(19).linkNodeToResource(resource);
                 mapSolver.getNode(14).linkNodeToResource(resource);
             }
-                //  COLUMN 2
+            //  COLUMN 2
             else if(x > 375)
             {
                 System.out.println(" 2");
@@ -1389,7 +1150,7 @@ public class ChromeBotMapParser
                 mapSolver.getNode(18).linkNodeToResource(resource);
                 mapSolver.getNode(13).linkNodeToResource(resource);
             }
-                //  COLUMN 1
+            //  COLUMN 1
             else if(x > 310)
             {
                 System.out.println(" 1");
@@ -1399,7 +1160,7 @@ public class ChromeBotMapParser
                 mapSolver.getNode(17).linkNodeToResource(resource);
                 mapSolver.getNode(12).linkNodeToResource(resource);
             }
-                //  COLUMN 0
+            //  COLUMN 0
             else
             {
                 System.out.println(" 0");
@@ -1425,7 +1186,7 @@ public class ChromeBotMapParser
                 mapSolver.getNode(9).linkNodeToResource(resource);
                 mapSolver.getNode(4).linkNodeToResource(resource);
             }
-                //  COLUMN 3
+            //  COLUMN 3
             else if(x > 435)
             {
                 System.out.println(" 3");
@@ -1435,7 +1196,7 @@ public class ChromeBotMapParser
                 mapSolver.getNode(8).linkNodeToResource(resource);
                 mapSolver.getNode(3).linkNodeToResource(resource);
             }
-                //  COLUMN 2
+            //  COLUMN 2
             else if(x > 375)
             {
                 System.out.println(" 2");
@@ -1445,7 +1206,7 @@ public class ChromeBotMapParser
                 mapSolver.getNode(7).linkNodeToResource(resource);
                 mapSolver.getNode(2).linkNodeToResource(resource);
             }
-                //  COLUMN 1
+            //  COLUMN 1
             else if(x > 310)
             {
                 System.out.println(" 1");
@@ -1455,7 +1216,7 @@ public class ChromeBotMapParser
                 mapSolver.getNode(6).linkNodeToResource(resource);
                 mapSolver.getNode(1).linkNodeToResource(resource);
             }
-                //  COLUMN 0
+            //  COLUMN 0
             else
             {
                 System.out.println(" 0");
@@ -1469,139 +1230,139 @@ public class ChromeBotMapParser
     }
 
     /*
-        NOTE: Pre-decided/Hard coded locations/color(s) on the map to determine whether or not a 'node'
-            is inaccessible or not.
+        NOTE: Pre-determined/Hard coded locations/color(s) on the map to determine whether a 'node'
+            is accessible or not.
      */
-    private static void checkInaccessibleNodes(BufferedImage mapImage, ChromeBotMapSolver mapSolver)
+    private static void findAccessibleNodes(BufferedImage mapImage, ChromeBotMapSolver mapSolver)
     {
         if(!new Color(mapImage.getRGB(306, 180)).equals(new Color(95, 96, 95)))
-            mapSolver.getNode(6).setInaccessible(true);
+            mapSolver.getNode(6).setAccessible(false);
         if(!new Color(mapImage.getRGB(367, 180)).equals(new Color(96, 97, 96)))
-            mapSolver.getNode(7).setInaccessible(true);
+            mapSolver.getNode(7).setAccessible(false);
         if(!new Color(mapImage.getRGB(428, 180)).equals(new Color(93, 95, 94)))
-            mapSolver.getNode(8).setInaccessible(true);
+            mapSolver.getNode(8).setAccessible(false);
         if(!new Color(mapImage.getRGB(487, 180)).equals(new Color(96, 97, 96)))
-            mapSolver.getNode(9).setInaccessible(true);
+            mapSolver.getNode(9).setAccessible(false);
 
         if(!new Color(mapImage.getRGB(290, 197)).equals(new Color(95, 97, 95)))
-            mapSolver.getNode(11).setInaccessible(true);
+            mapSolver.getNode(11).setAccessible(false);
         if(!new Color(mapImage.getRGB(359, 197)).equals(new Color(92, 94, 92)))
-            mapSolver.getNode(12).setInaccessible(true);
+            mapSolver.getNode(12).setAccessible(false);
         if(!new Color(mapImage.getRGB(380, 197)).equals(new Color(94, 95, 94)))
-            mapSolver.getNode(13).setInaccessible(true);
+            mapSolver.getNode(13).setAccessible(false);
         if(!new Color(mapImage.getRGB(440, 197)).equals(new Color(92, 95, 93)))
-            mapSolver.getNode(14).setInaccessible(true);
+            mapSolver.getNode(14).setAccessible(false);
         if(!new Color(mapImage.getRGB(505, 197)).equals(new Color(95, 96, 94)))
-            mapSolver.getNode(15).setInaccessible(true);
+            mapSolver.getNode(15).setAccessible(false);
 
         if(!new Color(mapImage.getRGB(304, 215)).equals(new Color(92, 94, 92)))
-            mapSolver.getNode(17).setInaccessible(true);
+            mapSolver.getNode(17).setAccessible(false);
         if(!new Color(mapImage.getRGB(364, 215)).equals(new Color(92, 94, 92)))
-            mapSolver.getNode(18).setInaccessible(true);
+            mapSolver.getNode(18).setAccessible(false);
         if(!new Color(mapImage.getRGB(429, 215)).equals(new Color(92, 94, 92)))
-            mapSolver.getNode(19).setInaccessible(true);
+            mapSolver.getNode(19).setAccessible(false);
         if(!new Color(mapImage.getRGB(496, 215)).equals(new Color(89, 91, 90)))
-            mapSolver.getNode(20).setInaccessible(true);
+            mapSolver.getNode(20).setAccessible(false);
 
         if(!new Color(mapImage.getRGB(280, 231)).equals(new Color(93, 94, 92)))
-            mapSolver.getNode(22).setInaccessible(true);
+            mapSolver.getNode(22).setAccessible(false);
         if(!new Color(mapImage.getRGB(306, 231)).equals(new Color(92, 95, 93)))
-            mapSolver.getNode(23).setInaccessible(true);
+            mapSolver.getNode(23).setAccessible(false);
         if(!new Color(mapImage.getRGB(380, 231)).equals(new Color(93, 94, 92)))
-            mapSolver.getNode(24).setInaccessible(true);
+            mapSolver.getNode(24).setAccessible(false);
         if(!new Color(mapImage.getRGB(450, 231)).equals(new Color(93, 95, 94)))
-            mapSolver.getNode(25).setInaccessible(true);
+            mapSolver.getNode(25).setAccessible(false);
         if(!new Color(mapImage.getRGB(515, 231)).equals(new Color(94, 95, 94)))
-            mapSolver.getNode(26).setInaccessible(true);
+            mapSolver.getNode(26).setAccessible(false);
 
         if(!new Color(mapImage.getRGB(295, 250)).equals(new Color(92, 94, 92)))
-            mapSolver.getNode(28).setInaccessible(true);
+            mapSolver.getNode(28).setAccessible(false);
         if(!new Color(mapImage.getRGB(366, 250)).equals(new Color(92, 94, 92)))
-            mapSolver.getNode(29).setInaccessible(true);
+            mapSolver.getNode(29).setAccessible(false);
         if(!new Color(mapImage.getRGB(440, 250)).equals(new Color(92, 93, 91)))
-            mapSolver.getNode(30).setInaccessible(true);
+            mapSolver.getNode(30).setAccessible(false);
         if(!new Color(mapImage.getRGB(504, 250)).equals(new Color(95, 96, 95)))
-            mapSolver.getNode(31).setInaccessible(true);
+            mapSolver.getNode(31).setAccessible(false);
 
         if(!new Color(mapImage.getRGB(250, 275)).equals(new Color(92, 94, 92)))
-            mapSolver.getNode(33).setInaccessible(true);
+            mapSolver.getNode(33).setAccessible(false);
         if(!new Color(mapImage.getRGB(330, 275)).equals(new Color(95, 97, 96)))
-            mapSolver.getNode(34).setInaccessible(true);
+            mapSolver.getNode(34).setAccessible(false);
         if(!new Color(mapImage.getRGB(400, 275)).equals(new Color(93, 95, 94)))
-            mapSolver.getNode(35).setInaccessible(true);
+            mapSolver.getNode(35).setAccessible(false);
         if(!new Color(mapImage.getRGB(454, 275)).equals(new Color(93, 95, 94)))
-            mapSolver.getNode(36).setInaccessible(true);
+            mapSolver.getNode(36).setAccessible(false);
         if(!new Color(mapImage.getRGB(530, 275)).equals(new Color(93, 95, 94)))
-            mapSolver.getNode(37).setInaccessible(true);
+            mapSolver.getNode(37).setAccessible(false);
 
         if(!new Color(mapImage.getRGB(278, 295)).equals(new Color(95, 96, 95)))
-            mapSolver.getNode(39).setInaccessible(true);
+            mapSolver.getNode(39).setAccessible(false);
         if(!new Color(mapImage.getRGB(357, 295)).equals(new Color(95, 96, 95)))
-            mapSolver.getNode(40).setInaccessible(true);
+            mapSolver.getNode(40).setAccessible(false);
         if(!new Color(mapImage.getRGB(435, 295)).equals(new Color(95, 96, 95)))
-            mapSolver.getNode(41).setInaccessible(true);
+            mapSolver.getNode(41).setAccessible(false);
         if(!new Color(mapImage.getRGB(522, 295)).equals(new Color(94, 95, 94)))
-            mapSolver.getNode(42).setInaccessible(true);
+            mapSolver.getNode(42).setAccessible(false);
 
         if(!new Color(mapImage.getRGB(232, 325)).equals(new Color(91, 92, 91)))
-            mapSolver.getNode(44).setInaccessible(true);
+            mapSolver.getNode(44).setAccessible(false);
         if(!new Color(mapImage.getRGB(316, 325)).equals(new Color(91, 92, 91)))
-            mapSolver.getNode(45).setInaccessible(true);
+            mapSolver.getNode(45).setAccessible(false);
         if(!new Color(mapImage.getRGB(400, 325)).equals(new Color(91, 92, 91)))
-            mapSolver.getNode(46).setInaccessible(true);
+            mapSolver.getNode(46).setAccessible(false);
         if(!new Color(mapImage.getRGB(485, 325)).equals(new Color(93, 95, 93)))
-            mapSolver.getNode(47).setInaccessible(true);
+            mapSolver.getNode(47).setAccessible(false);
         if(!new Color(mapImage.getRGB(565, 325)).equals(new Color(92, 93, 91)))
-            mapSolver.getNode(48).setInaccessible(true);
+            mapSolver.getNode(48).setAccessible(false);
 
         if(!new Color(mapImage.getRGB(262, 355)).equals(new Color(91, 94, 92)))
-            mapSolver.getNode(50).setInaccessible(true);
+            mapSolver.getNode(50).setAccessible(false);
         if(!new Color(mapImage.getRGB(352, 355)).equals(new Color(92, 95, 92)))
-            mapSolver.getNode(51).setInaccessible(true);
+            mapSolver.getNode(51).setAccessible(false);
         if(!new Color(mapImage.getRGB(441, 355)).equals(new Color(93, 96, 93)))
-            mapSolver.getNode(52).setInaccessible(true);
+            mapSolver.getNode(52).setAccessible(false);
         if(!new Color(mapImage.getRGB(536, 355)).equals(new Color(92, 95, 93)))
-            mapSolver.getNode(53).setInaccessible(true);
+            mapSolver.getNode(53).setAccessible(false);
 
         if(!new Color(mapImage.getRGB(208, 395)).equals(new Color(92, 93, 92)))
-            mapSolver.getNode(55).setInaccessible(true);
+            mapSolver.getNode(55).setAccessible(false);
         if(!new Color(mapImage.getRGB(306, 395)).equals(new Color(92, 93, 92)))
-            mapSolver.getNode(56).setInaccessible(true);
+            mapSolver.getNode(56).setAccessible(false);
         if(!new Color(mapImage.getRGB(400, 395)).equals(new Color(91, 92, 91)))
-            mapSolver.getNode(57).setInaccessible(true);
+            mapSolver.getNode(57).setAccessible(false);
         if(!new Color(mapImage.getRGB(495, 395)).equals(new Color(91, 92, 91)))
-            mapSolver.getNode(58).setInaccessible(true);
+            mapSolver.getNode(58).setAccessible(false);
         if(!new Color(mapImage.getRGB(590, 395)).equals(new Color(92, 93, 91)))
-            mapSolver.getNode(59).setInaccessible(true);
+            mapSolver.getNode(59).setAccessible(false);
 
         if(!new Color(mapImage.getRGB(244, 430)).equals(new Color(91, 93, 91)))
-            mapSolver.getNode(61).setInaccessible(true);
+            mapSolver.getNode(61).setAccessible(false);
         if(!new Color(mapImage.getRGB(345, 430)).equals(new Color(91, 93, 91)))
-            mapSolver.getNode(62).setInaccessible(true);
+            mapSolver.getNode(62).setAccessible(false);
         if(!new Color(mapImage.getRGB(447, 430)).equals(new Color(92, 94, 92)))
-            mapSolver.getNode(63).setInaccessible(true);
+            mapSolver.getNode(63).setAccessible(false);
         if(!new Color(mapImage.getRGB(548, 430)).equals(new Color(91, 94, 92)))
-            mapSolver.getNode(64).setInaccessible(true);
+            mapSolver.getNode(64).setAccessible(false);
 
         if(!new Color(mapImage.getRGB(182, 471)).equals(new Color(92, 93, 91)))
-            mapSolver.getNode(66).setInaccessible(true);
+            mapSolver.getNode(66).setAccessible(false);
         if(!new Color(mapImage.getRGB(291, 471)).equals(new Color(92, 93, 91)))
-            mapSolver.getNode(67).setInaccessible(true);
+            mapSolver.getNode(67).setAccessible(false);
         if(!new Color(mapImage.getRGB(400, 471)).equals(new Color(91, 92, 91)))
-            mapSolver.getNode(68).setInaccessible(true);
+            mapSolver.getNode(68).setAccessible(false);
         if(!new Color(mapImage.getRGB(510, 471)).equals(new Color(92, 94, 92)))
-            mapSolver.getNode(69).setInaccessible(true);
+            mapSolver.getNode(69).setAccessible(false);
         if(!new Color(mapImage.getRGB(620, 471)).equals(new Color(91, 93, 91)))
-            mapSolver.getNode(70).setInaccessible(true);
+            mapSolver.getNode(70).setAccessible(false);
 
         if(!new Color(mapImage.getRGB(220, 522)).equals(new Color(91, 93, 91)))
-            mapSolver.getNode(72).setInaccessible(true);
+            mapSolver.getNode(72).setAccessible(false);
         if(!new Color(mapImage.getRGB(337, 522)).equals(new Color(92, 94, 92)))
-            mapSolver.getNode(73).setInaccessible(true);
+            mapSolver.getNode(73).setAccessible(false);
         if(!new Color(mapImage.getRGB(452, 522)).equals(new Color(91, 93, 91)))
-            mapSolver.getNode(74).setInaccessible(true);
+            mapSolver.getNode(74).setAccessible(false);
         if(!new Color(mapImage.getRGB(570, 522)).equals(new Color(92, 95, 92)))
-            mapSolver.getNode(75).setInaccessible(true);
+            mapSolver.getNode(75).setAccessible(false);
 
     }
 
@@ -1620,83 +1381,153 @@ public class ChromeBotMapParser
         return true;
     }
 
-    //  HELPER: Check 'straw' color correctness, when finding Juice resource.
+    //  JUICE Resource Color Checkers.
+    //  HELPER: Check 'straw' color correctness.
     private static boolean isStrawColorCorrect(Color straw)
     {
-        //  Color straw = new Color(mapImage.getRGB(x, y));
-        if(straw.getRed() < 190 || straw.getRed() > 220)
-            return false;
-        if(straw.getGreen() < 205 || straw.getGreen() > 225)
-            return false;
-        if(straw.getBlue() < 205 || straw.getBlue() > 240)
-            return false;
-
-        return true;
+        return ((straw.getRed() > 190 && straw.getRed() < 220) &&
+                (straw.getGreen() > 205 && straw.getGreen() < 225) &&
+                (straw.getBlue() > 205 && straw.getBlue() < 240));
     }
 
-    //  HELPER: Check 'redArt' color correctness, when finding Juice resource.
+    //  HELPER: Check 'redArt' color correctness.
     private static boolean isRedArtColorCorrect(Color redArt)
     {
-        if(redArt.getRed() < 215)
-            return false;
-        if(redArt.getGreen() < 70 || redArt.getGreen() > 110)
-            return false;
-        if(redArt.getBlue() < 75 || redArt.getBlue() > 140)
-            return false;
-
-        return true;
+        return (redArt.getRed() > 215 &&
+                (redArt.getGreen() > 70 && redArt.getGreen() < 110) &&
+                (redArt.getBlue() > 75 && redArt.getBlue() < 140));
     }
 
-    //  HELPER: Check 'juiceBoxDark' color correctness, when finding Juice resource.
+    //  HELPER: Check 'juiceBoxDark' color correctness.
     private static boolean isJuiceBoxDarkColorCorrect(Color juiceBoxDark)
     {
-        if(juiceBoxDark.getRed() < 185)
-            return false;
-        if(juiceBoxDark.getGreen() < 150 || juiceBoxDark.getGreen() > 195)
-            return false;
-        if(juiceBoxDark.getBlue() > 50)
-            return false;
-
-        return true;
+        return (juiceBoxDark.getRed() > 185 &&
+                (juiceBoxDark.getGreen() > 150 && juiceBoxDark.getGreen() < 195) &&
+                juiceBoxDark.getBlue() < 50);
     }
 
-    //  HELPER: Check 'cheese' color correctness, when finding Spaghetti resource.
+    //  SPAGHETTI Resource Color Checkers.
+    //  HELPER: Check 'cheese' color correctness.
     private static boolean isCheeseColorCorrect(Color cheese)
     {
-        if(cheese.getRed() < 235)
-            return false;
-        if(cheese.getGreen() < 210)
-            return false;
-        if(cheese.getBlue() < 170 || cheese.getBlue() > 210)
-            return false;
-
-        return true;
+        return (cheese.getRed() > 235 &&
+                cheese.getGreen() > 210 &&
+                (cheese.getBlue() > 170 && cheese.getBlue() < 210));
     }
 
-    //  HELPER: Check 'sauce' color correctness, when finding Spaghetti resource.
+    //  HELPER: Check 'sauce' color correctness.
     private static boolean isSauceColorCorrect(Color sauce)
     {
-        if (sauce.getRed() < 225)
-            return false;
-        if (sauce.getGreen() < 70 || sauce.getGreen() > 100)
-            return false;
-        if (sauce.getBlue() < 80 || sauce.getBlue() > 150)
-            return false;
-
-        return true;
+        return (sauce.getRed() > 225 &&
+                (sauce.getGreen() > 70 && sauce.getGreen() < 100) &&
+                (sauce.getBlue() > 80 && sauce.getBlue() < 150));
     }
 
-    //  HELPER: Check 'fork' color correctness, when finding Spaghetti resource.
+    //  HELPER: Check 'fork' color correctness.
     private static boolean isForkColorCorrect(Color fork)
     {
-        if(fork.getRed() < 130 || fork.getRed() > 170)
-            return false;
-        if(fork.getGreen() < 150 || fork.getGreen() > 195)
-            return false;
-        if(fork.getBlue() < 150 || fork.getBlue() > 200)
-            return false;
+        return ((fork.getRed() >= 130 && fork.getRed() <= 170) &&
+                (fork.getGreen() >= 150 && fork.getGreen() <= 195) &&
+                (fork.getBlue() >= 150 && fork.getBlue() <= 200));
+    }
 
-        return true;
+    //  BAR Resource Color Checkers.
+    //  HELPER: Check 'umbrellaShaft' color correctness.
+    private static boolean isUmbrellaShaftColorCorrect(Color umbrellaShaft)
+    {
+        return ((umbrellaShaft.getRed() > 175 && umbrellaShaft.getRed() < 220) &&
+                (umbrellaShaft.getGreen() > 90 && umbrellaShaft.getGreen() < 120) &&
+                (umbrellaShaft.getBlue() > 60 && umbrellaShaft.getBlue() < 110));
+    }
+
+    //  HELPER: Check 'liquid' color correctness.
+    private static boolean isLiquidColorCorrect(Color liquid)
+    {
+        return (liquid.getRed() > 195 &&
+                (liquid.getGreen() > 120 && liquid.getGreen() < 165) &&
+                liquid.getBlue() < 45);
+    }
+
+    //  HELPER: Check 'eyeMouth' color correctness, when finding Theater resource.
+    private static boolean isTheaterColorCorrect(Color eyeMouth)
+    {
+        return ((eyeMouth.getRed() > 110 && eyeMouth.getRed() < 170) &&
+                (eyeMouth.getGreen() > 90 && eyeMouth.getGreen() < 120) &&
+                (eyeMouth.getBlue() > 185 && eyeMouth.getBlue() < 220));
+    }
+
+    //  HELPER: Check 'shellDark' color correctness, when finding Taco resource.
+    private static boolean isShellDarkCorrect(Color shellDark)
+    {
+        return (shellDark.getRed() > 200 &&
+                (shellDark.getGreen() > 115 && shellDark.getGreen() < 180) &&
+                shellDark.getBlue() < 50);
+    }
+
+    //  HELPER: Check 'outwardLeg' color correctness, when finding Ballroom resource.
+    private static boolean isOutwardLegColorCorrect(Color outwardLeg)
+    {
+        return (outwardLeg.getRed() > 220 &&
+                (outwardLeg.getGreen() > 205 && outwardLeg.getGreen() < 235) &&
+                (outwardLeg.getBlue() > 80 && outwardLeg.getBlue() < 110));
+    }
+
+    //  HELPER: Check 'trail' color correctness, when finding Coffee resource.
+    private static boolean isTrailColorCorrect(Color trail)
+    {
+        return ((trail.getRed() > 190 && trail.getRed() < 230) &&
+                (trail.getGreen() > 145 && trail.getGreen() < 180) &&
+                (trail.getBlue() > 110 && trail.getBlue() < 150));
+    }
+
+    //  MALL Resource Color Checkers.
+    //  HELPER: Check 'brightHandle' color correctness.
+    private static boolean isBrightHandleColorCorrect(Color brightHandle)
+    {
+        return (brightHandle.getRed() > 205 &&
+                (brightHandle.getGreen() > 185 && brightHandle.getGreen() < 230) &&
+                (brightHandle.getBlue() > 40 && brightHandle.getBlue() < 100));
+    }
+
+    //  HELPER: Check 'bag' color correctness.
+    private static boolean isBagColorCorrect(Color bag)
+    {
+        return ((bag.getRed() > 80 && bag.getRed() < 115) &&
+                (bag.getGreen() > 70 && bag.getGreen() < 105) &&
+                (bag.getBlue() > 155 && bag.getBlue() < 190));
+    }
+
+    //  HELPER: Check 'topLeftWindow'/'topRightWindow' color correctness, when finding Home resource.
+    private static boolean isTopWindowColorCorrect(Color topWindow)
+    {
+        return ((topWindow.getRed() > 60 && topWindow.getRed() < 115) &&
+                (topWindow.getGreen() > 160 && topWindow.getGreen() < 190) &&
+                topWindow.getBlue() > 210);
+    }
+
+    //  RING Resource Color Checkers.
+    //  HELPER: Check 'darkShade' color correctness.
+    private static boolean isDarkShadeColorCorrect(Color darkShade)
+    {
+        return ((darkShade.getRed() > 60 && darkShade.getRed() < 120) &&
+                (darkShade.getGreen() > 150 && darkShade.getGreen() < 195) &&
+                darkShade.getBlue() > 215);
+    }
+
+    //  HELPER: Check 'topBand' color correctness.
+    private static boolean isTopBandColorCorrect(Color topBand)
+    {
+        return ((topBand.getRed() > 130 && topBand.getRed() < 180) &&
+                (topBand.getGreen() > 140 && topBand.getGreen() < 200) &&
+                (topBand.getBlue() > 150 && topBand.getBlue() < 210));
+    }
+
+    //  HELPER: Check 'tailFin' color correctness.
+    private static boolean isTailFinColorCorrect(Color tailFin)
+    {
+        return ((tailFin.getRed() > 60 && tailFin.getRed() < 105) &&
+                (tailFin.getGreen() > 155 && tailFin.getGreen() < 190) &&
+                tailFin.getBlue() > 210);
     }
 
 }

@@ -32,17 +32,17 @@ public class ChromeBotKarutaListener extends ListenerAdapter
 {
     private final String DEVELOPER_ID = "209879011818471435";
 
-    private final String USER_REGEX = "<@(\\d{1,})>";
-    private final String VALUE_REGEX = "(.{1,}):(.{1,})";
-    private final String AIRPORT_REGEX = "([\\s?\\w{1,}]{1,}):\\n(\\w{1,} . \\d{1,})\\n(\\w{1,} . \\d{1,})\\n(\\w{1,} . \\d{1,})\\n(\\w{1,} . \\d{1,})\\n(\\w{1,} . \\d{1,})";
-    private final String BUTTON_KEY_REGEX = "(\\w{1,}):(\\d{1,})";
+    private final String USER_REGEX = "<@(\\d+)>";
+    private final String VALUE_REGEX = "(.+):(.+)";
+    private final String AIRPORT_REGEX = "([\\s?\\w+]+):\\n(\\w+ . \\d+)\\n(\\w+ . \\d+)\\n(\\w+ . \\d+)\\n(\\w+ . \\d+)\\n(\\w+ . \\d+)";
+    private final String BUTTON_KEY_REGEX = "(\\w+):(\\d+)";
 
     private final Pattern USER_REGEX_PATTERN = Pattern.compile(USER_REGEX);
     private final Pattern VALUE_REGEX_PATTERN = Pattern.compile(VALUE_REGEX);
     private final Pattern AIRPORT_REGEX_PATTERN = Pattern.compile(AIRPORT_REGEX);
     private final Pattern BUTTON_KEY_REGEX_PATTERN = Pattern.compile(BUTTON_KEY_REGEX);
 
-    private RedisCommands<String, String> redisSyncCommands;
+    private final RedisCommands<String, String> redisSyncCommands;
 
     //  CONSTRUCTOR TAKES REDIS CONNECTION TO WORK WITH THE DATABASE.
     public ChromeBotKarutaListener(StatefulRedisConnection<String, String> redisConnection)
@@ -61,19 +61,6 @@ public class ChromeBotKarutaListener extends ListenerAdapter
 
         String rawMessageContent = message.getContentRaw();
         String messageSenderId = messageSender.getId();
-
-        /*
-        if(fromDeveloper(messageSenderId))
-        {
-            Matcher userMatcher = userRegex.matcher(message.getContentRaw());
-            userMatcher.find();
-
-            messageGuild.retrieveMemberById(userMatcher.group(1)).queue(member -> {
-                message.reply(member.getUser().getAsTag()).queue();
-            });
-        }
-
-         */
 
         //  NOTE: Check to see if the message received (in the channel)
         //      is from Karuta bot.
@@ -158,6 +145,7 @@ public class ChromeBotKarutaListener extends ListenerAdapter
         //  DEBUG: Log to console which button was pressed.
         System.out.println("\nBUTTON " + buttonInteractionEvent.getComponentId() + " WAS PRESSED BY " + buttonInteractionEvent.getUser().getId());
 
+        //  NOTE: If button interaction is from a message that is relatively old, ignore it.
         if(!ChromeBotUtil.isInteractionRecent(buttonInteractionEvent, buttonInteractionEvent.getMessage()))
             return;
 
@@ -201,45 +189,43 @@ public class ChromeBotKarutaListener extends ListenerAdapter
                             //      with the Ring included, a path to the Airport, or the default one.
                             switch(buttonType)
                             {
-                                case "default":
-                                case "ring":
+                                case "default", "ring" ->
+                                {
                                     //  NOTE: At first, parsing 'default' and 'ring' paths/AP is mostly the same.
                                     String affectionPoints = valueMatcher.group(1);
                                     String path = valueMatcher.group(2);
 
                                     newEmbedMessage.setDescription(ChromeBotUtil.emojifyPath(path) + "\n**AP: " + affectionPoints + "**");
 
-                                    if(path.contains("MALL"))
+                                    if (path.contains("MALL"))
                                         newEmbedMessage.appendDescription(" (" + affectionPoints + " + :shopping_bags:)");
 
                                     //  NOTE: Branch off depending on what type of solution the button is for.
-                                    switch(buttonType)
+                                    switch (buttonType)
                                     {
-                                        case "default":
-
+                                        case "default" ->
+                                        {
                                             newEmbedMessage.setTitle("Date Solution")
                                                     .setColor(0xBABABA);
 
-                                            if(buttonInteractionEvent.getMessage().getButtons().get(0).getEmoji().equals(Emoji.fromMarkdown("\uD83D\uDC8D")))
+                                            if (buttonInteractionEvent.getMessage().getButtons().get(0).getEmoji().equals(Emoji.fromMarkdown("\uD83D\uDC8D")))
                                                 newButton = Button.secondary("ring:" + userId, Emoji.fromMarkdown("\uD83D\uDC8D"));
-                                            else if(buttonInteractionEvent.getMessage().getButtons().get(0).getEmoji().equals(Emoji.fromMarkdown("✈️")))
+                                            else if (buttonInteractionEvent.getMessage().getButtons().get(0).getEmoji().equals(Emoji.fromMarkdown("✈️")))
                                                 newButton = Button.secondary("airplane:" + userId, Emoji.fromMarkdown("✈️"));
-
-                                            break;
-                                        case "ring":
-
+                                        }
+                                        case "ring" ->
+                                        {
                                             newEmbedMessage.setTitle("Ring Solution")
                                                     .setColor(0x7eaede);
 
                                             newButton = Button.danger("default:" + userId, Emoji.fromMarkdown("\uD83D\uDC8D"));
-
-                                            break;
+                                        }
                                     }
-
-                                    break;
-                                case "airplane":
+                                }
+                                case "airplane" ->
+                                {
                                     Matcher airplaneMatcher = AIRPORT_REGEX_PATTERN.matcher(redisSyncCommands.get(buttonInteractionEvent.getComponentId()));
-                                        airplaneMatcher.find();
+                                    airplaneMatcher.find();
 
                                     String airplanePath = airplaneMatcher.group(1);
                                     String fuel = airplaneMatcher.group(2),
@@ -254,8 +240,8 @@ public class ChromeBotKarutaListener extends ListenerAdapter
                                                     "\n\n`" + fuel + "`\n`" + hunger + "`\n`" + thirst + "`\n`" + happiness + "`\n`" + time + "`");
 
                                     newButton = Button.danger("default:" + userId, Emoji.fromMarkdown("✈️"));
+                                }
 
-                                    break;
                             }
 
                             //  NOTE: After building the message, change the original embed for the user's request and
@@ -287,6 +273,8 @@ public class ChromeBotKarutaListener extends ListenerAdapter
         //      return an error message in the footer).
         Matcher userMatcher = USER_REGEX_PATTERN.matcher(embedMessage.getDescription());
             userMatcher.find();
+
+        long currentTime = System.currentTimeMillis();
 
         try
         {
@@ -399,7 +387,6 @@ public class ChromeBotKarutaListener extends ListenerAdapter
                                     tempMessage.editMessageComponents().setActionRow(
                                             Button.secondary("airplane:" + member.getId(), Emoji.fromMarkdown("✈️")
                                             )).queue();
-
                                 }
 
                                 //  NOTE: Final step, edit the message to include the solution(s).
@@ -423,11 +410,19 @@ public class ChromeBotKarutaListener extends ListenerAdapter
                 }
             }
         }
+        catch (NullPointerException noe)
+        {
+            System.out.println("ERROR: NullPointerException (Most likely from fetching Discord Proxy URL).");
+            noe.printStackTrace();
+        }
         catch (IOException ioe)
         {
             System.out.println("ERROR: Image can't load for some reason.");
             ioe.printStackTrace();
         }
+
+        //  DEBUG: Track how long processing takes.
+        System.out.println("\nPROCESSING MINI-GAME TOOK: " + (System.currentTimeMillis() - currentTime) + "ms\n");
     }
 
     //  HELPER: Push data onto Redis DB.
@@ -441,13 +436,6 @@ public class ChromeBotKarutaListener extends ListenerAdapter
         System.out.println("SET " + solutionId + " TO " + solutionApPath);
     }
 
-    //  SCAN MESSAGE FOR WISHLIST DROP
-    private boolean wishListIsDropping(MessageReceivedEvent messageReceivedEvent)
-    {
-        return (ChromeBotUtil.isIdFromKaruta(messageReceivedEvent.getAuthor().getId()) &&
-                messageReceivedEvent.getMessage().getContentRaw().contains("A card from your wishlist is dropping!"));
-    }
-
-    //  CHECK IF ID IS MINE
+    //  DEBUG: CHECK IF ID IS MINE
     private boolean fromDeveloper(String id)    {   return id.equals(DEVELOPER_ID); }
 }

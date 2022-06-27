@@ -2,10 +2,14 @@
 //  CHROME-BOT (Driver Class)
 //  04/03/2022
 
-import io.lettuce.core.api.StatefulRedisConnection;
-import io.lettuce.core.api.sync.RedisCommands;
+import general.ChromeBotListener;
+import general.ChromeBotRPSListener;
+import general.WedThurs;
+
 import karuta.ChromeBotKarutaListener;
 
+import io.lettuce.core.api.StatefulRedisConnection;
+import io.lettuce.core.api.sync.RedisCommands;
 import io.lettuce.core.RedisClient;
 
 import net.dv8tion.jda.api.JDA;
@@ -15,6 +19,8 @@ import net.dv8tion.jda.api.interactions.commands.Command;
 import javax.security.auth.login.LoginException;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.time.LocalDate;
+import java.util.Date;
 import java.util.Scanner;
 
 public class ChromeBotDriver
@@ -63,12 +69,18 @@ public class ChromeBotDriver
             //  WAIT FOR JDA OBJECT TO ACTUALLY BE READY BEFORE DOING ANYTHING.
             jda.awaitReady();
 
-            if(jda.getToken().equals(CHROME_BOT_TOKEN))
+            /*
+            if(jda.getToken().substring(4).equals(CHROME_BOT_TOKEN))
             {
                 //  NOW SINCE JDA OBJECT IS READY, START THREAD WITH THAT OBJECT.
-                WedThurs WTPrinter = new WedThurs(jda);
+                WedThurs WTPrinter = new WedThurs(jda, redisSyncCommands);
                 WTPrinter.start();
             }
+            
+             */
+
+            //  jda.getGuildById(TEST_SERVER_ID).upsertCommand("help", "Displays helpful information about bot features and commands.")
+            //          .queue();
 
             /*
             jda.upsertCommand("rockpaperscissors", "Challenge someone to Rock-Paper-Scissors!")
